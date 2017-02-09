@@ -67,7 +67,9 @@
 
 #include "emu_msvcrt.h"
 #include "emu_dummy.h"
+#ifndef MS_UWP
 #include "emu_kernel32.h"
+#endif
 #include "util/EmuFileWrapper.h"
 #include "utils/log.h"
 #include "threads/SingleLock.h"
@@ -118,8 +120,10 @@ extern "C" void __stdcall init_emu_environ()
   // python
 #if defined(TARGET_WINDOWS)
   // fill our array with the windows system vars
+
+#ifndef MS_UWP
   LPTSTR lpszVariable;
-  LPTCH lpvEnv;
+  LPTCH lpvEnv = NULL;
   lpvEnv = GetEnvironmentStrings();
   if (lpvEnv != NULL)
   {
@@ -131,6 +135,7 @@ extern "C" void __stdcall init_emu_environ()
     }
     FreeEnvironmentStrings(lpvEnv);
   }
+#endif
   dll_putenv("OS=win32");
 #elif defined(TARGET_DARWIN)
   dll_putenv("OS=darwin");

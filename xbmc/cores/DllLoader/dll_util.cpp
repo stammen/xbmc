@@ -23,7 +23,12 @@
 
 #ifdef TARGET_WINDOWS
 #include <windows.h>
+#ifdef MS_UWP
+#include "filesystem/SpecialProtocol.h"
+#include "utils/CharsetConverter.h"
 #endif
+#endif
+
 #include <stdlib.h>
 #include <string.h>
 
@@ -102,6 +107,22 @@ uintptr_t create_dummy_function(const char* strDllName, const char* strFunctionN
   return (uintptr_t)pData;
 }
 
+#ifdef MS_UWP
+uintptr_t get_win_function_address(const char* strDllName, const char* strFunctionName)
+{
+  std::wstring strdllW;
+  g_charsetConverter.utf8ToW(CSpecialProtocol::TranslatePath(strDllName), strdllW, false);
+
+  HMODULE handle = LoadPackagedLibrary(strdllW.c_str(), NULL);
+  if (handle != NULL)
+  {
+    uintptr_t pGNSI = (uintptr_t)GetProcAddress(handle, strFunctionName);
+    if (pGNSI != NULL)
+      return pGNSI;
+  }
+  return 0;
+}
+#else
 uintptr_t get_win_function_address(const char* strDllName, const char* strFunctionName)
 {
 #ifdef TARGET_WINDOWS
@@ -119,6 +140,7 @@ uintptr_t get_win_function_address(const char* strDllName, const char* strFuncti
 #endif
   return 0;
 }
+#endif //MS_WUP
 
 #ifdef _cplusplus
 }

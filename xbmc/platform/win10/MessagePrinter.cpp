@@ -23,17 +23,6 @@
 
 #include <windows.h>
 
-#ifdef MS_UWP
-#include <assert.h>
-int WINAPI MessageBox(void* hWnd, const char* lpText, const char* lpCaption, UINT uType)
-{
-    assert(false);
-    return IDOK;
-}
-
-
-#endif
-
 void CMessagePrinter::DisplayMessage(const std::string& message)
 {
   MessageBox(NULL, message.c_str(), CCompileInfo::GetAppName(), MB_OK | MB_ICONINFORMATION);

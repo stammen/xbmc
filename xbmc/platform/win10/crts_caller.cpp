@@ -31,8 +31,6 @@
 #include <Windows.h>
 #include <cassert>
 
-#ifndef MS_UWP
-
 namespace win32_utils
 {
 
@@ -97,5 +95,3 @@ crts_caller::~crts_caller()
 }
 
 }
-
-#endif

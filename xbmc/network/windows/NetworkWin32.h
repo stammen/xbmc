@@ -27,6 +27,7 @@
 #include "utils/stopwatch.h"
 #include "threads/CriticalSection.h"
 
+#ifndef MS_UWP
 class CNetworkWin32;
 
 class CNetworkInterfaceWin32 : public CNetworkInterface
@@ -91,5 +92,33 @@ private:
    CStopWatch m_netrefreshTimer;
    CCriticalSection m_critSection;
 };
+#else
+class CNetworkWin10 : public CNetwork
+{
+public:
+    CNetworkWin10(void);
+    virtual ~CNetworkWin10(void);
 
+    // Return the list of interfaces
+    virtual std::vector<CNetworkInterface*>& GetInterfaceList(void);
+
+    // Ping remote host
+    virtual bool PingHost(unsigned long host, unsigned int timeout_ms = 2000);
+
+    // Get/set the nameserver(s)
+    virtual std::vector<std::string> GetNameServers(void);
+    virtual void SetNameServers(const std::vector<std::string>& nameServers);
+
+    friend class CNetworkInterfaceWin32;
+
+private:
+    int GetSocket() { return m_sock; }
+    void queryInterfaceList();
+    void CleanInterfaceList();
+    std::vector<CNetworkInterface*> m_interfaces;
+    int m_sock;
+    CStopWatch m_netrefreshTimer;
+    CCriticalSection m_critSection;
+};
+#endif //MS_UWP
 #endif

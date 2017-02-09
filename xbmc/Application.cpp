@@ -630,7 +630,7 @@ bool CApplication::Create()
   update_emu_environ();//apply the GUI settings
 
   //! @todo - move to CPlatformXXX
-#ifdef TARGET_WINDOWS
+#if defined(TARGET_WINDOWS) && !defined(MS_UWP)
   CWIN32Util::SetThreadLocalLocale(true); // enable independent locale for each thread, see https://connect.microsoft.com/VisualStudio/feedback/details/794122
 #endif // TARGET_WINDOWS
 

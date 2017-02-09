@@ -38,9 +38,7 @@
 #include "utils/SystemInfo.h"
 #include "utils/Environment.h"
 #include "utils/StringUtils.h"
-#ifndef MS_UWP
 #include "platform/win32/crts_caller.h"
-#endif
 #include "CompileInfo.h"
 
 #include <cassert>
@@ -1630,11 +1628,9 @@ std::string CWIN32Util::WUSysMsg(DWORD dwError)
     return StringUtils::Format("Unknown error (0x%X)", dwError);
 }
 
-#ifndef MS_UWP
 bool CWIN32Util::SetThreadLocalLocale(bool enable /* = true */)
 {
   const int param = enable ? _ENABLE_PER_THREAD_LOCALE : _DISABLE_PER_THREAD_LOCALE;
   return CALL_IN_CRTS(_configthreadlocale, param) != -1;
 }
-#endif
 

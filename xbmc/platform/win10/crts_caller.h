@@ -28,8 +28,6 @@
 #include <string>
 #include <vector>
 
-#ifndef MS_UWP
-
 namespace win32_utils
 {
 
@@ -71,5 +69,3 @@ private:
 #define CALL_IN_CRTS(function,...) ::win32_utils::crts_caller::call_in_all_crts(#function,&(function),##__VA_ARGS__)
 
 }
-
-#endif // MS_UWP

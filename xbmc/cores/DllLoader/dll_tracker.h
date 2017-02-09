@@ -23,6 +23,9 @@
 #include "threads/CriticalSection.h"
 #include "PlatformDefs.h"
 #ifdef TARGET_WINDOWS
+#ifdef MS_UWP
+#include <WinSock2.h>
+#endif
 #include "system.h" // for SOCKET
 #endif
 

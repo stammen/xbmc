@@ -631,7 +631,9 @@ extern "C" UINT WINAPI dllGetACP();
 extern "C" UINT WINAPI dllSetHandleCount(UINT uNumber);
 extern "C" HANDLE WINAPI dllGetStdHandle(DWORD nStdHandle);
 extern "C" DWORD WINAPI dllGetFileType(HANDLE hFile);
+#ifndef MS_UWP
 extern "C" int WINAPI dllGetStartupInfoA(LPSTARTUPINFOA lpStartupInfo);
+#endif
 extern "C" BOOL WINAPI dllFreeEnvironmentStringsA(LPSTR lpString);
 extern "C" LPVOID WINAPI dllGetEnvironmentStrings();
 extern "C" LPVOID WINAPI dllGetEnvironmentStringsW();

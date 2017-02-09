@@ -54,6 +54,7 @@ extern "C" HANDLE xboxopendvdrom()
   return CIoSupport::OpenCDROM();
 }
 
+#ifndef MS_UWP
 extern "C" UINT WINAPI dllGetAtomNameA( ATOM nAtom, LPTSTR lpBuffer, int nSize)
 {
   if (nAtom < 1 || nAtom > m_vecAtoms.size() ) return 0;
@@ -82,6 +83,7 @@ extern "C" ATOM WINAPI dllAddAtomA( LPCTSTR lpString)
 extern "C" ATOM WINAPI dllDeleteAtomA(ATOM nAtom)
 {
 }*/
+#endif
 
 #ifdef TARGET_WINDOWS
 
@@ -90,6 +92,19 @@ extern "C" BOOL WINAPI dllFindClose(HANDLE hFile)
   return FindClose(hFile);
 }
 
+#define CORRECT_SEP_STR_W(str) \
+  if (wcsstr(str, L"://") == NULL) \
+  { \
+    int iSize_##str = wcslen(str); \
+    for (int pos = 0; pos < iSize_##str; pos++) \
+      if (str[pos] == '/') str[pos] = '\\'; \
+  } \
+  else \
+  { \
+    int iSize_##str = wcslen(str); \
+    for (int pos = 0; pos < iSize_##str; pos++) \
+      if (str[pos] == '\\') str[pos] = '/'; \
+  }
 
 #define CORRECT_SEP_STR(str) \
   if (strstr(str, "://") == NULL) \
@@ -106,11 +121,23 @@ extern "C" BOOL WINAPI dllFindClose(HANDLE hFile)
   }
 #else
 #define CORRECT_SEP_STR(str)
+#define CORRECT_SEP_STR_W(str)
 #endif
 
 #ifdef TARGET_WINDOWS
 static void to_WIN32_FIND_DATA(LPWIN32_FIND_DATAW wdata, LPWIN32_FIND_DATA data)
 {
+#ifdef MS_UWP
+  size_t size = wcslen(data->cFileName);
+  wcsncpy(data->cFileName, data->cFileName, size);
+  if (size)
+    data->cFileName[size - 1] = '\0';
+
+  size = wcslen(data->cAlternateFileName);
+  wcsncpy(data->cAlternateFileName, data->cAlternateFileName, size);
+  if (size)
+    data->cAlternateFileName[size - 1] = '\0';
+#else
   std::string strname;
   g_charsetConverter.wToUTF8(wdata->cFileName, strname);
   size_t size = sizeof(data->cFileName) / sizeof(char);
@@ -123,6 +150,8 @@ static void to_WIN32_FIND_DATA(LPWIN32_FIND_DATAW wdata, LPWIN32_FIND_DATA data)
   strncpy(data->cAlternateFileName, strname.c_str(), size);
   if (size)
     data->cAlternateFileName[size - 1] = '\0';
+#endif
+
 
   data->dwFileAttributes = wdata->dwFileAttributes;
   data->ftCreationTime = wdata->ftCreationTime;
@@ -136,14 +165,22 @@ static void to_WIN32_FIND_DATA(LPWIN32_FIND_DATAW wdata, LPWIN32_FIND_DATA data)
 
 static void to_WIN32_FIND_DATAW(LPWIN32_FIND_DATA data, LPWIN32_FIND_DATAW wdata)
 {
-  std::wstring strwname;
+#ifdef MS_UWP
+  std::wstring strwname(data->cFileName);
+#else
   g_charsetConverter.utf8ToW(data->cFileName, strwname, false);
+#endif
   size_t size = sizeof(wdata->cFileName) / sizeof(wchar_t);
   wcsncpy(wdata->cFileName, strwname.c_str(), size);
   if (size)
     wdata->cFileName[size - 1] = '\0';
 
+#ifdef MS_UWP
+  strwname = data->cFileName;
+#else
   g_charsetConverter.utf8ToW(data->cAlternateFileName, strwname, false);
+#endif
+
   size = sizeof(wdata->cAlternateFileName) / sizeof(wchar_t);
   wcsncpy(wdata->cAlternateFileName, strwname.c_str(), size);
   if (size)
@@ -161,6 +198,20 @@ static void to_WIN32_FIND_DATAW(LPWIN32_FIND_DATA data, LPWIN32_FIND_DATAW wdata
 
 extern "C" HANDLE WINAPI dllFindFirstFileA(LPCTSTR lpFileName, LPWIN32_FIND_DATA lpFindFileData)
 {
+#ifdef MS_UWP
+  wchar_t* p = wcsdup(lpFileName);
+  CORRECT_SEP_STR_W(p);
+
+  // change default \\*.* into \\* which the xbox is using
+  wchar_t* e = wcsrchr(p, '.');
+  if (e != NULL && wcslen(e) > 1 && e[1] == '*')
+  {
+    e[0] = '\0';
+  }
+
+  std::wstring strwfile(p);
+
+#else
   char* p = strdup(lpFileName);
   CORRECT_SEP_STR(p);
 
@@ -171,10 +222,14 @@ extern "C" HANDLE WINAPI dllFindFirstFileA(LPCTSTR lpFileName, LPWIN32_FIND_DATA
     e[0] = '\0';
   }
 
-#ifdef TARGET_WINDOWS
-  struct _WIN32_FIND_DATAW FindFileDataW;
   std::wstring strwfile;
   g_charsetConverter.utf8ToW(CSpecialProtocol::TranslatePath(p), strwfile, false);
+#endif
+
+
+#ifdef TARGET_WINDOWS
+  struct _WIN32_FIND_DATAW FindFileDataW;
+
   HANDLE res = FindFirstFileW(strwfile.c_str(), &FindFileDataW);
   if (res != INVALID_HANDLE_VALUE)
     to_WIN32_FIND_DATA(&FindFileDataW, lpFindFileData);
@@ -436,6 +491,7 @@ extern "C" DWORD WINAPI dllGetFileType(HANDLE hFile)
   return 3;
 }
 
+#ifndef MS_UWP
 extern "C" int WINAPI dllGetStartupInfoA(LPSTARTUPINFOA lpStartupInfo)
 {
 #ifdef API_DEBUG
@@ -461,6 +517,7 @@ extern "C" int WINAPI dllGetStartupInfoA(LPSTARTUPINFOA lpStartupInfo)
   lpStartupInfo->wShowWindow = 0;
   return 1;
 }
+#endif
 
 extern "C" BOOL WINAPI dllFreeEnvironmentStringsA(LPSTR lpString)
 {
@@ -474,7 +531,9 @@ static const char ch_envs[] =
 
 extern "C" LPVOID WINAPI dllGetEnvironmentStrings()
 {
-#ifdef TARGET_WINDOWS
+#ifdef MS_UWP
+  return 0;
+#elif defined (TARGET_WINDOWS)
   return GetEnvironmentStrings();
 #else
 #ifdef API_DEBUG
@@ -486,16 +545,20 @@ extern "C" LPVOID WINAPI dllGetEnvironmentStrings()
 
 extern "C" LPVOID WINAPI dllGetEnvironmentStringsW()
 {
-#ifdef TARGET_WINDOWS
+#ifdef MS_UWP
+  return 0;
+#elif defined (TARGET_WINDOWS)
   return GetEnvironmentStringsW();
-#else  
+#else
   return 0;
 #endif
 }
 
 extern "C" int WINAPI dllGetEnvironmentVariableA(LPCSTR lpName, LPSTR lpBuffer, DWORD nSize)
 {
-#ifdef TARGET_WINDOWS
+#ifdef MS_UWP
+  return 0;
+#elif defined (TARGET_WINDOWS)
   return GetEnvironmentVariableA(lpName, lpBuffer, nSize);
 #else
   if (lpBuffer)
@@ -570,6 +633,7 @@ extern "C" DWORD WINAPI dllFormatMessageA(DWORD dwFlags, LPCVOID lpSource, DWORD
 #endif
 }
 
+#ifndef MS_UWP
 extern "C" DWORD WINAPI dllGetFullPathNameA(LPCTSTR lpFileName, DWORD nBufferLength, LPTSTR lpBuffer, LPTSTR* lpFilePart)
 {
 #ifdef TARGET_WINDOWS
@@ -602,6 +666,7 @@ extern "C" DWORD WINAPI dllGetFullPathNameA(LPCTSTR lpFileName, DWORD nBufferLen
   return 0;
 #endif
 }
+#endif
 
 extern "C" DWORD WINAPI dllGetFullPathNameW(LPCWSTR lpFileName, DWORD nBufferLength, LPWSTR lpBuffer, LPWSTR* lpFilePart)
 {

@@ -156,7 +156,11 @@ bool Win32DllLoader::Load()
 
   std::wstring strDllW;
   g_charsetConverter.utf8ToW(CSpecialProtocol::TranslatePath(strFileName), strDllW, false, false, false);
+#ifdef MS_UWP
+  m_dllHandle = LoadPackagedLibrary(strDllW.c_str(), NULL);
+#else
   m_dllHandle = LoadLibraryExW(strDllW.c_str(), NULL, LOAD_WITH_ALTERED_SEARCH_PATH);
+#endif
   if (!m_dllHandle)
   {
     DWORD dw = GetLastError();
@@ -238,6 +242,7 @@ bool Win32DllLoader::HasSymbols()
 
 void Win32DllLoader::OverrideImports(const std::string &dll)
 {
+#ifndef MS_UWP
   std::wstring strdllW;
   g_charsetConverter.utf8ToW(CSpecialProtocol::TranslatePath(dll), strdllW, false);
   BYTE* image_base = (BYTE*)GetModuleHandleW(strdllW.c_str());
@@ -319,6 +324,7 @@ void Win32DllLoader::OverrideImports(const std::string &dll)
       }
     }
   }
+#endif
 }
 
 bool Win32DllLoader::NeedsHooking(const char *dllName)
