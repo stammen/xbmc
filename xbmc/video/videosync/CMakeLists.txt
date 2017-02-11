@@ -10,7 +10,7 @@ if(X_FOUND)
   list(APPEND HEADERS VideoSyncDRM.h)
 endif()
 
-if(CORE_SYSTEM_NAME STREQUAL windows)
+if(CORE_SYSTEM_NAME STREQUAL windows OR CORE_SYSTEM_NAME STREQUAL windowsstore)
   list(APPEND SOURCES VideoSyncD3D.cpp)
   list(APPEND HEADERS VideoSyncD3D.h)
 endif()

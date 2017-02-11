@@ -100,7 +100,11 @@ private:
   static std::wstring win32ConvertUtf8ToW(const std::string &text, bool *resultSuccessful = NULL);
   static std::string win32ConvertWToUtf8(const std::wstring &text, bool *resultSuccessful = NULL);
   enum updateAction:int {addOrUpdateOnly = -2, deleteVariable = -1, addOnly =  0, autoDetect = 1};
+#ifdef MS_UWP
+  static int win10_setenv(const std::string &name, const std::string &value = "", updateAction action = autoDetect);
+#else
   static int win32_setenv(const std::string &name, const std::string &value = "", updateAction action = autoDetect);
+#endif
 #endif // TARGET_WINDOWS
 };
 #endif

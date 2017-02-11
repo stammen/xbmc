@@ -606,6 +606,9 @@ void CPVRManager::Process(void)
 
 bool CPVRManager::SetWakeupCommand(void)
 {
+#ifdef MS_UWP
+  assert(false); // will need to investigate how to wake up a UWP app
+#else
   if (!CServiceBroker::GetSettings().GetBool(CSettings::SETTING_PVRPOWERMANAGEMENT_ENABLED))
     return false;
 
@@ -627,7 +630,7 @@ bool CPVRManager::SetWakeupCommand(void)
       return iReturn == 0;
     }
   }
-
+#endif
   return false;
 }
 

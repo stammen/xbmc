@@ -109,7 +109,6 @@ public:
     virtual std::vector<std::string> GetNameServers(void);
     virtual void SetNameServers(const std::vector<std::string>& nameServers);
 
-    friend class CNetworkInterfaceWin32;
 
 private:
     int GetSocket() { return m_sock; }

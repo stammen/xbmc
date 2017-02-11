@@ -1630,11 +1630,13 @@ std::string CWIN32Util::WUSysMsg(DWORD dwError)
     return StringUtils::Format("Unknown error (0x%X)", dwError);
 }
 
-#ifndef MS_UWP
 bool CWIN32Util::SetThreadLocalLocale(bool enable /* = true */)
 {
+#ifdef MS_UWP
+	return false;
+#else
   const int param = enable ? _ENABLE_PER_THREAD_LOCALE : _DISABLE_PER_THREAD_LOCALE;
   return CALL_IN_CRTS(_configthreadlocale, param) != -1;
-}
 #endif
+}
 

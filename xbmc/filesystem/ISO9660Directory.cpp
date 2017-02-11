@@ -29,6 +29,11 @@
 #include "linux/XTimeUtils.h"
 #endif
 
+#ifdef MS_UWP
+#include "platform/win32/CharsetConverter.h"
+using namespace KODI::PLATFORM::WINDOWS;
+#endif
+
 using namespace XFILE;
 
 CISO9660Directory::CISO9660Directory(void)
@@ -66,7 +71,7 @@ bool CISO9660Directory::GetDirectory(const CURL& url, CFileItemList &items)
     if (strSearchMask[i] == '/') strSearchMask[i] = '\\';
   }
 
-  hFind = m_isoReader.FindFirstFile((char*)strSearchMask.c_str(), &wfd);
+  hFind = m_isoReader.FindFirstFile9660((char*)strSearchMask.c_str(), &wfd);
   if (hFind == NULL)
     return false;
 
@@ -74,13 +79,17 @@ bool CISO9660Directory::GetDirectory(const CURL& url, CFileItemList &items)
   {
     if (wfd.cFileName[0] != 0)
     {
+#ifdef MS_UWP
+      std::string strDir = FromW(std::wstring(wfd.cFileName));
+#else
+      std::string strDir = wfd.cFileName;
+#endif
       if ( (wfd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) )
       {
-        std::string strDir = wfd.cFileName;
         if (strDir != "." && strDir != "..")
         {
-          CFileItemPtr pItem(new CFileItem(wfd.cFileName));
-          std::string path = strRoot + wfd.cFileName;
+          CFileItemPtr pItem(new CFileItem(strDir));
+          std::string path = strRoot + strDir;
           URIUtils::AddSlashAtEnd(path);
           pItem->SetPath(path);
           pItem->m_bIsFolder = true;
@@ -92,8 +101,8 @@ bool CISO9660Directory::GetDirectory(const CURL& url, CFileItemList &items)
       }
       else
       {
-        CFileItemPtr pItem(new CFileItem(wfd.cFileName));
-        pItem->SetPath(strRoot + wfd.cFileName);
+        CFileItemPtr pItem(new CFileItem(strDir));
+        pItem->SetPath(strRoot + strDir);
         pItem->m_bIsFolder = false;
         pItem->m_dwSize = CUtil::ToInt64(wfd.nFileSizeHigh, wfd.nFileSizeLow);
         FILETIME localTime;

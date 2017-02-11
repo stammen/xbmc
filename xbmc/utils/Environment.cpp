@@ -32,6 +32,11 @@
 #include <Windows.h>
 #endif
 
+#ifdef MS_UWP
+using namespace Windows::Storage;
+using namespace Windows::Foundation;
+#endif
+
 // --------------------- Helper Functions ---------------------
 
 #ifdef TARGET_WINDOWS
@@ -112,6 +117,48 @@ typedef int (_cdecl * wputenvPtr) (const wchar_t *envstring);
  * 		   environment update failed, 8 if our runtime environment update failed or, in case of
  * 		   several errors, sum of all errors values; non-zero in case of other errors.
  */
+#ifdef MS_UWP
+int CEnvironment::win10_setenv(const std::string &name, const std::string &value /* = "" */, enum updateAction action /* = autoDetect */)
+{
+  std::wstring Wname(win32ConvertUtf8ToW(name));
+  if (Wname.empty() || name.find('=') != std::wstring::npos)
+    return -1;
+  if ((action == addOnly || action == addOrUpdateOnly) && value.empty())
+    return -1;
+  if (action == addOnly && !(getenv(name).empty()))
+    return 0;
+
+  bool convIsOK;
+  std::wstring Wvalue(win32ConvertUtf8ToW(value, &convIsOK));
+  if (!convIsOK)
+    return -1;
+
+  int retValue = 0;
+
+  ApplicationDataContainer^ localSettings = ApplicationData::Current->LocalSettings;
+  auto values = localSettings->Values;
+
+  Platform::String^ key = ref new Platform::String(Wname.c_str());
+  Platform::String^ v = ref new Platform::String(Wvalue.c_str());
+
+  switch (action)
+  {
+  case deleteVariable:
+    if (values->HasKey(key))
+    {
+      values->Remove(key);
+    }
+    retValue = 0;
+    break;
+
+  default:
+    retValue = values->Insert(key, v) ? 0 : 4;
+    break;
+  }
+
+  return retValue;
+}
+#else
 int CEnvironment::win32_setenv(const std::string &name, const std::string &value /* = "" */, enum updateAction action /* = autoDetect */)
 {
   std::wstring Wname (win32ConvertUtf8ToW(name));
@@ -185,16 +232,18 @@ int CEnvironment::win32_setenv(const std::string &name, const std::string &value
 
   // Finally update our runtime Environment
   retValue += (::_wputenv(EnvString.c_str()) == 0) ? 0 : 8; // 8 if failed
-
   return retValue;
 }
+#endif
 #endif
 
 // --------------------- Main Functions ---------------------
 
 int CEnvironment::setenv(const std::string &name, const std::string &value, int overwrite /*= 1*/)
 {
-#ifdef TARGET_WINDOWS
+#ifdef MS_UWP
+  return (win10_setenv(name, value, overwrite ? autoDetect : addOnly) == 0) ? 0 : -1;
+#elif defined(TARGET_WINDOWS)
   return (win32_setenv(name, value, overwrite ? autoDetect : addOnly)==0) ? 0 : -1;
 #else
   if (value.empty() && overwrite != 0)
@@ -203,6 +252,33 @@ int CEnvironment::setenv(const std::string &name, const std::string &value, int 
 #endif
 }
 
+#ifdef MS_UWP
+
+std::string CEnvironment::getenv(const std::string &name)
+{
+  std::string result;
+
+  // check key
+  if (name.empty())
+  {
+    return "";
+  }
+
+  std::wstring Wname(win32ConvertUtf8ToW(name));
+  Platform::String^ key = ref new Platform::String(Wname.c_str());
+
+  ApplicationDataContainer^ localSettings = ApplicationData::Current->LocalSettings;
+  auto values = localSettings->Values;
+
+  if (values->HasKey(key))
+  {
+    auto value = safe_cast<Platform::String^>(values->Lookup(key));
+    result = win32ConvertWToUtf8(std::wstring(value->Data()));
+  }
+
+  return nullptr;
+}
+#else
 std::string CEnvironment::getenv(const std::string &name)
 {
 #ifdef TARGET_WINDOWS
@@ -236,10 +312,13 @@ std::string CEnvironment::getenv(const std::string &name)
   return str;
 #endif
 }
+#endif
 
 int CEnvironment::unsetenv(const std::string &name)
 {
-#ifdef TARGET_WINDOWS
+#ifdef MS_UWP
+  return (win10_setenv(name, "", deleteVariable)) == 0 ? 0 : -1;
+#elif defined(TARGET_WINDOWS)
   return (win32_setenv(name, "", deleteVariable)) == 0 ? 0 : -1;
 #else
   return ::unsetenv(name.c_str());

@@ -52,8 +52,10 @@ typedef intptr_t      ssize_t;
 #define strncasecmp strnicmp
 #endif
 
+#ifndef MW_UWP
 #define popen   _popen
 #define pclose  _pclose
+#endif
 
 #if 0
 // big endian

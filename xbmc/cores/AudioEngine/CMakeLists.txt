@@ -79,6 +79,11 @@ if(FFMPEG_FOUND)
   list(APPEND HEADERS Engines/ActiveAE/ActiveAEResampleFFMPEG.h)
 endif()
 
+if(CORE_SYSTEM_NAME STREQUAL windowsstore)
+  list(APPEND SOURCES Sinks/AESinkWASAPI.cpp)
+  list(APPEND HEADERS Sinks/AESinkWASAPI.h)
+endif()
+
 if(CORE_SYSTEM_NAME STREQUAL windows)
   list(APPEND SOURCES Sinks/AESinkDirectSound.cpp
                       Sinks/AESinkWASAPI.cpp)

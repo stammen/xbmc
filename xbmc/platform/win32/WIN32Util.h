@@ -96,9 +96,7 @@ public:
   static bool IsUsbDevice(const std::wstring &strWdrive);
 
   static std::string WUSysMsg(DWORD dwError);
-#ifndef MS_UWP
   static bool SetThreadLocalLocale(bool enable = true);
-#endif
 private:
 #ifndef MS_UWP
   static DEVINST GetDrivesDevInstByDiskNumber(long DiskNumber);

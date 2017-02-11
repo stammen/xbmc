@@ -160,6 +160,7 @@ public:
   bool DPIChanged(WORD dpi, RECT windowRect);
 
   // touchscreen support
+#ifndef MS_UWP
   typedef BOOL (WINAPI *pGetGestureInfo)(HGESTUREINFO, PGESTUREINFO);
   typedef BOOL (WINAPI *pSetGestureConfig)(HWND, DWORD, UINT, PGESTURECONFIG, UINT);
   typedef BOOL (WINAPI *pCloseGestureInfoHandle)(HGESTUREINFO);
@@ -168,6 +169,7 @@ public:
   pSetGestureConfig       PtrSetGestureConfig;
   pCloseGestureInfoHandle PtrCloseGestureInfoHandle;
   pEnableNonClientDpiScaling PtrEnableNonClientDpiScaling;
+#endif
 
 protected:
   bool ChangeResolution(const RESOLUTION_INFO& res, bool forceChange = false);

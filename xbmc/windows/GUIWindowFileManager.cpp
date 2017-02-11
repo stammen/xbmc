@@ -63,6 +63,11 @@
 #include "linux/XFileUtils.h"
 #endif
 
+#ifdef MS_UWP
+#include "filesystem/SpecialProtocol.h"
+#include "utils/CharsetConverter.h"
+#endif
+
 using namespace XFILE;
 using namespace PLAYLIST;
 using namespace KODI::MESSAGING;
@@ -333,10 +338,17 @@ void CGUIWindowFileManager::OnSort(int iList)
     // Set free space on disc
     if (pItem->m_bIsShareOrDrive)
     {
+#ifdef MS_UWP
+      std::wstring strDllW;
+      g_charsetConverter.utf8ToW(CSpecialProtocol::TranslatePath(pItem->GetPath().c_str()), strDllW, false, false, false);
+      const wchar_t* path = strDllW.c_str();
+#else
+      const char* path = pItem->GetPath().c_str();
+#endif
       if (pItem->IsHD())
       {
         ULARGE_INTEGER ulBytesFree;
-        if (GetDiskFreeSpaceEx(pItem->GetPath().c_str(), &ulBytesFree, NULL, NULL))
+        if (GetDiskFreeSpaceEx(path, &ulBytesFree, NULL, NULL))
         {
           pItem->m_dwSize = ulBytesFree.QuadPart;
           pItem->SetFileSizeLabel();
@@ -345,7 +357,7 @@ void CGUIWindowFileManager::OnSort(int iList)
       else if (pItem->IsDVD() && g_mediaManager.IsDiscInDrive())
       {
         ULARGE_INTEGER ulBytesTotal;
-        if (GetDiskFreeSpaceEx(pItem->GetPath().c_str(), NULL, &ulBytesTotal, NULL))
+        if (GetDiskFreeSpaceEx(path, NULL, &ulBytesTotal, NULL))
         {
           pItem->m_dwSize = ulBytesTotal.QuadPart;
           pItem->SetFileSizeLabel();

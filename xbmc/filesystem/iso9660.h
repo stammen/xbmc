@@ -178,10 +178,11 @@ public:
   iso9660( );
   virtual ~iso9660( );
 
-  HANDLE FindFirstFile( char *szLocalFolder, WIN32_FIND_DATA *wfdFile );
+  HANDLE FindFirstFileW9660(wchar_t *szLocalFolder, WIN32_FIND_DATA *wfdFile);
+  HANDLE FindFirstFile9660(char *szLocalFolder, WIN32_FIND_DATA *wfdFile);
   int FindNextFile( HANDLE szLocalFolder, WIN32_FIND_DATA *wfdFile );
   bool FindClose( HANDLE szLocalFolder );
-  DWORD SetFilePointer(HANDLE hFile, LONG lDistanceToMove, PLONG lpDistanceToMoveHigh, DWORD dwMoveMethod );
+  //DWORD SetFilePointer(HANDLE hFile, LONG lDistanceToMove, PLONG lpDistanceToMoveHigh, DWORD dwMoveMethod );
   int64_t GetFileSize(HANDLE hFile);
   int64_t GetFilePosition(HANDLE hFile);
   int64_t Seek(HANDLE hFile, int64_t lOffset, int whence);
@@ -195,7 +196,8 @@ public:
 protected:
   void IsoDateTimeToFileTime(iso9660_Datetime* isoDateTime, FILETIME* filetime);
   struct iso_dirtree* ReadRecursiveDirFromSector( DWORD sector, const char * );
-  struct iso_dirtree* FindFolder( char *Folder );
+  struct iso_dirtree* FindFolder(char *Folder);
+  struct iso_dirtree* FindFolderW(wchar_t *Folder);
   std::string GetThinText(BYTE* strTxt, int iLen );
   bool ReadSectorFromCache(iso9660::isofile* pContext, DWORD sector, uint8_t** ppBuffer);
   void ReleaseSectorFromCache(iso9660::isofile* pContext, DWORD sector);

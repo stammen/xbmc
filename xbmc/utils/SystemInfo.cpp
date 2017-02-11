@@ -48,6 +48,11 @@
 #endif // WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 #include "utils/CharsetConverter.h"
+#ifdef MS_UWP
+using namespace Windows::ApplicationModel;
+using namespace Windows::Security::ExchangeActiveSyncProvisioning;
+using namespace Windows::System;
+#endif
 #endif
 #if defined(TARGET_DARWIN)
 #include "platform/darwin/DarwinUtils.h"
@@ -784,6 +789,10 @@ std::string CSysInfo::GetManufacturerName(void)
     manufName.assign(deviceCStr, (propLen > 0 && propLen <= PROP_VALUE_MAX) ? propLen : 0);
 #elif defined(TARGET_DARWIN)
     manufName = CDarwinUtils::GetManufacturer();
+#elif defined(MS_UWP)
+    EasClientDeviceInformation^ eas = ref new EasClientDeviceInformation();
+    Platform::String^ manufacturer = eas->SystemManufacturer;
+    g_charsetConverter.wToUTF8(std::wstring(manufacturer->Data()), manufName);
 #elif defined(TARGET_WINDOWS)
     HKEY hKey;
     if (RegOpenKeyExW(HKEY_LOCAL_MACHINE, L"HARDWARE\\DESCRIPTION\\System\\BIOS", 0, KEY_READ, &hKey) == ERROR_SUCCESS)
@@ -832,6 +841,10 @@ std::string CSysInfo::GetModelName(void)
       if (sysctlbyname("hw.model", buf.get(), &nameLen, NULL, 0) == 0 && nameLen == buf.size())
         modelName.assign(buf.get(), nameLen - 1); // assign exactly 'nameLen-1' characters to 'modelName'
     }
+#elif defined(MS_UWP)
+    EasClientDeviceInformation^ eas = ref new EasClientDeviceInformation();
+    Platform::String^ manufacturer = eas->SystemProductName;
+    g_charsetConverter.wToUTF8(std::wstring(manufacturer->Data()), modelName);
 #elif defined(TARGET_WINDOWS)
     HKEY hKey;
     if (RegOpenKeyExW(HKEY_LOCAL_MACHINE, L"HARDWARE\\DESCRIPTION\\System\\BIOS", 0, KEY_READ, &hKey) == ERROR_SUCCESS)
@@ -862,7 +875,9 @@ std::string CSysInfo::GetModelName(void)
 
 bool CSysInfo::IsAeroDisabled()
 {
-#ifdef TARGET_WINDOWS
+#ifdef MS_UWP
+  return true; // need to review https://msdn.microsoft.com/en-us/library/windows/desktop/aa969518(v=vs.85).aspx
+#elif defined(TARGET_WINDOWS)
   BOOL aeroEnabled = FALSE;
   HRESULT res = DwmIsCompositionEnabled(&aeroEnabled);
   if (SUCCEEDED(res))
@@ -930,7 +945,27 @@ int CSysInfo::GetKernelBitness(void)
   static int kernelBitness = -1;
   if (kernelBitness == -1)
   {
-#ifdef TARGET_WINDOWS
+#ifdef MS_UWP
+    Package^ package = Package::Current;
+    auto arch = package->Id->Architecture;
+    switch (arch)
+    {
+    case ProcessorArchitecture::X86:
+      kernelBitness = 32;
+      break;
+    case ProcessorArchitecture::X64:
+      kernelBitness = 64;
+      break;
+    case ProcessorArchitecture::Arm:
+      kernelBitness = 32;
+      break;
+    case ProcessorArchitecture::Unknown: // not sure what to do here. guess 32 for now
+    case ProcessorArchitecture::Neutral:
+      kernelBitness = 32;
+      break;
+    }
+
+#elif defined(TARGET_WINDOWS)
     SYSTEM_INFO si;
     GetNativeSystemInfo(&si);
     if (si.wProcessorArchitecture == PROCESSOR_ARCHITECTURE_INTEL || si.wProcessorArchitecture == PROCESSOR_ARCHITECTURE_ARM)
@@ -1097,10 +1132,12 @@ std::string CSysInfo::GetUserAgent()
   result = GetAppName() + "/" + CSysInfo::GetVersionShort() + " (";
 #if defined(TARGET_WINDOWS)
   result += GetKernelName() + " " + GetKernelVersion();
+#ifndef MS_UWP
   BOOL bIsWow = FALSE;
   if (IsWow64Process(GetCurrentProcess(), &bIsWow) && bIsWow)
       result.append("; WOW64");
   else
+#endif
   {
     SYSTEM_INFO si = {};
     GetSystemInfo(&si);

@@ -168,6 +168,7 @@ static void to_WIN32_FIND_DATAW(LPWIN32_FIND_DATA data, LPWIN32_FIND_DATAW wdata
 #ifdef MS_UWP
   std::wstring strwname(data->cFileName);
 #else
+  std::wstring strwname;
   g_charsetConverter.utf8ToW(data->cFileName, strwname, false);
 #endif
   size_t size = sizeof(wdata->cFileName) / sizeof(wchar_t);
@@ -623,6 +624,8 @@ extern "C" BOOL WINAPI dllSetPriorityClass(HANDLE hProcess, DWORD dwPriorityClas
   return false;
 }
 
+#ifndef MS_UWP
+
 extern "C" DWORD WINAPI dllFormatMessageA(DWORD dwFlags, LPCVOID lpSource, DWORD dwMessageId, DWORD dwLanguageId, LPTSTR lpBuffer, DWORD nSize, va_list* Arguments)
 {
 #ifdef TARGET_WINDOWS
@@ -633,7 +636,6 @@ extern "C" DWORD WINAPI dllFormatMessageA(DWORD dwFlags, LPCVOID lpSource, DWORD
 #endif
 }
 
-#ifndef MS_UWP
 extern "C" DWORD WINAPI dllGetFullPathNameA(LPCTSTR lpFileName, DWORD nBufferLength, LPTSTR lpBuffer, LPTSTR* lpFilePart)
 {
 #ifdef TARGET_WINDOWS
@@ -703,7 +705,7 @@ extern "C" DWORD WINAPI dllGetFullPathNameW(LPCWSTR lpFileName, DWORD nBufferLen
 
 extern "C" DWORD WINAPI dllExpandEnvironmentStringsA(LPCTSTR lpSrc, LPTSTR lpDst, DWORD nSize)
 {
-#ifdef TARGET_WINDOWS
+#if defined(TARGET_WINDOWS) && !defined(MS_UWP)
   return ExpandEnvironmentStringsA(lpSrc, lpDst, nSize);
 #else
   not_implement("kernel32.dll fake function ExpandEnvironmentStringsA called\n"); //warning
@@ -729,11 +731,29 @@ extern "C" UINT WINAPI dllGetSystemDirectoryA(LPTSTR lpBuffer, UINT uSize)
 #ifdef API_DEBUG
   CLog::Log(LOGDEBUG, "GetSystemDirectoryA(%p,%d)\n", lpBuffer, uSize);
 #endif
+#ifdef MS_UWP
+  if (lpBuffer) wcscpy(lpBuffer, L".");
+#else
   if (lpBuffer) strcpy(lpBuffer, ".");
+#endif
   return 1;
 }
 
-
+#ifdef MS_UWP
+extern "C" UINT WINAPI dllGetShortPathName(LPTSTR lpszLongPath, LPTSTR lpszShortPath, UINT cchBuffer)
+{
+  if (!lpszLongPath) return 0;
+  if (wcslen(lpszLongPath) == 0)
+  {
+    //strcpy(lpszLongPath, "special://xbmc/system/mplayer/codecs/QuickTime.qts");
+  }
+#ifdef API_DEBUG
+  CLog::Log(LOGDEBUG, "KERNEL32!GetShortPathNameA('%s',%p,%d)\n", lpszLongPath, lpszShortPath, cchBuffer);
+#endif
+  wcscpy(lpszShortPath, lpszLongPath);
+  return wcslen(lpszShortPath);
+}
+#else
 extern "C" UINT WINAPI dllGetShortPathName(LPTSTR lpszLongPath, LPTSTR lpszShortPath, UINT cchBuffer)
 {
   if (!lpszLongPath) return 0;
@@ -747,6 +767,7 @@ extern "C" UINT WINAPI dllGetShortPathName(LPTSTR lpszLongPath, LPTSTR lpszShort
   strcpy(lpszShortPath, lpszLongPath);
   return strlen(lpszShortPath);
 }
+#endif
 
 extern "C" HANDLE WINAPI dllGetProcessHeap()
 {
@@ -872,7 +893,11 @@ extern "C" int WINAPI dllGetLocaleInfoA(LCID Locale, LCTYPE LCType, LPTSTR lpLCD
     {
       if (cchData > 3)
       {
+#ifdef MS_UWP
+        wcscpy(lpLCData, L"eng");
+#else
         strcpy(lpLCData, "eng");
+#endif
         return 4;
       }
     }
@@ -880,7 +905,11 @@ extern "C" int WINAPI dllGetLocaleInfoA(LCID Locale, LCTYPE LCType, LPTSTR lpLCD
     {
       if (cchData > 2)
       {
+#ifdef MS_UWP
+        wcscpy(lpLCData, L"US");
+#else
         strcpy(lpLCData, "US");
+#endif
         return 3;
       }
     }
@@ -888,7 +917,11 @@ extern "C" int WINAPI dllGetLocaleInfoA(LCID Locale, LCTYPE LCType, LPTSTR lpLCD
     {
       if (cchData > 5)
       {
+#ifdef MS_UWP
+        wcscpy(lpLCData, L"en-US");
+#else
         strcpy(lpLCData, "en-US");
+#endif
         return 6;
       }
     }
@@ -1001,7 +1034,7 @@ extern "C" int WINAPI dllWideCharToMultiByte(UINT CodePage, DWORD dwFlags, LPCWS
 
 extern "C" UINT WINAPI dllSetConsoleCtrlHandler(PHANDLER_ROUTINE HandlerRoutine, BOOL Add)
 {
-#ifdef TARGET_WINDOWS
+#if defined(TARGET_WINDOWS) && !defined(MS_UWP)
   return SetConsoleCtrlHandler(HandlerRoutine, Add);
 #else
   // no consoles exists on the xbox, do nothing
@@ -1063,7 +1096,12 @@ extern "C" DWORD WINAPI dllGetTempPathA(DWORD nBufferLength, LPTSTR lpBuffer)
 
   if (nBufferLength > len)
   {
+#ifdef MS_UWP
+    wcscpy(lpBuffer, tempPath);
+#else
     strcpy(lpBuffer, tempPath);
+
+#endif
   }
 
   return len;
@@ -1138,7 +1176,7 @@ extern "C" BOOL WINAPI dllDVDReadFileLayerChangeHack(HANDLE hFile, LPVOID lpBuff
 
 extern "C" LPVOID WINAPI dllLockResource(HGLOBAL hResData)
 {
-#ifdef TARGET_WINDOWS
+#if defined(TARGET_WINDOWS) && !defined(MS_UWP)
   return LockResource(hResData);
 #else
   not_implement("kernel32.dll fake function LockResource called\n"); //warning
@@ -1148,7 +1186,7 @@ extern "C" LPVOID WINAPI dllLockResource(HGLOBAL hResData)
 
 extern "C" SIZE_T WINAPI dllGlobalSize(HGLOBAL hMem)
 {
-#ifdef TARGET_WINDOWS
+#if defined(TARGET_WINDOWS) && !defined(MS_UWP)
   return GlobalSize(hMem);
 #else
   not_implement("kernel32.dll fake function GlobalSize called\n"); //warning
@@ -1158,7 +1196,7 @@ extern "C" SIZE_T WINAPI dllGlobalSize(HGLOBAL hMem)
 
 extern "C" DWORD WINAPI dllSizeofResource(HMODULE hModule, HRSRC hResInfo)
 {
-#ifdef TARGET_WINDOWS
+#if defined(TARGET_WINDOWS) && !defined(MS_UWP)
   return SizeofResource(hModule, hResInfo);
 #else
   not_implement("kernel32.dll fake function SizeofResource called\n"); //warning

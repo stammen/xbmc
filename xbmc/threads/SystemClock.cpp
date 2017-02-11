@@ -39,6 +39,8 @@ namespace XbmcThreads
     static bool start_time_set = false;
 #if defined(TARGET_DARWIN)
     now_time = CVGetCurrentHostTime() *  1000 / CVGetHostClockFrequency();
+#elif defined(MS_UWP)
+	now_time = GetTickCount64();
 #elif defined(TARGET_WINDOWS)
     now_time = (uint64_t)timeGetTime();
 #else

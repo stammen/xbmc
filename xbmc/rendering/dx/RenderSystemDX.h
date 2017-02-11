@@ -30,7 +30,9 @@
 #include "guilib/GUIShaderDX.h"
 #include "threads/Condition.h"
 #include "threads/CriticalSection.h"
+#ifndef MS_UWP
 #include "easyhook/easyhook.h"
+#endif
 
 enum PCI_Vendors
 {
@@ -188,7 +190,9 @@ protected:
 #endif
   bool                        m_bDefaultStereoEnabled{false};
   bool                        m_bStereoEnabled{false};
+#ifndef MS_UWP
   TRACED_HOOK_HANDLE          m_hHook{nullptr};
+#endif
   HMODULE                     m_hDriverModule{nullptr};
 
   CCriticalSection m_decoderSection;

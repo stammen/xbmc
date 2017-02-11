@@ -82,8 +82,13 @@ bool CWin32File::Open(const CURL& url)
   assert((pathnameW.compare(4, 4, L"UNC\\", 4) == 0 && m_smbFile) || !m_smbFile);
 
   m_filepathnameW = pathnameW;
+#ifdef MS_UWP
+  m_hFile = CreateFile2(pathnameW.c_str(), GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE, 
+                        OPEN_EXISTING, NULL);
+#else
   m_hFile = CreateFileW(pathnameW.c_str(), GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE,
                         NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+#endif
   if (m_smbFile)
     m_lastSMBFileErr = GetLastError(); // set real error state
 
@@ -105,9 +110,13 @@ bool CWin32File::OpenForWrite(const CURL& url, bool bOverWrite /*= false*/)
 
   assert((pathnameW.compare(4, 4, L"UNC\\", 4) == 0 && m_smbFile) || !m_smbFile);
 
+#ifdef MS_UWP
+  m_hFile = CreateFile2(pathnameW.c_str(), GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ, 
+                        bOverWrite ? CREATE_ALWAYS : OPEN_ALWAYS, NULL);
+#else
   m_hFile = CreateFileW(pathnameW.c_str(), GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ,
                         NULL, bOverWrite ? CREATE_ALWAYS : OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
-
+#endif
   if (m_smbFile)
     m_lastSMBFileErr = GetLastError(); // set real error state
 
@@ -518,7 +527,12 @@ int CWin32File::Stat(const CURL& url, struct __stat64* statData)
     statData->st_dev = 0;
   statData->st_rdev = statData->st_dev;
 
+#ifdef MS_UWP
+  const HANDLE hFile = CreateFile2(pathnameW.c_str(), GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE,
+    OPEN_EXISTING, NULL);
+#else
   const HANDLE hFile = CreateFileW(pathnameW.c_str(), FILE_READ_ATTRIBUTES, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+#endif
   /* set st_nlink */
   statData->st_nlink = 1; // fallback value
   if (hFile != INVALID_HANDLE_VALUE)
@@ -558,7 +572,11 @@ int CWin32File::Stat(const CURL& url, struct __stat64* statData)
 
   /* set st_mode */
   statData->st_mode = _S_IREAD; // Always assume Read permission for file owner
+#ifdef MS_UWP
+  if ((findData.dwFileAttributes & FILE_ATTRIBUTE_READONLY) == 0)
+#else
   if ((findData.dwFileAttributes & FILE_READ_ONLY) == 0)
+#endif
     statData->st_mode |= _S_IWRITE; // Write possible
   if ((findData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0)
     statData->st_mode |= _S_IFDIR | _S_IEXEC; // directory
@@ -681,7 +699,11 @@ int CWin32File::Stat(struct __stat64* statData)
   
   /* set st_mode */
   statData->st_mode = _S_IREAD; // Always assume Read permission for file owner
+#ifdef MS_UWP
+  if ((basicInfo.FileAttributes & FILE_ATTRIBUTE_READONLY) == 0)
+#else
   if ((basicInfo.FileAttributes & FILE_READ_ONLY) == 0)
+#endif
     statData->st_mode |= _S_IWRITE; // Write possible
   if ((basicInfo.FileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0)
     statData->st_mode |= _S_IFDIR | _S_IEXEC; // directory
