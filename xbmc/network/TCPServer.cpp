@@ -276,6 +276,14 @@ bool CTCPServer::Initialize()
   return false;
 }
 
+#ifdef MS_UWP
+bool CTCPServer::InitializeBlue()
+{
+  CLog::Log(LOGERROR, "%s is not implemented", __FUNCTION__);
+  return true; // need to fake it for now
+}
+
+#else
 bool CTCPServer::InitializeBlue()
 {
   if (!m_nonlocal)
@@ -456,6 +464,7 @@ bool CTCPServer::InitializeBlue()
 #endif
   return false;
 }
+#endif
 
 bool CTCPServer::InitializeTCP()
 {

@@ -56,7 +56,9 @@ public:
   static std::vector<std::string> GetDiskUsage();
   static std::string GetResInfoString();
   static int GetDesktopColorDepth();
+#ifndef MS_UWP
   static std::string GetSpecialFolder(int csidl);
+#endif
   static std::string GetSystemPath();
   static std::string GetProfilePath();
   static std::string UncToSmb(const std::string &strPath);
@@ -89,8 +91,8 @@ public:
 #ifndef MS_UWP
   static LONG UtilRegGetValue( const HKEY hKey, const char *const pcKey, DWORD *const pdwType, char **const ppcBuffer, DWORD *const pdwSizeBuff, const DWORD dwSizeAdd );
   static bool UtilRegOpenKeyEx( const HKEY hKeyParent, const char *const pcKey, const REGSAM rsAccessRights, HKEY *hKey, const bool bReadX64= false );
-#endif // MS_UWP
   static bool GetFocussedProcess(std::string &strProcessFile);
+#endif // MS_UWP
   static void CropSource(CRect& src, CRect& dst, CRect target, UINT rotation = 0);
 
   static bool IsUsbDevice(const std::wstring &strWdrive);

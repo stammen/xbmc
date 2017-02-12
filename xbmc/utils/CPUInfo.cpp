@@ -152,7 +152,8 @@ CCPUInfo::CCPUInfo(void)
     core.m_strVendor = cpuVendor;
     m_cores[core.m_id] = core;
   }
-
+#elif defined(MS_UWP)
+  assert(false); // not impletmented
 #elif defined(TARGET_WINDOWS)
   using KODI::PLATFORM::WINDOWS::FromW;
 
@@ -481,7 +482,7 @@ CCPUInfo::~CCPUInfo()
 
   if (m_fCPUFreq != NULL)
     fclose(m_fCPUFreq);
-#elif defined(TARGET_WINDOWS)
+#elif defined(TARGET_WINDOWS) && !defined(MS_UWP)
   if (m_cpuQueryFreq)
     PdhCloseQuery(m_cpuQueryFreq);
 
@@ -543,6 +544,7 @@ float CCPUInfo::getCPUFrequency()
     return 0.f;
   return hz / 1000000.0;
 #elif defined TARGET_WINDOWS
+#ifndef MS_UWP
   if (m_cpuFreqCounter && PdhCollectQueryData(m_cpuQueryFreq) == ERROR_SUCCESS)
   {
     PDH_RAW_COUNTER cnt;
@@ -557,6 +559,7 @@ float CCPUInfo::getCPUFrequency()
   if (!m_cores.empty())
     return float(m_cores.begin()->second.m_fSpeed);
   else
+#endif
     return 0.f;
 #elif defined(TARGET_FREEBSD)
   int hz = 0;
