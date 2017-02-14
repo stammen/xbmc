@@ -86,10 +86,12 @@ void CProcessorHD::Close()
   m_eViewType = PROCESSOR_VIEW_TYPE_UNKNOWN;
 }
 
+#ifndef MS_UWP
 bool CProcessorHD::UpdateSize(const DXVA2_VideoDesc& dsc)
 {
   return true;
 }
+#endif
 
 bool CProcessorHD::PreInit()
 {

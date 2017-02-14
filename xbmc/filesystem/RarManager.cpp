@@ -45,6 +45,10 @@
 #include "linux/XFileUtils.h"
 #endif
 
+#ifdef MS_UWP
+#include "utils/CharsetConverter.h"
+#endif
+
 #define EXTRACTION_WARN_SIZE 50*1024*1024
 
 using namespace XFILE;
@@ -518,8 +522,15 @@ void CRarManager::ExtractArchive(const std::string& strArchive, const std::strin
 int64_t CRarManager::CheckFreeSpace(const std::string& strDrive)
 {
   ULARGE_INTEGER lTotalFreeBytes;
+
+#ifdef MS_UWP
+  std::wstring strDllW;
+  g_charsetConverter.utf8ToW(CSpecialProtocol::TranslatePath(strDrive), strDllW, false, false, false);
+  if (GetDiskFreeSpaceEx(strDllW.c_str(), NULL, NULL, &lTotalFreeBytes))
+      return lTotalFreeBytes.QuadPart;
+#else
   if (GetDiskFreeSpaceEx(CSpecialProtocol::TranslatePath(strDrive).c_str(), NULL, NULL, &lTotalFreeBytes))
     return lTotalFreeBytes.QuadPart;
-
+#endif
   return 0;
 }

@@ -69,7 +69,9 @@ public:
   void OnResetDevice() override   { CSingleLock lock(m_section); Close();  }
 
 protected:
+#ifndef MS_UWP
   bool UpdateSize(const DXVA2_VideoDesc& dsc);
+#endif
   bool ReInit();
   bool InitProcessor();
   bool ConfigureProcessor(unsigned int format, unsigned int extended_format);

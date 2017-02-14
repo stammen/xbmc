@@ -27,7 +27,9 @@
 
 #ifdef TARGET_WINDOWS
 #include <mmdeviceapi.h>
+#ifndef MS_UWP
 #include "platform/win32/IMMNotificationClient.h"
+#endif
 #endif
 
 #include "platform/MessagePrinter.h"
@@ -72,7 +74,7 @@ extern "C" int XBMC_Run(bool renderGUI, CFileItemList &playlist)
     return status;
   }
 
-#ifdef TARGET_WINDOWS
+#if defined(TARGET_WINDOWS) && !defined(MS_UWP)
   IMMDeviceEnumerator *pEnumerator = nullptr;
   CMMNotificationClient cMMNC;
   HRESULT hr = CoCreateInstance(CLSID_MMDeviceEnumerator, nullptr, CLSCTX_ALL, IID_IMMDeviceEnumerator,
@@ -102,7 +104,7 @@ extern "C" int XBMC_Run(bool renderGUI, CFileItemList &playlist)
     status = -1;
   }
 
-#ifdef TARGET_WINDOWS
+#if defined(TARGET_WINDOWS) && !defined(MS_UWP)
   // the end
   hr = CoCreateInstance(CLSID_MMDeviceEnumerator, nullptr, CLSCTX_ALL, IID_IMMDeviceEnumerator,
                         reinterpret_cast<void**>(&pEnumerator));

@@ -91,10 +91,14 @@
  *****************/
 
 #if defined(TARGET_WINDOWS)
+#ifdef MS_UWP
+#define HAS_WIN10_NETWORK
+#define HAS_IRSERVERSUITE
+#else
 #define HAS_WIN32_NETWORK
 #define HAS_IRSERVERSUITE
 #define HAS_FILESYSTEM_SMB
-
+#endif
 #define DECLARE_UNUSED(a,b) a b;
 #endif
 

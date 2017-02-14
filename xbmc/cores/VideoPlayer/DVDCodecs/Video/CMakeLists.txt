@@ -25,7 +25,7 @@ if(OPENMAX_FOUND)
                       OpenMaxVideo.h)
 endif()
 
-if(CORE_SYSTEM_NAME STREQUAL windows)
+if(CORE_SYSTEM_NAME STREQUAL windows OR CORE_SYSTEM_NAME STREQUAL windowsstore)
   list(APPEND SOURCES DXVA.cpp)
   list(APPEND HEADERS DXVA.h)
 endif()
