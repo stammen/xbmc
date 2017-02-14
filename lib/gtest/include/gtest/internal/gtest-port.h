@@ -296,6 +296,14 @@
 # include <io.h>
 #endif
 
+#ifdef WINAPI_FAMILY
+#   include <winapifamily.h>
+#   if WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_APP)
+#       define MS_UWP
+#       define getenv(x) NULL
+#   endif
+#endif
+
 #if GTEST_OS_LINUX_ANDROID
 // Used to define __ANDROID_API__ matching the target NDK API level.
 #  include <android/api-level.h>  // NOLINT
@@ -1766,7 +1774,7 @@ inline const char* StrNCpy(char* dest, const char* src, size_t n) {
 // StrError() aren't needed on Windows CE at this time and thus not
 // defined there.
 
-#if !GTEST_OS_WINDOWS_MOBILE
+#if !defined(GTEST_OS_WINDOWS_MOBILE) && !defined(MS_UWP)
 inline int ChDir(const char* dir) { return chdir(dir); }
 #endif
 inline FILE* FOpen(const char* path, const char* mode) {

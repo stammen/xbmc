@@ -70,7 +70,7 @@ set(SOURCES Platinum/Source/Core/PltAction.cpp
             Platinum/Source/Devices/MediaConnect/PltMediaConnect.cpp
             Neptune/Source/System/Posix/NptPosixEnvironment.cpp)
 
-if(NOT CORE_SYSTEM_NAME STREQUAL windows)
+if(NOT CORE_SYSTEM_NAME STREQUAL windows AND NOT CORE_SYSTEM_NAME STREQUAL windowsstore)
   list(APPEND SOURCES Neptune/Source/System/Posix/NptPosixSystem.cpp
                       Neptune/Source/System/Posix/NptSelectableMessageQueue.cpp
                       Neptune/Source/System/Posix/NptPosixQueue.cpp
@@ -106,7 +106,7 @@ target_include_directories(upnp PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
                                        Platinum/Source/Extras
                                        Neptune/Source/Core
                                        Neptune/Source/System/Posix)
-if(CORE_SYSTEM_NAME STREQUAL windows)
+if(CORE_SYSTEM_NAME STREQUAL windows OR CORE_SYSTEM_NAME STREQUAL windowsstore)
   target_include_directories(upnp PRIVATE Neptune/Source/System/Win32)
 endif()
 set_target_properties(upnp PROPERTIES FOLDER lib)

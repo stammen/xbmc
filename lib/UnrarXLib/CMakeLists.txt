@@ -42,7 +42,7 @@ set(SOURCES archive.cpp
             volume.cpp)
 
 add_library(unrarxlib STATIC ${SOURCES} ${HEADERS})
-if(NOT CORE_SYSTEM_NAME STREQUAL windows)
+if(NOT CORE_SYSTEM_NAME STREQUAL windows AND NOT CORE_SYSTEM_NAME STREQUAL windowsstore)
   target_compile_definitions(unrarxlib PRIVATE -DSILENT)
 else()
   target_compile_definitions(unrarxlib PRIVATE -D_XBMC)
