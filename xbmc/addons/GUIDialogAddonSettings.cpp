@@ -400,7 +400,7 @@ bool CGUIDialogAddonSettings::ShowVirtualKeyboard(int iControl)
               // convert mask qualifiers
               StringUtils::Replace(strMask, "$AUDIO", g_advancedSettings.GetMusicExtensions());
               StringUtils::Replace(strMask, "$VIDEO", g_advancedSettings.m_videoExtensions);
-              StringUtils::Replace(strMask, "$IMAGE", g_advancedSettings.m_pictureExtensions);
+              StringUtils::Replace(strMask, "$IMAGE", g_advancedSettings.GetPictureExtensions());
 #if defined(_WIN32_WINNT)
               StringUtils::Replace(strMask, "$EXECUTABLE", ".exe|.bat|.cmd|.py");
 #else
@@ -1038,6 +1038,12 @@ bool CGUIDialogAddonSettings::GetCondition(const std::string &condition, const i
           value = ((CGUISpinControlEx*) control2)->GetLabel();
         else
           value = StringUtils::Format("%i", ((CGUISpinControlEx*) control2)->GetValue());
+        break;
+      case CGUIControl::GUICONTROL_SETTINGS_SLIDER:
+        if (((CGUISettingsSliderControl *)control2)->GetType() == SLIDER_CONTROL_TYPE_INT)
+          value = StringUtils::Format("%i", ((CGUISettingsSliderControl *)control2)->GetIntValue());
+        else
+          value = StringUtils::Format("%f", ((CGUISettingsSliderControl *)control2)->GetFloatValue());
         break;
       default:
         break;

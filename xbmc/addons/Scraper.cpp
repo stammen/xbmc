@@ -496,6 +496,20 @@ CScraperUrl CScraper::ResolveIDToUrl(const std::string& externalID)
 {
   CScraperUrl scurlRet;
 
+  if (m_isPython)
+  {
+    std::stringstream str;
+    str << "plugin://" << ID()
+        << "?action=resolveid&key=" << CURL::Encode(externalID);
+
+    CFileItem item("resolve me", false);
+
+    if (XFILE::CPluginDirectory::GetPluginResult(str.str(), item))
+      scurlRet.ParseString(item.GetPath());
+
+    return scurlRet;
+  }
+
   // scraper function takes an external ID, returns XML (see below)
   std::vector<std::string> vcsIn;
   vcsIn.push_back(externalID);
@@ -672,11 +686,7 @@ static void ParseThumbs(CScraperUrl& scurl, const CFileItem& item,
     prefix << tag << i+1;
     std::string url = FromString(item, prefix.str()+".url");
     std::string aspect = FromString(item, prefix.str()+".aspect");
-    TiXmlElement thumb("thumb");
-    thumb.SetAttribute("aspect", aspect);
-    TiXmlText text(url);
-    thumb.InsertEndChild(text);
-    scurl.ParseElement(&thumb);
+    scurl.AddElement(url, aspect);
   }
 }
 
@@ -691,9 +701,7 @@ static std::string ParseFanart(const CFileItem& item,
     prefix << tag << i+1;
     std::string url = FromString(item, prefix.str()+".url");
     std::string preview = FromString(item, prefix.str()+".preview");
-    std::string res = FromString(item, prefix.str()+".dim");
     TiXmlElement thumb("thumb");
-    thumb.SetAttribute("dim", res);
     thumb.SetAttribute("preview", preview);
     TiXmlText text(url);
     thumb.InsertEndChild(text);

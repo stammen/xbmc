@@ -20,6 +20,7 @@
 
 #include "DriverPrimitive.h"
 
+using namespace KODI;
 using namespace JOYSTICK;
 
 CDriverPrimitive::CDriverPrimitive(void)
@@ -146,7 +147,7 @@ bool CDriverPrimitive::IsValid(void) const
     }
     case 0:
     {
-      if (m_semiAxisDirection != SEMIAXIS_DIRECTION::POSITIVE ||
+      if (m_semiAxisDirection != SEMIAXIS_DIRECTION::POSITIVE &&
           m_semiAxisDirection != SEMIAXIS_DIRECTION::NEGATIVE)
         return false;
       break;

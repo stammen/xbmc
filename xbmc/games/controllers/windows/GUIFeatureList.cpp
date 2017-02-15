@@ -34,6 +34,7 @@
 #include "guilib/GUIWindow.h"
 #include "messaging/ApplicationMessenger.h"
 
+using namespace KODI;
 using namespace GAME;
 
 CGUIFeatureList::CGUIFeatureList(CGUIWindow* window, const std::string& windowParam) :
@@ -160,12 +161,7 @@ void CGUIFeatureList::OnSelect(unsigned int index)
       buttons.push_back(control);
   }
 
-  m_wizard->Run(m_controller->ID(), buttons, this);
-}
-
-void CGUIFeatureList::OnSkipDetected()
-{
-  //! @todo
+  m_wizard->Run(m_controller->ID(), buttons);
 }
 
 IFeatureButton* CGUIFeatureList::GetButtonControl(unsigned int featureIndex)
