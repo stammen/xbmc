@@ -49,6 +49,11 @@ else()
   add_precompiled_header(unrarxlib rar.hpp rar.cpp
                          EXCLUDE_SOURCES consio.cpp global.cpp)
 endif()
+
+if(CORE_SYSTEM_NAME STREQUAL windowsstore)
+	set_target_properties(unrarxlib PROPERTIES STATIC_LIBRARY_FLAGS "/ignore:4264")
+endif()
+
 set_target_properties(unrarxlib PROPERTIES FOLDER lib)
 source_group_by_folder(unrarxlib)
 set(core_DEPENDS unrarxlib ${core_DEPENDS} CACHE STRING "" FORCE)

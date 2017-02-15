@@ -37,3 +37,7 @@ add_precompiled_header(effects11 pchfx.h d3dxGlobal.cpp)
 set_target_properties(effects11 PROPERTIES FOLDER lib)
 source_group_by_folder(effects11)
 set(core_DEPENDS effects11 ${core_DEPENDS} CACHE STRING "" FORCE)
+
+if(CORE_SYSTEM_NAME STREQUAL windowsstore)
+	set_target_properties(effects11 PROPERTIES STATIC_LIBRARY_FLAGS "/ignore:4264")
+endif()

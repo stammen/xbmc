@@ -24,6 +24,7 @@ set(PYTHON_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/project/BuildDependencies/include/pyt
 # -------- Compiler options ---------
 
 add_options(CXX ALL_BUILDS "/wd\"4996\"")
+add_options(CXX ALL_BUILDS "/wd\"4146\"")
 set(ARCH_DEFINES -D_WINDOWS -DTARGET_WINDOWS -DMS_UWP -D__SSE__ -D__SSE2__)
 set(SYSTEM_DEFINES -DNOMINMAX -D_USE_32BIT_TIME_T -DHAS_DX -D__STDC_CONSTANT_MACROS
                    -DTAGLIB_STATIC -DNPT_CONFIG_ENABLE_LOGGING
@@ -42,7 +43,8 @@ set(gtest_force_shared_crt ON CACHE STRING "" FORCE)
 
 # -------- Linker options ---------
 
-set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /SAFESEH:NO")
+# remove "archiving object file compiled with /ZW into a static library" linker warning for UWP
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /SAFESEH:NO /ignore:4264")
 
 # For #pragma comment(lib X)
 # TODO: It would certainly be better to handle these libraries via CMake modules.

@@ -112,3 +112,7 @@ endif()
 set_target_properties(upnp PROPERTIES FOLDER lib)
 source_group_by_folder(upnp)
 set(core_DEPENDS upnp ${core_DEPENDS} CACHE STRING "" FORCE)
+
+if(CORE_SYSTEM_NAME STREQUAL windowsstore)
+	set_target_properties(upnp PROPERTIES STATIC_LIBRARY_FLAGS "/ignore:4264")
+endif()

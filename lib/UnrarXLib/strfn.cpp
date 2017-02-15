@@ -22,7 +22,7 @@ char *IntNameToExt(const char *Name)
 
 void ExtToInt(const char *Src,char *Dest)
 {
-#if defined(_WIN_32)
+#if defined(_WIN_32) && !defined(MS_UWP)
   CharToOem(Src,Dest);
 #else
   if (Dest!=Src)
@@ -33,7 +33,7 @@ void ExtToInt(const char *Src,char *Dest)
 
 void IntToExt(const char *Src,char *Dest)
 {
-#if defined(_WIN_32)
+#if defined(_WIN_32) && !defined(MS_UWP)
   OemToChar(Src,Dest);
 #else
   if (Dest!=Src)
@@ -44,7 +44,7 @@ void IntToExt(const char *Src,char *Dest)
 
 char* strlower(char *Str)
 {
-#ifdef _WIN_32
+#if defined(_WIN_32) && !defined(MS_UWP)
   CharLower((LPTSTR)Str);
 #else
   for (char *ChPtr=Str;*ChPtr;ChPtr++)
@@ -56,7 +56,7 @@ char* strlower(char *Str)
 
 char* strupper(char *Str)
 {
-#ifdef _WIN_32
+#if defined(_WIN_32) && !defined(MS_UWP)
   CharUpper((LPTSTR)Str);
 #else
   for (char *ChPtr=Str;*ChPtr;ChPtr++)
@@ -102,7 +102,7 @@ char* RemoveLF(char *Str)
 
 unsigned int loctolower(byte ch)
 {
-#ifdef _WIN_32
+#if defined(_WIN_32) && !defined(MS_UWP)
   return((int)CharLower((LPTSTR)ch));
 #else
   return(tolower(ch));
@@ -112,7 +112,7 @@ unsigned int loctolower(byte ch)
 
 unsigned int loctoupper(byte ch)
 {
-#ifdef _WIN_32
+#if defined(_WIN_32) && !defined(MS_UWP)
   return((int)CharUpper((LPTSTR)ch));
 #else
   return(toupper(ch));

@@ -184,7 +184,7 @@ bool FindFile::FastFind(const char *FindMask,const wchar *FindMaskW,struct FindD
 HANDLE FindFile::Win32Find(HANDLE hFind,const char *Mask,const wchar *MaskW,struct FindData *fd)
 {
 #if !defined(TARGET_POSIX)
-#ifndef _WIN_CE
+#if !defined(_WIN_CE) && !defined(MS_UWP)
   if (WinNT())
 #endif
   {
@@ -229,13 +229,14 @@ HANDLE FindFile::Win32Find(HANDLE hFind,const char *Mask,const wchar *MaskW,stru
       fd->atime=FindData.ftLastAccessTime;
       fd->FileTime=fd->mtime.GetDos();
 
-#ifndef _WIN_CE
+#if !defined(_WIN_CE) && !defined(MS_UWP)
       if (LowAscii(fd->NameW))
         *fd->NameW=0;
 #endif
     }
   }
-#ifndef _WIN_CE
+#if !defined(MS_UWP)
+#if !defined(_WIN_CE)
   else
 #endif
   {
@@ -281,7 +282,9 @@ HANDLE FindFile::Win32Find(HANDLE hFind,const char *Mask,const wchar *MaskW,stru
         *fd->NameW=0;
     }
   }
+#endif // MS_UWP
 #endif
+
   return(hFind);
 }
 #endif

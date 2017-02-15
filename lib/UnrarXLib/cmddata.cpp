@@ -44,7 +44,7 @@ void CommandData::Close()
 }
 
 
-#if !defined(SFX_MODULE) && !defined(_WIN_CE)
+#if !defined(SFX_MODULE) && !defined(_WIN_CE) && !defined(MS_UWP)
 void CommandData::ParseArg(char *Arg,wchar *ArgW)
 {
   if (IsSwitch(*Arg) && !NoMoreSwitches)
@@ -126,7 +126,7 @@ void CommandData::ParseDone()
 }
 
 
-#if !defined(SFX_MODULE) && !defined(_WIN_CE) && !defined(TARGET_POSIX)
+#if !defined(SFX_MODULE) && !defined(_WIN_CE) && !defined(TARGET_POSIX) && !defined(MS_UWP)
 void CommandData::ParseEnvVar()
 {
   char *EnvStr=getenv("RAR");

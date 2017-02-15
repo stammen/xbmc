@@ -12,8 +12,20 @@ void SetDirTime(const char *Name,RarTime *ftm,RarTime *ftc,RarTime *fta)
   bool sa=ftc!=NULL && fta->IsSet();
   if (!WinNT())
     return;
-  HANDLE hFile=CreateFile(Name,GENERIC_WRITE,FILE_SHARE_READ|FILE_SHARE_WRITE,
-                          NULL,OPEN_EXISTING,FILE_FLAG_BACKUP_SEMANTICS,NULL);
+#ifdef MS_UWP
+  auto size = strlen(Name) * 4;
+  wchar_t* wName = (wchar_t*)malloc(size);
+  HANDLE hFile = INVALID_HANDLE_VALUE;
+  if (wName)
+  {
+    CharToWide(Name, wName, size);
+    hFile = CreateFile2(wName, GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, OPEN_EXISTING, NULL);
+    free(wName);
+  }
+#else
+  HANDLE hFile = CreateFile(Name, GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE,
+    NULL, OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS, NULL);
+#endif
   if (hFile==INVALID_HANDLE_VALUE)
     return;
   FILETIME fm,fc,fa;
@@ -37,7 +49,7 @@ bool IsRemovable(const char *Name)
 #if defined(TARGET_POSIX)
   return false;
 //#ifdef _WIN_32
-#elif defined(_WIN_32)
+#elif defined(_WIN_32) && !defined(MS_UWP)
   char Root[NM];
   GetPathRoot(Name,Root);
   int Type=GetDriveType(*Root ? Root:NULL);
@@ -52,6 +64,33 @@ bool IsRemovable(const char *Name)
 
 
 #ifndef SFX_MODULE
+#ifdef MS_UWP
+Int64 GetFreeDisk(const char *Name)
+{
+  char Root[NM];
+  wchar_t wRoot[NM];
+  GetPathRoot(Name, Root);
+  GetFilePath(Name, Root);
+  CharToWide(Root, wRoot, NM);
+
+  if (CharToWide(Root, wRoot, NM))
+  {
+    ULARGE_INTEGER uiTotalSize, uiTotalFree, uiUserFree;
+    uiUserFree.u.LowPart = uiUserFree.u.HighPart = 0;
+    if (GetDiskFreeSpaceEx(*wRoot ? wRoot : NULL, &uiUserFree, &uiTotalSize, &uiTotalFree) &&
+      uiUserFree.u.HighPart <= uiTotalFree.u.HighPart)
+      return(int32to64(uiUserFree.u.HighPart, uiUserFree.u.LowPart));
+
+    DWORD SectorsPerCluster, BytesPerSector, FreeClusters, TotalClusters;
+    if (!GetDiskFreeSpace(*wRoot ? wRoot : NULL, &SectorsPerCluster, &BytesPerSector, &FreeClusters, &TotalClusters))
+      return(1457664);
+    Int64 FreeSize = SectorsPerCluster*BytesPerSector;
+    FreeSize = FreeSize*FreeClusters;
+    return(FreeSize);
+  }
+  return(1457664);
+}
+#else
 Int64 GetFreeDisk(const char *Name)
 {
 #if defined(TARGET_POSIX)
@@ -141,8 +180,15 @@ Int64 GetFreeDisk(const char *Name)
 #endif
 }
 #endif
+#endif // MS_UWP
 
 
+#if MS_UWP
+bool FileExist(const char *Name, const wchar *NameW)
+{
+  return(GetFileAttributesW(NameW) != 0xffffffff);
+}
+#else
 bool FileExist(const char *Name,const wchar *NameW)
 {
 #ifdef _WIN_32
@@ -159,6 +205,7 @@ bool FileExist(const char *Name,const wchar *NameW)
   return(FindFile::FastFind(Name,NameW,&FD));
 #endif
 }
+#endif
 
 
 bool WildFileExist(const char *Name,const wchar *NameW)
@@ -239,6 +286,12 @@ void PrepareToDelete(const char *Name,const wchar *NameW)
 }
 
 
+#ifdef MS_UWP
+uint GetFileAttr(const char *Name, const wchar *NameW)
+{
+  return(GetFileAttributesW(NameW));
+}
+#else
 uint GetFileAttr(const char *Name,const wchar *NameW)
 {
 #ifdef _WIN_32
@@ -261,8 +314,16 @@ uint GetFileAttr(const char *Name,const wchar *NameW)
 #endif
 #endif
 }
+#endif // MS_UWP
 
-
+#ifdef MS_UWP
+bool SetFileAttr(const char *Name, const wchar *NameW, uint Attr)
+{
+  bool success;
+  success = SetFileAttributesW(NameW, Attr) != 0;
+  return(success);
+}
+#else
 bool SetFileAttr(const char *Name,const wchar *NameW,uint Attr)
 {
   bool success;
@@ -284,13 +345,13 @@ bool SetFileAttr(const char *Name,const wchar *NameW,uint Attr)
 #endif
   return(success);
 }
-
+#endif // MS_UWP
 
 void ConvertNameToFull(const char *Src,char *Dest)
 {
 #ifdef _WIN_32
 //#ifndef _WIN_CE
-#if !defined(_WIN_CE) && !defined(TARGET_POSIX)
+#if !defined(_WIN_CE) && !defined(TARGET_POSIX) && !defined(MS_UWP)
   char FullName[NM],*NamePtr;
   if (GetFullPathName(Src,sizeof(FullName),FullName,&NamePtr))
     strcpy(Dest,FullName);

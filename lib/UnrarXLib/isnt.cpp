@@ -1,8 +1,11 @@
 #include "rar.hpp"
 
-#ifdef _WIN_32
+#ifdef _WIN_32 
 int WinNT()
 {
+#ifdef MS_UWP
+  return 1;
+#else
   static int dwPlatformId=-1,dwMajorVersion;
   if (dwPlatformId==-1)
   {
@@ -13,5 +16,6 @@ int WinNT()
     dwMajorVersion=WinVer.dwMajorVersion;
   }
   return(dwPlatformId==VER_PLATFORM_WIN32_NT ? dwMajorVersion:0);
+#endif
 }
 #endif

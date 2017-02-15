@@ -5,7 +5,9 @@
 // functions in here which are used if _APPLE is defined.
 // Therefore, define _APPLE in this case to do proper conversion
 #undef MBFUNCTIONS
+#ifndef MS_UWP
 #undef _WIN_32
+#endif
 #define _APPLE
 
 bool WideToChar(const wchar *Src,char *Dest,int DestSize)
@@ -371,7 +373,7 @@ void SupportDBCS::Init()
   DBCSMode = true;
   for (int I=0;I<sizeof(IsLeadByte)/sizeof(IsLeadByte[0]);I++)
     IsLeadByte[I]=true;
-#else
+#elif !defined(MS_UWP)
   CPINFO CPInfo;
   GetCPInfo(CP_ACP,&CPInfo);
   DBCSMode=CPInfo.MaxCharSize > 1;

@@ -293,8 +293,8 @@ void _stdfunction ProcessSignal(int SigType)
 void ErrorHandler::SetSignalHandlers(bool Enable)
 {
   EnableBreak=Enable;
-#if !defined(GUI) && !defined(_SFX_RTL_)
-#ifdef _WIN_32
+#if !defined(GUI) && !defined(_SFX_RTL_) && !defined(MS_UWP)
+#if defined(_WIN_32) 
   SetConsoleCtrlHandler(Enable ? ProcessSignal:NULL,TRUE);
 #else
   signal(SIGINT,Enable ? ProcessSignal:SIG_IGN);

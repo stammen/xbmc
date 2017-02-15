@@ -53,7 +53,9 @@ bool FileCreate(RAROptions *Cmd,File *NewFile,char *Name,wchar *NameW,
         SrcFile.SetHandleType(FILE_HANDLESTD);
         int Size=SrcFile.Read(NewName,NM);
         NewName[Size]=0;
+#ifndef MS_UWP
         OemToChar(NewName,NewName);
+#endif
 #else
         if (!fgets(NewName,sizeof(NewName),stdin))
           continue;
