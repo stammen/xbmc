@@ -10,6 +10,8 @@
 #ifndef _NPT_WIN32_MESSAGE_QUEUE_
 #define _NPT_WIN32_MESSAGE_QUEUE_
 
+#ifndef MS_UWP
+
 /*----------------------------------------------------------------------
 |       includes
 +---------------------------------------------------------------------*/
@@ -44,6 +46,8 @@ private:
     TCHAR       m_ClassName[16];
     HINSTANCE   m_hInstance;
 };
+
+#endif // MS_UWP
 
 #endif // _NPT_WIN32_MESSAGE_QUEUE_
 

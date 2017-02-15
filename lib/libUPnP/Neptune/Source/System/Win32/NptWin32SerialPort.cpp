@@ -17,6 +17,7 @@
 #include "NptStrings.h"
 #include "NptLogging.h"
 
+#ifndef MS_UWP
 /*----------------------------------------------------------------------
 |   NPT_Win32HandletWrapper
 +---------------------------------------------------------------------*/
@@ -335,3 +336,5 @@ NPT_SerialPort::NPT_SerialPort(const char* name)
 {
     m_Delegate = new NPT_Win32SerialPort(name);
 }
+
+#endif //MS_UWP

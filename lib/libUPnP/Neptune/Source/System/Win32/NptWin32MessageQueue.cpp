@@ -11,7 +11,7 @@
 |       includes
 +---------------------------------------------------------------------*/
 #include "NptWin32MessageQueue.h"
-
+#ifndef MS_UWP
 /*----------------------------------------------------------------------
 |       platform adaptation
 +---------------------------------------------------------------------*/
@@ -180,4 +180,7 @@ NPT_Win32WindowMessageQueue::HandleMessage(NPT_Message*        message,
     delete message;
     return result;
 }
+
+#endif // MS_UWP
+
 

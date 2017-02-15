@@ -25,13 +25,6 @@
 #include <iostream>
 #include <fstream>
 
-#ifdef WINAPI_FAMILY
-#   include <winapifamily.h>
-#   if WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_APP)
-#       define MS_UWP
-#   endif
-#endif
-
 #if !(defined(_WINSOCKAPI_) || defined(_WINSOCK_H))
 #include <winsock2.h>
 #endif

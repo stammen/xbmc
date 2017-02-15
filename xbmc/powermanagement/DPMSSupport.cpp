@@ -190,6 +190,10 @@ void DPMSSupport::PlatformSpecificInit()
 
 bool DPMSSupport::PlatformSpecificEnablePowerSaving(PowerSavingMode mode)
 {
+#ifdef MS_UWP
+  CLog::Log(LOGERROR, "%s is not implemented", __FUNCTION__);
+  return false;
+#else
   if(!g_graphicsContext.IsFullScreenRoot())
   {
     CLog::Log(LOGDEBUG, "DPMS: not in fullscreen, power saving disabled");
@@ -206,12 +210,18 @@ bool DPMSSupport::PlatformSpecificEnablePowerSaving(PowerSavingMode mode)
   default:
     return true;
   }
+#endif
 }
 
 bool DPMSSupport::PlatformSpecificDisablePowerSaving()
 {
+#ifdef MS_UWP
+  CLog::Log(LOGERROR, "%s is not implemented", __FUNCTION__);
+  return false;
+#else
   // Turn display on
   return SendMessage(g_Windowing.GetHwnd(), WM_SYSCOMMAND, SC_MONITORPOWER, (LPARAM) -1) == 0;
+#endif
 }
 
 #elif defined(TARGET_DARWIN_OSX)

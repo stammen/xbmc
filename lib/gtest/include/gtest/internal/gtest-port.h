@@ -296,14 +296,6 @@
 # include <io.h>
 #endif
 
-#ifdef WINAPI_FAMILY
-#   include <winapifamily.h>
-#   if WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_APP)
-#       define MS_UWP
-#       define getenv(x) NULL
-#   endif
-#endif
-
 #if GTEST_OS_LINUX_ANDROID
 // Used to define __ANDROID_API__ matching the target NDK API level.
 #  include <android/api-level.h>  // NOLINT

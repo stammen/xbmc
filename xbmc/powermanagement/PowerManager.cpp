@@ -283,7 +283,7 @@ void CPowerManager::OnWake()
 #if defined(HAS_SDL) || defined(TARGET_WINDOWS)
   if (g_Windowing.IsFullScreen())
   {
-#if defined(TARGET_WINDOWS)
+#if defined(TARGET_WINDOWS) && !defined(MS_UWP)
     ShowWindow(g_hWnd,SW_RESTORE);
     SetForegroundWindow(g_hWnd);
 #endif
