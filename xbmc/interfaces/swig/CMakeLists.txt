@@ -47,3 +47,7 @@ set(core_DEPENDS python_binding ${core_DEPENDS} CACHE STRING "" FORCE)
 if(WIN32)
   add_precompiled_header(python_binding pch.h ${CMAKE_SOURCE_DIR}/xbmc/platform/win32/pch.cpp PCH_TARGET kodi)
 endif()
+
+if(CORE_SYSTEM_NAME STREQUAL windowsstore)
+	set_target_properties(python_binding PROPERTIES STATIC_LIBRARY_FLAGS "/ignore:4264")
+endif()
