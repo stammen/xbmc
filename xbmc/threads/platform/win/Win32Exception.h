@@ -25,6 +25,7 @@
 #endif
 #include <windows.h>
 
+#ifndef MS_UWP
 class win32_exception
 {
 public:
@@ -37,3 +38,4 @@ public:
 private:
     static std::string mVersion;
 };
+#endif
