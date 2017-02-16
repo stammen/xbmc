@@ -22,7 +22,11 @@
 #include "peripherals/Peripherals.h"
 #include "threads/SingleLock.h"
 
-#if   defined(TARGET_WINDOWS)
+#if   defined(MS_UWP)
+#include "windowsstore/WinEventsWin10.h"
+#define WinEventsType CWinEventsWin10
+
+#elif   defined(TARGET_WINDOWS)
 #include "windows/WinEventsWin32.h"
 #define WinEventsType CWinEventsWin32
 
