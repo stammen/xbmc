@@ -30,18 +30,18 @@
 
 #ifdef HAS_DX
 
-CWinSystemWin32DX::CWinSystemWin32DX()
+CWinSystemWin10DX::CWinSystemWin10DX()
 : CRenderSystemDX()
 {
 
 }
 
-CWinSystemWin32DX::~CWinSystemWin32DX()
+CWinSystemWin10DX::~CWinSystemWin10DX()
 {
 
 }
 
-void CWinSystemWin32DX::PresentRender(bool rendered, bool videoLayer)
+void CWinSystemWin10DX::PresentRender(bool rendered, bool videoLayer)
 {
   if (rendered)
     PresentRenderImpl(rendered);
@@ -49,22 +49,23 @@ void CWinSystemWin32DX::PresentRender(bool rendered, bool videoLayer)
   if (m_delayDispReset && m_dispResetTimer.IsTimePast())
   {
     m_delayDispReset = false;
-    CWinSystemWin32::OnDisplayReset();
+    CWinSystemWin10::OnDisplayReset();
   }
   if (!rendered)
     Sleep(40);
 }
 
-bool CWinSystemWin32DX::UseWindowedDX(bool fullScreen)
+bool CWinSystemWin10DX::UseWindowedDX(bool fullScreen)
 {
   return (CServiceBroker::GetSettings().GetBool(CSettings::SETTING_VIDEOSCREEN_FAKEFULLSCREEN) || !fullScreen);
 }
 
-bool CWinSystemWin32DX::CreateNewWindow(std::string name, bool fullScreen, RESOLUTION_INFO& res, PHANDLE_EVENT_FUNC userFunction)
+bool CWinSystemWin10DX::CreateNewWindow(std::string name, bool fullScreen, RESOLUTION_INFO& res, PHANDLE_EVENT_FUNC userFunction)
 {
-  if(!CWinSystemWin32::CreateNewWindow(name, fullScreen, res, userFunction))
+  if(!CWinSystemWin10::CreateNewWindow(name, fullScreen, res, userFunction))
     return false;
 
+#if 0
   SetFocusWnd(m_hWnd);
   SetDeviceWnd(m_hWnd);
   CRenderSystemDX::m_interlaced = ((res.dwFlags & D3DPRESENTFLAG_INTERLACED) != 0);
@@ -75,31 +76,31 @@ bool CWinSystemWin32DX::CreateNewWindow(std::string name, bool fullScreen, RESOL
     return false;
 
   SetMonitor(monitor->hMonitor);
-
+#endif
   return true;
 }
 
-void CWinSystemWin32DX::UpdateMonitor()
+void CWinSystemWin10DX::UpdateMonitor()
 {
   const MONITOR_DETAILS* monitor = GetMonitor(m_nScreen);
   if (monitor)
     SetMonitor(monitor->hMonitor);
 }
 
-bool CWinSystemWin32DX::ResizeWindow(int newWidth, int newHeight, int newLeft, int newTop)
+bool CWinSystemWin10DX::ResizeWindow(int newWidth, int newHeight, int newLeft, int newTop)
 {
-  CWinSystemWin32::ResizeWindow(newWidth, newHeight, newLeft, newTop);
+  CWinSystemWin10::ResizeWindow(newWidth, newHeight, newLeft, newTop);
   CRenderSystemDX::OnResize(newWidth, newHeight);
 
   return true;
 }
 
-void CWinSystemWin32DX::OnMove(int x, int y)
+void CWinSystemWin10DX::OnMove(int x, int y)
 {
   CRenderSystemDX::OnMove();
 }
 
-bool CWinSystemWin32DX::SetFullScreen(bool fullScreen, RESOLUTION_INFO& res, bool blankOtherDisplays)
+bool CWinSystemWin10DX::SetFullScreen(bool fullScreen, RESOLUTION_INFO& res, bool blankOtherDisplays)
 {
   // When going DX fullscreen -> windowed, we must switch DXGI device to windowed mode first to
   // get it out of fullscreen mode because it restores a former resolution.
@@ -116,13 +117,14 @@ bool CWinSystemWin32DX::SetFullScreen(bool fullScreen, RESOLUTION_INFO& res, boo
   CRenderSystemDX::m_useWindowedDX = UseWindowedDX(fullScreen);
 
   // this needed to prevent resize/move events from DXGI during changing mode
-  CWinSystemWin32::m_IsAlteringWindow = true;
+  CWinSystemWin10::m_IsAlteringWindow = true;
   if (FS2Windowed)
     CRenderSystemDX::SetFullScreenInternal();
 
+#if 0
   if (!m_useWindowedDX)
     SetForegroundWindowInternal(m_hWnd);
-
+#endif
   // most 3D content has 23.976fps, so switch for this mode
   if (g_graphicsContext.GetStereoMode() == RENDER_STEREO_MODE_HARDWAREBASED)
     res = CDisplaySettings::GetInstance().GetResolutionInfo(CResolutionUtils::ChooseBestResolution(24.f / 1.001f, res.iWidth, true));
@@ -130,33 +132,34 @@ bool CWinSystemWin32DX::SetFullScreen(bool fullScreen, RESOLUTION_INFO& res, boo
   // so this flags delays call SetFullScreen _after_ resetting render system
   bool delaySetFS = CRenderSystemDX::m_bHWStereoEnabled;
   if (!delaySetFS)
-    CWinSystemWin32::SetFullScreen(fullScreen, res, blankOtherDisplays);
+    CWinSystemWin10::SetFullScreen(fullScreen, res, blankOtherDisplays);
 
   // this needed to prevent resize/move events from DXGI during changing mode
-  CWinSystemWin32::m_IsAlteringWindow = true;
+  CWinSystemWin10::m_IsAlteringWindow = true;
   CRenderSystemDX::ResetRenderSystem(res.iWidth, res.iHeight, fullScreen, res.fRefreshRate);
 
   if (delaySetFS)
   {
     // now resize window and force changing resolution if stereo mode disabled
     if (UseWindowedDX(fullScreen))
-      CWinSystemWin32::SetFullScreenEx(fullScreen, res, blankOtherDisplays, !CRenderSystemDX::m_bHWStereoEnabled);
+      CWinSystemWin10::SetFullScreenEx(fullScreen, res, blankOtherDisplays, !CRenderSystemDX::m_bHWStereoEnabled);
     else
     {
       CRenderSystemDX::SetFullScreenInternal();
       CRenderSystemDX::CreateWindowSizeDependentResources();
     }
   }
-  CWinSystemWin32::m_IsAlteringWindow = false;
+  CWinSystemWin10::m_IsAlteringWindow = false;
 
   return true;
 }
 
-std::string CWinSystemWin32DX::GetClipboardText(void)
+std::string CWinSystemWin10DX::GetClipboardText(void)
 {
   std::wstring unicode_text;
   std::string utf8_text;
 
+#if 0
   if (OpenClipboard(NULL))
   {
     HGLOBAL hglb = GetClipboardData(CF_UNICODETEXT);
@@ -171,16 +174,17 @@ std::string CWinSystemWin32DX::GetClipboardText(void)
     }
     CloseClipboard();
   }
-
+#endif
   g_charsetConverter.wToUTF8(unicode_text, utf8_text);
 
   return utf8_text;
 }
 
-void CWinSystemWin32DX::NotifyAppFocusChange(bool bGaining)
+void CWinSystemWin10DX::NotifyAppFocusChange(bool bGaining)
 {
-  CWinSystemWin32::NotifyAppFocusChange(bGaining);
+  CWinSystemWin10::NotifyAppFocusChange(bGaining);
 
+#if 0
   // if true fullscreen we need switch render system to/from ff manually like dx9 does
   if (!UseWindowedDX(m_bFullScreen) && CRenderSystemDX::m_bRenderCreated)
   {
@@ -193,6 +197,7 @@ void CWinSystemWin32DX::NotifyAppFocusChange(bool bGaining)
     if (!bGaining)
       ShowWindow(m_hWnd, SW_FORCEMINIMIZE);
   }
+#endif
 }
 
 #endif

@@ -18,23 +18,23 @@
  *
  */
 
-#ifndef WIN_SYSTEM_WIN32_DX_H
-#define WIN_SYSTEM_WIN32_DX_H
+#ifndef WIN_SYSTEM_WIN10_DX_H
+#define WIN_SYSTEM_WIN10_DX_H
 
 #ifdef HAS_DX
 
 #pragma once
 
-#include "windowing/windows/WinSystemWin32.h"
-#include "rendering/dx/RenderSystemDX.h"
+#include "windowing/windowsstore/WinSystemWin10.h"
+#include "rendering/dx/RenderSystemDXWin10.h"
 #include "utils/GlobalsHandling.h"
 
 
-class CWinSystemWin32DX : public CWinSystemWin32, public CRenderSystemDX
+class CWinSystemWin10DX : public CWinSystemWin10, public CRenderSystemDX
 {
 public:
-  CWinSystemWin32DX();
-  ~CWinSystemWin32DX();
+  CWinSystemWin10DX();
+  ~CWinSystemWin10DX();
 
   virtual bool CreateNewWindow(std::string name, bool fullScreen, RESOLUTION_INFO& res, PHANDLE_EVENT_FUNC userFunction);
   virtual bool ResizeWindow(int newWidth, int newHeight, int newLeft, int newTop);
@@ -62,20 +62,20 @@ public:
   */
   void Unregister(ID3DResource *resource) override { CRenderSystemDX::Unregister(resource); };
 
-  void Register(IDispResource *resource) override { CWinSystemWin32::Register(resource); };
-  void Unregister(IDispResource *resource) override { CWinSystemWin32::Unregister(resource); };
+  void Register(IDispResource *resource) override { CWinSystemWin10::Register(resource); };
+  void Unregister(IDispResource *resource) override { CWinSystemWin10::Unregister(resource); };
 
 protected:
   bool UseWindowedDX(bool fullScreen);
   void UpdateMonitor() override;
-  void OnDisplayLost() override { CWinSystemWin32::OnDisplayLost(); };
-  void OnDisplayReset() override { CWinSystemWin32::OnDisplayReset(); };
-  void OnDisplayBack() override { CWinSystemWin32::OnDisplayBack(); };
+  void OnDisplayLost() override { CWinSystemWin10::OnDisplayLost(); };
+  void OnDisplayReset() override { CWinSystemWin10::OnDisplayReset(); };
+  void OnDisplayBack() override { CWinSystemWin10::OnDisplayBack(); };
 };
 
-XBMC_GLOBAL_REF(CWinSystemWin32DX,g_Windowing);
-#define g_Windowing XBMC_GLOBAL_USE(CWinSystemWin32DX)
+XBMC_GLOBAL_REF(CWinSystemWin10DX,g_Windowing);
+#define g_Windowing XBMC_GLOBAL_USE(CWinSystemWin10DX)
 
 #endif
 
-#endif // WIN_SYSTEM_WIN32_DX_H
+#endif // WIN_SYSTEM_WIN10_DX_H
