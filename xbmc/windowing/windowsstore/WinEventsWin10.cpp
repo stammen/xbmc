@@ -51,7 +51,7 @@
 #include "Util.h"
 #include "messaging/ApplicationMessenger.h"
 
-#ifdef MS_UWP
+#ifdef TARGET_WIN10
 
 using namespace PERIPHERALS;
 using namespace KODI::MESSAGING;

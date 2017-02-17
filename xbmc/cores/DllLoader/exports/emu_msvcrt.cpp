@@ -67,7 +67,7 @@
 
 #include "emu_msvcrt.h"
 #include "emu_dummy.h"
-#ifndef MS_UWP
+#ifndef TARGET_WIN10
 #include "emu_kernel32.h"
 #endif
 #include "util/EmuFileWrapper.h"
@@ -79,7 +79,7 @@
 #endif
 #if defined(TARGET_ANDROID)
 #include "platform/android/loader/AndroidDyload.h"
-#elif !defined(TARGET_WINDOWS)
+#elif !defined(TARGET_WINDOWS) && !defined(TARGET_WIN10)
 #include <dlfcn.h>
 #endif
 #include "utils/Environment.h"
@@ -121,7 +121,7 @@ extern "C" void __stdcall init_emu_environ()
 #if defined(TARGET_WINDOWS)
   // fill our array with the windows system vars
 
-#ifndef MS_UWP
+#ifndef TARGET_WIN10
   LPTSTR lpszVariable;
   LPTCH lpvEnv = NULL;
   lpvEnv = GetEnvironmentStrings();
@@ -255,7 +255,7 @@ static int convert_fmode(const char* mode)
   return iMode;
 }
 
-#ifdef TARGET_WINDOWS
+#if defined(TARGET_WINDOWS) || defined(TARGET_WIN10)
 static void to_finddata64i32(_wfinddata64i32_t *wdata, _finddata64i32_t *data)
 {
   std::string strname;
@@ -464,7 +464,7 @@ extern "C"
 #if defined(TARGET_ANDROID)
     CAndroidDyload temp;
     return temp.Open(filename);
-#elif !defined(TARGET_WINDOWS)
+#elif !defined(TARGET_WINDOWS) && !defined(TARGET_WIN10)
     return dlopen(filename, flag);
 #else
     return NULL;
@@ -1843,7 +1843,7 @@ extern "C"
     return CFile::Stat(path, buffer);
   }
 
-#ifdef TARGET_WINDOWS
+#if defined(TARGET_WINDOWS) || defined(TARGET_WIN10)
   int dll_stat64i32(const char *path, struct _stat64i32 *buffer)
   {
     struct __stat64 a;
@@ -1907,7 +1907,7 @@ extern "C"
     return -1;
   }
 
-#ifdef TARGET_WINDOWS
+#if defined(TARGET_WINDOWS) || defined(TARGET_WIN10)
   int dll_fstat64i32(int fd, struct _stat64i32 *buffer)
   {
     CFile* pFile = g_emuFileWrapper.GetFileXbmcByDescriptor(fd);

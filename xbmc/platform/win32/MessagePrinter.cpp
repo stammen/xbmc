@@ -20,19 +20,15 @@
 
 #include "platform/MessagePrinter.h"
 #include "CompileInfo.h"
+#include "utils/log.h"
 
-#include <windows.h>
-
-#ifdef MS_UWP
-#include <assert.h>
+#ifdef TARGET_WIN10
 int WINAPI MessageBox(void* hWnd, const char* lpText, const char* lpCaption, UINT uType)
 {
-    assert(false);
-    return IDOK;
+  CLog::Log(LOGERROR, "%s is not implemented", __FUNCTION__);
+  return IDOK;
 }
-
-
-#endif
+#endif // TARGET_WIN10
 
 void CMessagePrinter::DisplayMessage(const std::string& message)
 {

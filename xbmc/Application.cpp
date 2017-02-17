@@ -182,6 +182,10 @@
 #include "win32util.h"
 #endif
 
+#ifdef TARGET_WIN10
+#include "win32util.h"
+#endif
+
 #ifdef TARGET_DARWIN_OSX
 #include "platform/darwin/osx/CocoaInterface.h"
 #include "platform/darwin/osx/XBMCHelper.h"
@@ -215,6 +219,10 @@
 #endif
 
 #ifdef TARGET_WINDOWS
+#include "utils/Environment.h"
+#endif
+
+#ifdef TARGET_WIN10
 #include "utils/Environment.h"
 #endif
 
@@ -582,7 +590,7 @@ bool CApplication::Create()
   setenv("OS","OS X",true);
 #elif defined(TARGET_POSIX)
   setenv("OS","Linux",true);
-#elif defined(TARGET_WINDOWS)
+#elif defined(TARGET_WINDOWS) || defined (TARGET_WIN10)
   CEnvironment::setenv("OS", "win32");
 #endif
 
@@ -632,7 +640,7 @@ bool CApplication::Create()
   update_emu_environ();//apply the GUI settings
 
   //! @todo - move to CPlatformXXX
-#if defined(TARGET_WINDOWS) && !defined(MS_UWP)
+#if defined(TARGET_WINDOWS) && !defined(TARGET_WIN10)
   CWIN32Util::SetThreadLocalLocale(true); // enable independent locale for each thread, see https://connect.microsoft.com/VisualStudio/feedback/details/794122
 #endif // TARGET_WINDOWS
 

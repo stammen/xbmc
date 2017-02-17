@@ -26,7 +26,7 @@
   #define M_PI       3.14159265358979323846
 #endif
 
-#ifdef MS_UWP
+#ifdef TARGET_WIN10
 #include "DirectXPackedVector.h"
 using namespace DirectX::PackedVector;
 

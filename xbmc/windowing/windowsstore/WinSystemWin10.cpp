@@ -32,7 +32,7 @@
 #include "utils/CharsetConverter.h"
 #include "utils/SystemInfo.h"
 
-#ifdef MS_UWP
+#ifdef TARGET_WIN10
 #include <tpcshrd.h>
 
 CWinSystemWin10::CWinSystemWin10()

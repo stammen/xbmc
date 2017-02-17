@@ -32,7 +32,7 @@ void XPhysicalFree(LPVOID lpAddress)
   free(lpAddress);
 }
 
-#ifndef MS_UWP
+#ifndef TARGET_WIN10
 D3DFORMAT GetD3DFormat(XB_D3DFORMAT format)
 {
   switch (format)

@@ -229,7 +229,7 @@ bool CLangCodeExpander::LookupUserCode(const std::string& desc, std::string &use
   return false;
 }
 
-#ifdef TARGET_WINDOWS
+#if defined(TARGET_WINDOWS) || defined(TARGET_WIN10)
 bool CLangCodeExpander::ConvertISO36111Alpha2ToISO36111Alpha3(const std::string& strISO36111Alpha2, std::string& strISO36111Alpha3)
 {
   if (strISO36111Alpha2.length() != 2)

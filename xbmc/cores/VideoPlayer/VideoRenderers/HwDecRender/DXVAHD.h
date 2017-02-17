@@ -69,7 +69,7 @@ public:
   void OnResetDevice() override   { CSingleLock lock(m_section); Close();  }
 
 protected:
-#ifndef MS_UWP
+#ifndef TARGET_WIN10
   bool UpdateSize(const DXVA2_VideoDesc& dsc);
 #endif
   bool ReInit();

@@ -27,7 +27,7 @@ class CGUIKeyboard;
 enum FILTERING { FILTERING_NONE = 0, FILTERING_CURRENT, FILTERING_SEARCH };
 typedef void (*char_callback_t) (CGUIKeyboard *ref, const std::string &typedString);
 
-#ifdef TARGET_WINDOWS // disable 4355: 'this' used in base member initializer list
+#if defined(TARGET_WINDOWS) || defined(TARGET_WIN10) // disable 4355: 'this' used in base member initializer list
 #pragma warning(push)
 #pragma warning(disable: 4355)
 #endif

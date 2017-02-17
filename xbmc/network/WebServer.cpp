@@ -46,7 +46,7 @@
 #include "utils/Variant.h"
 #include "XBDateTime.h"
 
-#ifdef TARGET_WINDOWS
+#if defined(TARGET_WINDOWS)
 #ifndef _DEBUG
 #pragma comment(lib, "libmicrohttpd.lib")
 #else  // _DEBUG

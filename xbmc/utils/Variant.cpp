@@ -26,7 +26,7 @@
 #include <utility>
 
 #ifndef strtoll
-#ifdef TARGET_WINDOWS
+#if defined(TARGET_WINDOWS) || defined(TARGET_WIN10)
 #define strtoll  _strtoi64
 #define strtoull _strtoui64
 #define wcstoll  _wcstoi64

@@ -130,7 +130,7 @@ typedef enum _XB_D3DFORMAT
   XB_D3DFMT_FORCE_DWORD          =0x7fffffff
 } XB_D3DFORMAT;
 
-#ifndef MS_UWP
+#ifndef TARGET_WIN10
 D3DFORMAT GetD3DFormat(XB_D3DFORMAT format);
 #endif
 

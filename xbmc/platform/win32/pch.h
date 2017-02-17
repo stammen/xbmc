@@ -35,9 +35,17 @@
 #include <comdef.h>
 #define DIRECTINPUT_VERSION 0x0800
 #include "DInput.h"
+
+#ifndef TARGET_WIN10
 #include "DSound.h"
+#endif
+
 #ifdef HAS_DX
+
+#ifndef TARGET_WIN10
 #include "d3d9.h"
+#endif
+
 #include "d3d11_1.h"
 #include "dxgi.h"
 #include "d3dcompiler.h"

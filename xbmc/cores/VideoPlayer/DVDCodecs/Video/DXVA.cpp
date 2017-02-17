@@ -28,7 +28,6 @@
 #include <dxva.h>
 #include <d3d11.h>
 #include <Initguid.h>
-#include <windows.h>
 #include "cores/VideoPlayer/Process/ProcessInfo.h"
 #include "cores/VideoPlayer/VideoRenderers/RenderManager.h"
 #include "../DVDCodecUtils.h"

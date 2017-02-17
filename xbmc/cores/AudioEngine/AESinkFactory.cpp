@@ -22,9 +22,9 @@
 #include "Interfaces/AESink.h"
 #if defined(TARGET_WINDOWS)
   #include "Sinks/AESinkWASAPI.h"
-#ifndef MS_UWP
   #include "Sinks/AESinkDirectSound.h"
-#endif
+#elif defined(TARGET_WIN10)
+  #include "Sinks/AESinkWASAPI-Win10.h"
 #elif defined(TARGET_ANDROID)
   #include "Sinks/AESinkAUDIOTRACK.h"
 #elif defined(TARGET_RASPBERRY_PI)
@@ -66,6 +66,8 @@ void CAESinkFactory::ParseDevice(std::string &device, std::string &driver)
 #if defined(TARGET_WINDOWS)
         driver == "WASAPI"      ||
         driver == "DIRECTSOUND" ||
+#elif defined(TARGET_WIN10)
+      driver == "WASAPI" ||
 #elif defined(TARGET_ANDROID)
         driver == "AUDIOTRACK"  ||
 #elif defined(TARGET_RASPBERRY_PI)
@@ -107,10 +109,10 @@ IAESink *CAESinkFactory::TrySink(std::string &driver, std::string &device, AEAud
 #if defined(TARGET_WINDOWS)
     if (driver == "WASAPI")
       sink = new CAESinkWASAPI();
-#ifndef MS_UWP
     else if (driver == "DIRECTSOUND")
       sink = new CAESinkDirectSound();
-#endif
+#elif defined(TARGET_WIN10)
+    sink = new CAESinkWASAPIWin10();
 #elif defined(TARGET_ANDROID)
     sink = new CAESinkAUDIOTRACK();
 #elif defined(TARGET_RASPBERRY_PI)
@@ -186,12 +188,10 @@ void CAESinkFactory::EnumerateEx(AESinkInfoList &list, bool force)
 #if defined(TARGET_WINDOWS)
 
   info.m_deviceInfoList.clear();
-#ifndef MS_UWP
   info.m_sinkName = "DIRECTSOUND";
   CAESinkDirectSound::EnumerateDevicesEx(info.m_deviceInfoList, force);
   if(!info.m_deviceInfoList.empty())
     list.push_back(info);
-#endif
 
   info.m_deviceInfoList.clear();
   info.m_sinkName = "WASAPI";
@@ -199,6 +199,13 @@ void CAESinkFactory::EnumerateEx(AESinkInfoList &list, bool force)
   if(!info.m_deviceInfoList.empty())
     list.push_back(info);
 
+#elif defined(TARGET_WIN10)
+
+  info.m_deviceInfoList.clear();
+  info.m_sinkName = "WASAPI";
+  CAESinkWASAPIWin10::EnumerateDevicesEx(info.m_deviceInfoList, force);
+  if (!info.m_deviceInfoList.empty())
+    list.push_back(info);
 #elif defined(TARGET_ANDROID)
 
   info.m_deviceInfoList.clear();

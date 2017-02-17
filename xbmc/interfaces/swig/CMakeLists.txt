@@ -49,5 +49,5 @@ if(WIN32)
 endif()
 
 if(CORE_SYSTEM_NAME STREQUAL windowsstore)
-	set_target_properties(python_binding PROPERTIES STATIC_LIBRARY_FLAGS "/ignore:4264")
+	set_target_properties(kodi_pch PROPERTIES STATIC_LIBRARY_FLAGS "/ignore:4264")
 endif()

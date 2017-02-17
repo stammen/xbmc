@@ -19,7 +19,7 @@
  *
  */
 
-#if defined(TARGET_WINDOWS)
+#if defined(TARGET_WINDOWS) || defined(TARGET_WIN10)
 
 #include "video/videosync/VideoSync.h"
 #include "guilib/DispResource.h"

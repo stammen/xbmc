@@ -31,7 +31,9 @@
 #include <Mmreg.h>
 #include "utils/StringUtils.h"
 
+#ifndef TARGET_WIN10
 #pragma comment(lib, "Avrt.lib")
+#endif
 
 const IID IID_IAudioClient = __uuidof(IAudioClient);
 const IID IID_IAudioRenderClient = __uuidof(IAudioRenderClient);
@@ -921,7 +923,7 @@ void CAESinkWASAPIWin10::BuildWaveFormatExtensible(AEAudioFormat &format, WAVEFO
   wfxex.Format.nAvgBytesPerSec      = wfxex.Format.nSamplesPerSec * wfxex.Format.nBlockAlign;
 }
 
-#ifndef MS_UWP
+#ifndef TARGET_WIN10
 
 void CAESinkWASAPIWin10::BuildWaveFormatExtensibleIEC61397(AEAudioFormat &format, WAVEFORMATEXTENSIBLE_IEC61937 &wfxex)
 {

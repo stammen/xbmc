@@ -29,6 +29,9 @@
 #elif defined(TARGET_WINDOWS) && defined(HAS_DX)
 #include "windows/WinSystemWin32DX.h"
 
+#elif defined(TARGET_WIN10) && defined(HAS_DX)
+#include "windowsstore/WinSystemWin10DX.h"
+
 #elif defined(TARGET_LINUX) && defined(HAVE_MIR) && defined(HAS_GL)
 #include "mir/WinSystemMirGLContext.h"
 

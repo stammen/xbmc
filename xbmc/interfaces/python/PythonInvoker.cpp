@@ -39,7 +39,7 @@
 #include "interfaces/python/swig.h"
 #include "interfaces/python/XBPython.h"
 #include "threads/SingleLock.h"
-#if defined(TARGET_WINDOWS)
+#if defined(TARGET_WINDOWS) || defined(TARGET_WIN10)
 #include "utils/CharsetConverter.h"
 #endif // defined(TARGET_WINDOWS)
 #include "utils/log.h"
@@ -49,7 +49,7 @@
 #include "linux/XTimeUtils.h"
 #endif
 
-#ifdef TARGET_WINDOWS
+#if defined(TARGET_WINDOWS) || defined(TARGET_WIN10)
 extern "C" FILE *fopen_utf8(const char *_Filename, const char *_Mode);
 #else
 #define fopen_utf8 fopen
@@ -230,7 +230,7 @@ bool CPythonInvoker::execute(const std::string &script, const std::vector<std::s
   if (m_argv != NULL)
     PySys_SetArgv(m_argc, m_argv);
 
-#ifdef TARGET_WINDOWS
+#if defined(TARGET_WINDOWS) || defined(TARGET_WIN10)
   std::string pyPathUtf8;
   g_charsetConverter.systemToUtf8(m_pythonPath, pyPathUtf8, false);
   CLog::Log(LOGDEBUG, "CPythonInvoker(%d, %s): setting the Python path to %s", GetId(), m_sourceFile.c_str(), pyPathUtf8.c_str());
@@ -268,7 +268,7 @@ bool CPythonInvoker::execute(const std::string &script, const std::vector<std::s
       //  is linked against may not be the DLL that xbmc is linked against so
       //  passing a FILE* to python from an fopen has the potential to crash.
       std::string nativeFilename(realFilename); // filename in system encoding
-#ifdef TARGET_WINDOWS
+#if defined(TARGET_WINDOWS) || defined(TARGET_WIN10)
       if (!g_charsetConverter.utf8ToSystem(nativeFilename, true))
       {
         CLog::Log(LOGERROR, "CPythonInvoker(%d, %s): can't convert filename \"%s\" to system encoding", GetId(), m_sourceFile.c_str(), realFilename.c_str());
@@ -642,7 +642,7 @@ void CPythonInvoker::getAddonModuleDeps(const ADDON::AddonPtr& addon, std::set<s
 
 void CPythonInvoker::addPath(const std::string& path)
 {
-#if defined(TARGET_WINDOWS)
+#if defined(TARGET_WINDOWS) || defined(TARGET_WIN10)
   if (path.empty())
     return;
 

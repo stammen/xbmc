@@ -28,7 +28,7 @@
 #include <string>
 #include <vector>
 
-#ifndef MS_UWP
+#ifndef TARGET_WIN10
 
 namespace win32_utils
 {
@@ -72,4 +72,4 @@ private:
 
 }
 
-#endif // MS_UWP
+#endif // TARGET_WIN10

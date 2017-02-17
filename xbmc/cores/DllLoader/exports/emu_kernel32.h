@@ -590,7 +590,7 @@ typedef long LONG_PTR;
 //All kernel32 function should use WINAPI calling convention.
 //When doing emulation or interception, the calling convention should
 //match exactly the target dlls suppose to use.   Monkeyhappy
-#ifdef TARGET_WINDOWS
+#if defined(TARGET_WINDOWS) || defined(TARGET_WIN10)
 extern "C" HANDLE WINAPI dllFindFirstFileA(LPCTSTR lpFileName, LPWIN32_FIND_DATA lpFindFileData);
 extern "C" BOOL WINAPI dllFindNextFileA(HANDLE hFindFile, LPWIN32_FIND_DATA lpFindFileData);
 extern "C" BOOL WINAPI dllFindClose(HANDLE hFile);
@@ -631,7 +631,7 @@ extern "C" UINT WINAPI dllGetACP();
 extern "C" UINT WINAPI dllSetHandleCount(UINT uNumber);
 extern "C" HANDLE WINAPI dllGetStdHandle(DWORD nStdHandle);
 extern "C" DWORD WINAPI dllGetFileType(HANDLE hFile);
-#ifndef MS_UWP
+#ifndef TARGET_WIN10
 extern "C" int WINAPI dllGetStartupInfoA(LPSTARTUPINFOA lpStartupInfo);
 #endif
 extern "C" BOOL WINAPI dllFreeEnvironmentStringsA(LPSTR lpString);

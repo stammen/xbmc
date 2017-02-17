@@ -38,7 +38,7 @@
 #include "utils/Variant.h"
 #include "cores/AudioEngine/AEFactory.h"
 #include "input/InputManager.h"
-#if defined(TARGET_WINDOWS)
+#if defined(TARGET_WINDOWS) || defined(TARGET_WIN10)
   #include "utils/CharsetConverter.h"
   #include "Windows.h"
 #endif

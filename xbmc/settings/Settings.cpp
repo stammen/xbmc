@@ -718,6 +718,9 @@ bool CSettings::InitializeDefinitions()
 #if defined(TARGET_WINDOWS)
   if (CFile::Exists(SETTINGS_XML_FOLDER "win32.xml") && !Initialize(SETTINGS_XML_FOLDER "win32.xml"))
     CLog::Log(LOGFATAL, "Unable to load win32-specific settings definitions");
+#elif defined(TARGET_WIN10)
+  if (CFile::Exists(SETTINGS_XML_FOLDER "win10.xml") && !Initialize(SETTINGS_XML_FOLDER "win10.xml"))
+    CLog::Log(LOGFATAL, "Unable to load win10-specific settings definitions");
 #elif defined(TARGET_ANDROID)
   if (CFile::Exists(SETTINGS_XML_FOLDER "android.xml") && !Initialize(SETTINGS_XML_FOLDER "android.xml"))
     CLog::Log(LOGFATAL, "Unable to load android-specific settings definitions");
@@ -813,7 +816,7 @@ void CSettings::InitializeDefaults()
     timezone->SetDefault(g_timezone.GetOSConfiguredTimezone());
 #endif // defined(TARGET_POSIX)
 
-#if defined(TARGET_WINDOWS)
+#if defined(TARGET_WINDOWS) || defined(TARGET_WIN10)
   #if defined(HAS_DX)
   ((CSettingString*)m_settingsManager->GetSetting(CSettings::SETTING_MUSICPLAYER_VISUALISATION))->SetDefault("visualization.milkdrop");
   #endif
@@ -828,7 +831,7 @@ void CSettings::InitializeDefaults()
   #endif
 #endif
 
-#if !defined(TARGET_WINDOWS)
+#if !defined(TARGET_WINDOWS) && !defined(TARGET_WIN10)
   ((CSettingString*)m_settingsManager->GetSetting(CSettings::SETTING_AUDIOOUTPUT_AUDIODEVICE))->SetDefault(CAEFactory::GetDefaultDevice(false));
   ((CSettingString*)m_settingsManager->GetSetting(CSettings::SETTING_AUDIOOUTPUT_PASSTHROUGHDEVICE))->SetDefault(CAEFactory::GetDefaultDevice(true));
 #endif

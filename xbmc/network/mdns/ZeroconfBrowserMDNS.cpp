@@ -31,7 +31,7 @@
 #include "threads/SingleLock.h"
 #include "utils/log.h"
 
-#if defined(TARGET_WINDOWS)
+#if defined(TARGET_WINDOWS) || defined(TARGET_WIN10)
 #include "platform/win32/WIN32Util.h"
 #endif //TARGET_WINDOWS
 
@@ -50,7 +50,7 @@ CZeroconfBrowserMDNS::~CZeroconfBrowserMDNS()
   for(tBrowserMap::iterator it = m_service_browsers.begin(); it != m_service_browsers.end(); ++it )
     doRemoveServiceType(it->first);
 
-#if defined(TARGET_WINDOWS)
+#if defined(TARGET_WINDOWS) || defined(TARGET_WIN10)
   WSAAsyncSelect( (SOCKET) DNSServiceRefSockFD( m_browser ), g_hWnd, BONJOUR_BROWSER_EVENT, 0 );
 #endif //TARGET_WINDOWS
 
@@ -237,7 +237,7 @@ bool CZeroconfBrowserMDNS::doAddServiceType(const std::string& fcr_service_type)
       CLog::Log(LOGERROR, "ZeroconfBrowserMDNS: DNSServiceCreateConnection failed with error = %ld", (int) err);
       return false;
     }
-#if defined(TARGET_WINDOWS)
+#if defined(TARGET_WINDOWS) || defined(TARGET_WIN10)
     err = WSAAsyncSelect( (SOCKET) DNSServiceRefSockFD( m_browser ), g_hWnd, BONJOUR_BROWSER_EVENT, FD_READ | FD_CLOSE );
     if (err != kDNSServiceErr_NoError)
       CLog::Log(LOGERROR, "ZeroconfBrowserMDNS: WSAAsyncSelect failed with error = %ld", (int) err);

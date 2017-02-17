@@ -18,10 +18,11 @@
 *
 */
 
-#ifdef TARGET_WINDOWS
+#if defined(TARGET_WINDOWS) || defined(TARGET_WIN10)
 #include "Win32Directory.h"
 #include "FileItem.h"
-#ifdef MS_UWP
+
+#ifdef TARGET_WIN10
 #include "platform/windowsstore/Win10Util.h"
 #endif
 
@@ -31,10 +32,6 @@
 #include "URL.h"
 #include "utils/log.h"
 
-#ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN 1
-#endif // WIN32_LEAN_AND_MEAN
-#include <Windows.h>
 
 using namespace XFILE;
 

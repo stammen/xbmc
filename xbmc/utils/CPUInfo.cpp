@@ -55,13 +55,16 @@
 #include "platform/android/activity/AndroidFeatures.h"
 #endif
 
-#ifdef TARGET_WINDOWS
+#if defined(TARGET_WINDOWS) || defined(TARGET_WIN10)
 #include "platform/win32/CharsetConverter.h"
 #include <algorithm>
 #include <intrin.h>
 #include <Pdh.h>
 #include <PdhMsg.h>
+
+#ifndef TARGET_WIN10
 #pragma comment(lib, "Pdh.lib")
+#endif
 
 // Defines to help with calls to CPUID
 #define CPUID_INFOTYPE_STANDARD 0x00000001
@@ -152,7 +155,7 @@ CCPUInfo::CCPUInfo(void)
     core.m_strVendor = cpuVendor;
     m_cores[core.m_id] = core;
   }
-#elif defined(MS_UWP)
+#elif defined(TARGET_WIN10)
   assert(false); // not impletmented
 #elif defined(TARGET_WINDOWS)
   using KODI::PLATFORM::WINDOWS::FromW;
@@ -482,7 +485,7 @@ CCPUInfo::~CCPUInfo()
 
   if (m_fCPUFreq != NULL)
     fclose(m_fCPUFreq);
-#elif defined(TARGET_WINDOWS) && !defined(MS_UWP)
+#elif defined(TARGET_WINDOWS) && !defined(TARGET_WIN10)
   if (m_cpuQueryFreq)
     PdhCloseQuery(m_cpuQueryFreq);
 
@@ -543,8 +546,8 @@ float CCPUInfo::getCPUFrequency()
   if (sysctlbyname("hw.cpufrequency", &hz, &len, NULL, 0) == -1)
     return 0.f;
   return hz / 1000000.0;
-#elif defined TARGET_WINDOWS
-#ifndef MS_UWP
+#elif defined(TARGET_WINDOWS) || defined(TARGET_WIN10)
+#ifndef TARGET_WIN10
   if (m_cpuFreqCounter && PdhCollectQueryData(m_cpuQueryFreq) == ERROR_SUCCESS)
   {
     PDH_RAW_COUNTER cnt;

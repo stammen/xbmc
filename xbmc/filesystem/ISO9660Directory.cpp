@@ -29,7 +29,7 @@
 #include "linux/XTimeUtils.h"
 #endif
 
-#ifdef MS_UWP
+#ifdef TARGET_WIN10
 #include "platform/win32/CharsetConverter.h"
 using namespace KODI::PLATFORM::WINDOWS;
 #endif
@@ -79,7 +79,7 @@ bool CISO9660Directory::GetDirectory(const CURL& url, CFileItemList &items)
   {
     if (wfd.cFileName[0] != 0)
     {
-#ifdef MS_UWP
+#ifdef TARGET_WIN10
       std::string strDir = FromW(std::wstring(wfd.cFileName));
 #else
       std::string strDir = wfd.cFileName;

@@ -450,7 +450,7 @@ static const WindowMapping fallbackWindows[] =
     { WINDOW_FULLSCREEN_GAME     , WINDOW_FULLSCREEN_VIDEO }
 };
 
-#ifdef TARGET_WINDOWS
+#if defined(TARGET_WINDOWS) || defined(TARGET_WIN10)
 static const ActionMapping appcommands[] =
 {
     { "browser_back"             , APPCOMMAND_BROWSER_BACKWARD },
@@ -1427,7 +1427,7 @@ uint32_t CButtonTranslator::TranslateKeyboardButton(TiXmlElement *pButton)
 
 uint32_t CButtonTranslator::TranslateAppCommand(const char *szButton)
 {
-#ifdef TARGET_WINDOWS
+#if defined(TARGET_WINDOWS) || defined(TARGET_WIN10)
   std::string strAppCommand = szButton;
   StringUtils::ToLower(strAppCommand);
 

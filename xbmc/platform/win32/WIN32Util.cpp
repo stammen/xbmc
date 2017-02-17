@@ -38,7 +38,7 @@
 #include "utils/SystemInfo.h"
 #include "utils/Environment.h"
 #include "utils/StringUtils.h"
-#ifndef MS_UWP
+#ifndef TARGET_WIN10
 
 #include "platform/win32/crts_caller.h"
 #endif
@@ -49,13 +49,13 @@
 
 #include <locale.h>
 
-#ifndef MS_UWP
+#ifndef TARGET_WIN10
 extern HWND g_hWnd;
 #endif
 
 using namespace MEDIA_DETECT;
 
-#ifdef MS_UWP
+#ifdef TARGET_WIN10
 using namespace Windows::Devices::Power;
 #endif
 
@@ -67,7 +67,7 @@ CWIN32Util::~CWIN32Util(void)
 {
 }
 
-#ifdef MS_UWP
+#ifdef TARGET_WIN10
 int CWIN32Util::GetDriveStatus(const std::string &strPath, bool bStatusEx)
 {
   CLog::Log(LOGERROR, "%s is not implemented", __FUNCTION__);
@@ -203,7 +203,7 @@ char CWIN32Util::FirstDriveFromMask (ULONG unitmask)
     return (i + 'A');
 }
 
-#ifdef MS_UWP
+#ifdef TARGET_WIN10
 bool CWIN32Util::PowerManagement(PowerState State)
 {
   static bool gotShutdownPrivileges = false;
@@ -270,7 +270,7 @@ bool CWIN32Util::PowerManagement(PowerState State)
 }
 #endif
 
-#ifdef MS_UWP
+#ifdef TARGET_WIN10
 int CWIN32Util::BatteryLevel()
 {
   int result = 0;
@@ -302,7 +302,7 @@ int CWIN32Util::BatteryLevel()
 #endif
 
 
-#ifdef MS_UWP
+#ifdef TARGET_WIN10
 bool CWIN32Util::XBMCShellExecute(const std::string &strPath, bool bWaitForScriptExit)
 {
   CLog::Log(LOGERROR, "%s is not implemented", __FUNCTION__);
@@ -384,7 +384,7 @@ bool CWIN32Util::XBMCShellExecute(const std::string &strPath, bool bWaitForScrip
 }
 #endif
 
-#ifdef MS_UWP
+#ifdef TARGET_WIN10
 std::vector<std::string> CWIN32Util::GetDiskUsage()
 {
   CLog::Log(LOGERROR, "%s is not implemented", __FUNCTION__);
@@ -426,7 +426,7 @@ std::vector<std::string> CWIN32Util::GetDiskUsage()
 }
 #endif
 
-#ifdef MS_UWP
+#ifdef TARGET_WIN10
 std::string CWIN32Util::GetResInfoString()
 {
   CLog::Log(LOGERROR, "%s is not implemented", __FUNCTION__);
@@ -443,7 +443,7 @@ std::string CWIN32Util::GetResInfoString()
 }
 #endif
 
-#ifdef MS_UWP
+#ifdef TARGET_WIN10
 int CWIN32Util::GetDesktopColorDepth()
 {
   CLog::Log(LOGERROR, "%s is not implemented", __FUNCTION__);
@@ -460,7 +460,7 @@ int CWIN32Util::GetDesktopColorDepth()
 }
 #endif
 
-#ifndef MS_UWP
+#ifndef TARGET_WIN10
 std::string CWIN32Util::GetSpecialFolder(int csidl)
 {
   std::string strProfilePath;
@@ -481,7 +481,7 @@ std::string CWIN32Util::GetSpecialFolder(int csidl)
 }
 #endif
 
-#ifdef MS_UWP
+#ifdef TARGET_WIN10
 std::string CWIN32Util::GetSystemPath()
 {
   // access to system folder is not allowed in a UWP app
@@ -495,7 +495,7 @@ std::string CWIN32Util::GetSystemPath()
 }
 #endif
 
-#ifdef MS_UWP
+#ifdef TARGET_WIN10
 std::string CWIN32Util::GetProfilePath()
 {
   CLog::Log(LOGERROR, "%s is not implemented", __FUNCTION__);
@@ -655,7 +655,7 @@ __time64_t CWIN32Util::fileTimeToTimeT(const LARGE_INTEGER& ftimeli)
   return fileTimeToTimeT(__int64(ftimeli.QuadPart));
 }
 
-#ifdef MS_UWP
+#ifdef TARGET_WIN10
 HRESULT CWIN32Util::ToggleTray(const char cDriveLetter)
 {
   CLog::Log(LOGERROR, "%s is not implemented", __FUNCTION__);
@@ -743,7 +743,7 @@ HRESULT CWIN32Util::CloseTray(const char cDriveLetter)
 // http://www.codeproject.com/KB/system/RemoveDriveByLetter.aspx
 // http://www.techtalkz.com/microsoft-device-drivers/250734-remove-usb-device-c-3.html
 
-#ifndef MS_UWP
+#ifndef TARGET_WIN10
 DEVINST CWIN32Util::GetDrivesDevInstByDiskNumber(long DiskNumber)
 {
 
@@ -821,7 +821,7 @@ DEVINST CWIN32Util::GetDrivesDevInstByDiskNumber(long DiskNumber)
 }
 #endif
 
-#ifdef MS_UWP
+#ifdef TARGET_WIN10
 bool CWIN32Util::EjectDrive(const char cDriveLetter)
 {
   CLog::Log(LOGERROR, "%s is not implemented", __FUNCTION__);
@@ -919,7 +919,7 @@ bool CWIN32Util::HasReqGLVersion()
 }
 #endif
 
-#ifdef MS_UWP
+#ifdef TARGET_WIN10
 BOOL CWIN32Util::IsCurrentUserLocalAdministrator()
 {
   // UWP apps never run as admin
@@ -951,7 +951,7 @@ BOOL CWIN32Util::IsCurrentUserLocalAdministrator()
 }
 #endif
 
-#ifdef MS_UWP
+#ifdef TARGET_WIN10
 void CWIN32Util::GetDrivesByType(VECSOURCES &localDrives, Drive_Types eDriveType, bool bonlywithmedia)
 {
   CLog::Log(LOGERROR, "%s is not implemented", __FUNCTION__);
@@ -1128,7 +1128,7 @@ extern "C" {
    * POSSIBILITY OF SUCH DAMAGE.
    */
 
-  #if !defined(TARGET_WINDOWS)
+  #if !defined(TARGET_WINDOWS) && !defined(TARGET_WIN10)
   #include <sys/cdefs.h>
   #endif
 
@@ -1136,8 +1136,8 @@ extern "C" {
   __RCSID("$NetBSD: strptime.c,v 1.25 2005/11/29 03:12:00 christos Exp $");
   #endif
 
-  #if !defined(TARGET_WINDOWS)
-  #include "namespace.h"
+#if !defined(TARGET_WINDOWS) && !defined(TARGET_WIN10)
+#include "namespace.h"
   #include <sys/localedef.h>
   #else
   typedef unsigned char u_char;
@@ -1147,7 +1147,7 @@ extern "C" {
   #include <locale.h>
   #include <string.h>
   #include <time.h>
-  #if !defined(TARGET_WINDOWS)
+#if !defined(TARGET_WINDOWS) && !defined(TARGET_WIN10)
   #include <tzfile.h>
   #endif
 
@@ -1155,7 +1155,7 @@ extern "C" {
   __weak_alias(strptime,_strptime)
   #endif
 
-  #if !defined(TARGET_WINDOWS)
+  #if !defined(TARGET_WINDOWS) && !defined(TARGET_WIN10)
   #define  _ctloc(x)    (_CurrentTimeLocale->x)
   #else
   #define _ctloc(x)   (x)
@@ -1485,7 +1485,7 @@ extern "C" {
 }
 
 
-#ifndef MS_UWP
+#ifndef TARGET_WIN10
 LONG CWIN32Util::UtilRegGetValue( const HKEY hKey, const char *const pcKey, DWORD *const pdwType, char **const ppcBuffer, DWORD *const pdwSizeBuff, const DWORD dwSizeAdd )
 {
   DWORD dwSize;
@@ -1675,7 +1675,7 @@ void CWIN32Util::CropSource(CRect& src, CRect& dst, CRect target, UINT rotation 
 
 void CWinIdleTimer::StartZero()
 {
-#ifndef MS_UWP
+#ifndef TARGET_WIN10
   if (!g_application.IsDPMSActive())
     SetThreadExecutionState(ES_SYSTEM_REQUIRED|ES_DISPLAY_REQUIRED);
 #endif
@@ -1711,7 +1711,7 @@ extern "C"
 // detect if a drive is a usb device
 // code taken from http://banderlogi.blogspot.com/2011/06/enum-drive-letters-attached-for-usb.html
 
-#ifdef MS_UWP
+#ifdef TARGET_WIN10
 bool CWIN32Util::IsUsbDevice(const std::wstring &strWdrive)
 {
   CLog::Log(LOGERROR, "%s is not implemented", __FUNCTION__);
@@ -1778,7 +1778,7 @@ std::string CWIN32Util::WUSysMsg(DWORD dwError)
 
 bool CWIN32Util::SetThreadLocalLocale(bool enable /* = true */)
 {
-#ifdef MS_UWP
+#ifdef TARGET_WIN10
   CLog::Log(LOGERROR, "%s is not implemented", __FUNCTION__);
 	return false;
 #else

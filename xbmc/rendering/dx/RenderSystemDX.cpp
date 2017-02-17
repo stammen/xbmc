@@ -41,12 +41,15 @@
 #pragma warning(default: 4091)
 #include <algorithm>
 
+#ifndef TARGET_WIN10
+
 #ifndef _M_X64
 #pragma comment(lib, "EasyHook32.lib")
 #else
 #pragma comment(lib, "EasyHook64.lib")
 #endif
 #pragma comment(lib, "dxgi.lib")
+#endif
 
 #define RATIONAL_TO_FLOAT(rational) ((rational.Denominator != 0) ? \
  static_cast<float>(rational.Numerator) / static_cast<float>(rational.Denominator) : 0.0f)

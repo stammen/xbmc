@@ -20,7 +20,7 @@
 
 #include "system.h"
 
-#if defined(TARGET_WINDOWS)
+#if defined(TARGET_WINDOWS) || defined(TARGET_WIN10)
 
 #include "utils/log.h"
 #include "Utils/TimeUtils.h"

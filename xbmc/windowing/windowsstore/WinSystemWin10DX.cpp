@@ -19,7 +19,7 @@
  */
 
 
-#include "WinSystemWin32DX.h"
+#include "WinSystemWin10DX.h"
 #include "ServiceBroker.h"
 #include "guilib/gui3d.h"
 #include "guilib/GraphicContext.h"

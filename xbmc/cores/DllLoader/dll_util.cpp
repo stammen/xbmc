@@ -21,12 +21,9 @@
 #include "utils/log.h"
 #include "dll_util.h"
 
-#ifdef TARGET_WINDOWS
-#include <windows.h>
-#ifdef MS_UWP
+#ifdef TARGET_WIN10
 #include "filesystem/SpecialProtocol.h"
 #include "utils/CharsetConverter.h"
-#endif
 #endif
 
 #include <stdlib.h>
@@ -107,7 +104,7 @@ uintptr_t create_dummy_function(const char* strDllName, const char* strFunctionN
   return (uintptr_t)pData;
 }
 
-#ifdef MS_UWP
+#ifdef TARGET_WIN10
 uintptr_t get_win_function_address(const char* strDllName, const char* strFunctionName)
 {
   std::wstring strdllW;
@@ -140,7 +137,7 @@ uintptr_t get_win_function_address(const char* strDllName, const char* strFuncti
 #endif
   return 0;
 }
-#endif //MS_WUP
+#endif //TARGET_WIN10
 
 #ifdef _cplusplus
 }

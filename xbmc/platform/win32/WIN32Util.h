@@ -56,7 +56,7 @@ public:
   static std::vector<std::string> GetDiskUsage();
   static std::string GetResInfoString();
   static int GetDesktopColorDepth();
-#ifndef MS_UWP
+#ifndef TARGET_WIN10
   static std::string GetSpecialFolder(int csidl);
 #endif
   static std::string GetSystemPath();
@@ -88,11 +88,11 @@ public:
   static void GetDrivesByType(VECSOURCES &localDrives, Drive_Types eDriveType=ALL_DRIVES, bool bonlywithmedia=false);
   static std::string GetFirstOpticalDrive();
 
-#ifndef MS_UWP
+#ifndef TARGET_WIN10
   static LONG UtilRegGetValue( const HKEY hKey, const char *const pcKey, DWORD *const pdwType, char **const ppcBuffer, DWORD *const pdwSizeBuff, const DWORD dwSizeAdd );
   static bool UtilRegOpenKeyEx( const HKEY hKeyParent, const char *const pcKey, const REGSAM rsAccessRights, HKEY *hKey, const bool bReadX64= false );
   static bool GetFocussedProcess(std::string &strProcessFile);
-#endif // MS_UWP
+#endif // TARGET_WIN10
   static void CropSource(CRect& src, CRect& dst, CRect target, UINT rotation = 0);
 
   static bool IsUsbDevice(const std::wstring &strWdrive);
@@ -100,7 +100,7 @@ public:
   static std::string WUSysMsg(DWORD dwError);
   static bool SetThreadLocalLocale(bool enable = true);
 private:
-#ifndef MS_UWP
+#ifndef TARGET_WIN10
   static DEVINST GetDrivesDevInstByDiskNumber(long DiskNumber);
 #endif
 };

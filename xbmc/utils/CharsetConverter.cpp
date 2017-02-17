@@ -48,16 +48,18 @@
   #define UTF32_CHARSET "UTF-32" ENDIAN_SUFFIX
   #define UTF8_SOURCE "UTF-8-MAC"
   #define WCHAR_CHARSET UTF32_CHARSET
-#elif defined(TARGET_WINDOWS)
+#elif defined(TARGET_WINDOWS) || defined(TARGET_WIN10)
   #define WCHAR_IS_UTF16 1
   #define UTF16_CHARSET "UTF-16" ENDIAN_SUFFIX
   #define UTF32_CHARSET "UTF-32" ENDIAN_SUFFIX
   #define UTF8_SOURCE "UTF-8"
   #define WCHAR_CHARSET UTF16_CHARSET 
-#if _DEBUG
-  #pragma comment(lib, "libiconvd.lib")
-#else
-  #pragma comment(lib, "libiconv.lib")
+  #ifndef TARGET_WIN10
+  #if _DEBUG
+    #pragma comment(lib, "libiconvd.lib")
+  #else
+    #pragma comment(lib, "libiconv.lib")
+  #endif
 #endif
 #elif defined(TARGET_ANDROID)
   #define WCHAR_IS_UCS_4 1

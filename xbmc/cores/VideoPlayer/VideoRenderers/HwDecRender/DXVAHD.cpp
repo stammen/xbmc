@@ -26,7 +26,6 @@
 #define DEFAULT_STREAM_INDEX (0)
 
 #include <dxva2api.h>
-#include <windows.h>
 #include "DXVAHD.h"
 #include "cores/VideoPlayer/VideoRenderers/RenderManager.h"
 #include "cores/VideoPlayer/VideoRenderers/RenderFlags.h"
@@ -86,7 +85,7 @@ void CProcessorHD::Close()
   m_eViewType = PROCESSOR_VIEW_TYPE_UNKNOWN;
 }
 
-#ifndef MS_UWP
+#ifndef TARGET_WIN10
 bool CProcessorHD::UpdateSize(const DXVA2_VideoDesc& dsc)
 {
   return true;

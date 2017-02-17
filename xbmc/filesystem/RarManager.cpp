@@ -45,7 +45,7 @@
 #include "linux/XFileUtils.h"
 #endif
 
-#ifdef MS_UWP
+#ifdef TARGET_WIN10
 #include "utils/CharsetConverter.h"
 #endif
 
@@ -523,7 +523,7 @@ int64_t CRarManager::CheckFreeSpace(const std::string& strDrive)
 {
   ULARGE_INTEGER lTotalFreeBytes;
 
-#ifdef MS_UWP
+#ifdef TARGET_WIN10
   std::wstring strDllW;
   g_charsetConverter.utf8ToW(CSpecialProtocol::TranslatePath(strDrive), strDllW, false, false, false);
   if (GetDiskFreeSpaceEx(strDllW.c_str(), NULL, NULL, &lTotalFreeBytes))

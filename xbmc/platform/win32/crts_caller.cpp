@@ -25,13 +25,9 @@
  */
 
 #include "crts_caller.h"
-#ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN 1
-#endif // WIN32_LEAN_AND_MEAN
-#include <Windows.h>
 #include <cassert>
 
-#ifndef MS_UWP
+#ifndef TARGET_WIN10
 
 namespace win32_utils
 {

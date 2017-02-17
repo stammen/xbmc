@@ -211,7 +211,7 @@ int CoffLoader::LoadCoffHModule(FILE *fp)
   // alloc aligned memory
 #ifdef TARGET_POSIX
   hModule = malloc(tempWindowsHeader.SizeOfImage);
-#elif defined MS_UWP
+#elif defined TARGET_WIN10
   hModule = VirtualAllocFromApp(GetCurrentProcess(), tempWindowsHeader.SizeOfImage, MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE);
 #else
   hModule = VirtualAllocEx(GetCurrentProcess(), (PVOID)tempWindowsHeader.ImageBase, tempWindowsHeader.SizeOfImage, MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE);

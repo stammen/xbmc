@@ -38,7 +38,7 @@
 #elif defined(HAS_IMXVPU)
 #include "video/videosync/VideoSyncIMX.h"
 #endif
-#if defined(TARGET_WINDOWS)
+#if defined(TARGET_WINDOWS) || defined(TARGET_WIN10)
 #include "video/videosync/VideoSyncD3D.h"
 #endif
 #if defined(TARGET_DARWIN_OSX)
@@ -117,7 +117,7 @@ void CVideoReferenceClock::Process()
   else
     m_pVideoSync = new CVideoSyncGLX(this);
 #endif
-#elif defined(TARGET_WINDOWS)
+#elif defined(TARGET_WINDOWS) || defined(TARGET_WIN10)
     m_pVideoSync = new CVideoSyncD3D(this);
 #elif defined(TARGET_DARWIN_OSX)
     m_pVideoSync = new CVideoSyncOsx(this);

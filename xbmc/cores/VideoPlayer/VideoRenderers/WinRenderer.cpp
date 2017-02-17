@@ -38,7 +38,7 @@
 #include "platform/win32/WIN32Util.h"
 #include "windowing/WindowingFactory.h"
 
-#ifdef MS_UWP
+#ifdef TARGET_WIN10
 #include "DirectXPackedVector.h"
 using namespace DirectX::PackedVector;
 

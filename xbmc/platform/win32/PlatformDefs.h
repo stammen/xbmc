@@ -20,7 +20,7 @@
  *
  */
 
-#ifdef TARGET_WINDOWS
+#if defined(TARGET_WINDOWS) || defined(TARGET_WIN10)
 
 #define LINE_ENDING "\r\n"
 
@@ -52,7 +52,7 @@ typedef intptr_t      ssize_t;
 #define strncasecmp strnicmp
 #endif
 
-#ifndef MW_UWP
+#ifndef TARGET_WIN10
 #define popen   _popen
 #define pclose  _pclose
 #endif

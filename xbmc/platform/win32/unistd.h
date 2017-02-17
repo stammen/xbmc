@@ -19,4 +19,7 @@
  *
  */
 #include <inttypes.h>
+
+#ifndef TARGET_WIN10
 #include <io.h>
+#endif

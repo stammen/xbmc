@@ -34,6 +34,8 @@
 #include "utils/CharsetConverter.h"
 
 
+#pragma pack(push, 8)
+
 using namespace Windows::Networking;
 using namespace Windows::Networking::Connectivity;
 
@@ -203,4 +205,7 @@ bool CNetworkWin10::PingHost(unsigned long host, unsigned int timeout_ms /* = 20
 
   return false;
 }
+
+#pragma pack(pop)
+
 

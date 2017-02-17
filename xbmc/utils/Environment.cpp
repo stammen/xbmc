@@ -28,18 +28,16 @@
 
 #include "Environment.h"
 #include <stdlib.h>
-#ifdef TARGET_WINDOWS
-#include <Windows.h>
-#endif
 
-#ifdef MS_UWP
+
+#ifdef TARGET_WIN10
 using namespace Windows::Storage;
 using namespace Windows::Foundation;
 #endif
 
 // --------------------- Helper Functions ---------------------
 
-#ifdef TARGET_WINDOWS
+#if defined(TARGET_WINDOWS) || defined(TARGET_WIN10)
 
 std::wstring CEnvironment::win32ConvertUtf8ToW(const std::string &text, bool *resultSuccessful /* = NULL*/)
 {
@@ -117,7 +115,7 @@ typedef int (_cdecl * wputenvPtr) (const wchar_t *envstring);
  * 		   environment update failed, 8 if our runtime environment update failed or, in case of
  * 		   several errors, sum of all errors values; non-zero in case of other errors.
  */
-#ifdef MS_UWP
+#ifdef TARGET_WIN10
 int CEnvironment::win10_setenv(const std::string &name, const std::string &value /* = "" */, enum updateAction action /* = autoDetect */)
 {
   std::wstring Wname(win32ConvertUtf8ToW(name));
@@ -241,7 +239,7 @@ int CEnvironment::win32_setenv(const std::string &name, const std::string &value
 
 int CEnvironment::setenv(const std::string &name, const std::string &value, int overwrite /*= 1*/)
 {
-#ifdef MS_UWP
+#ifdef TARGET_WIN10
   return (win10_setenv(name, value, overwrite ? autoDetect : addOnly) == 0) ? 0 : -1;
 #elif defined(TARGET_WINDOWS)
   return (win32_setenv(name, value, overwrite ? autoDetect : addOnly)==0) ? 0 : -1;
@@ -252,7 +250,7 @@ int CEnvironment::setenv(const std::string &name, const std::string &value, int 
 #endif
 }
 
-#ifdef MS_UWP
+#ifdef TARGET_WIN10
 
 std::string CEnvironment::getenv(const std::string &name)
 {
@@ -316,7 +314,7 @@ std::string CEnvironment::getenv(const std::string &name)
 
 int CEnvironment::unsetenv(const std::string &name)
 {
-#ifdef MS_UWP
+#ifdef TARGET_WIN10
   return (win10_setenv(name, "", deleteVariable)) == 0 ? 0 : -1;
 #elif defined(TARGET_WINDOWS)
   return (win32_setenv(name, "", deleteVariable)) == 0 ? 0 : -1;

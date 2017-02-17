@@ -34,7 +34,7 @@
 #include "websocket/WebSocketManager.h"
 #include "Network.h"
 
-#if defined(TARGET_WINDOWS) || defined(HAVE_LIBBLUETOOTH)
+#if defined(TARGET_WINDOWS) || defined(HAVE_LIBBLUETOOTH) || defined(TARGET_WIN10)
 static const char     bt_service_name[] = "XBMC JSON-RPC";
 static const char     bt_service_desc[] = "Interface for XBMC remote control over bluetooth";
 static const char     bt_service_prov[] = "XBMC JSON-RPC Provider";
@@ -276,7 +276,7 @@ bool CTCPServer::Initialize()
   return false;
 }
 
-#ifdef MS_UWP
+#ifdef TARGET_WIN10
 bool CTCPServer::InitializeBlue()
 {
   CLog::Log(LOGERROR, "%s is not implemented", __FUNCTION__);

@@ -53,7 +53,7 @@ ISO9660
 #include "threads/SingleLock.h"
 #include "IFile.h"
 
-#ifndef TARGET_WINDOWS
+#if !defined(TARGET_WINDOWS) && !defined(TARGET_WIN10)
 #include "storage/DetectDVDType.h"  // for MODE2_DATA_SIZE etc.
 #include "linux/XFileUtils.h"
 #include "linux/XTimeUtils.h"
@@ -690,7 +690,7 @@ HANDLE iso9660::FindFirstFileW9660(wchar_t *szLocalFolder, WIN32_FIND_DATA *wfdF
 
     if (m_searchpointer)
     {
-#ifdef MS_UWP
+#ifdef TARGET_WIN10
       std::wstring strDllW;
       g_charsetConverter.utf8ToW(CSpecialProtocol::TranslatePath(m_searchpointer->name), strDllW, false, false, false);
       wcscpy(wfdFile->cFileName, strDllW.c_str());
@@ -726,7 +726,7 @@ HANDLE iso9660::FindFirstFile9660( char *szLocalFolder, WIN32_FIND_DATA *wfdFile
 
 		if ( m_searchpointer )
 		{
-#ifdef MS_UWP
+#ifdef TARGET_WIN10
 		std::wstring strDllW;
 		g_charsetConverter.utf8ToW(CSpecialProtocol::TranslatePath(m_searchpointer->name), strDllW, false, false, false);
 		wcscpy(wfdFile->cFileName, strDllW.c_str());
@@ -757,7 +757,7 @@ int iso9660::FindNextFile( HANDLE szLocalFolder, WIN32_FIND_DATA *wfdFile )
 
 	if ( m_searchpointer )
 	{
-#ifdef MS_UWP
+#ifdef TARGET_WIN10
 		std::wstring strDllW;
 		g_charsetConverter.utf8ToW(CSpecialProtocol::TranslatePath(m_searchpointer->name), strDllW, false, false, false);
 		wcscpy(wfdFile->cFileName, strDllW.c_str());
@@ -816,7 +816,7 @@ HANDLE iso9660::OpenFile(const char *filename)
   pContext->m_bUseMode2 = false;
   m_info.curr_filepos = 0;
 
-#ifdef MS_UWP
+#ifdef TARGET_WIN10
   const wchar_t *pointer, *pointer2;
   wchar_t work[512];
 

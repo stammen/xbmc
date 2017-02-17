@@ -20,7 +20,7 @@
  *
  */
 
-#if !defined(TARGET_WINDOWS)
+#if !defined(TARGET_WINDOWS) && !defined(TARGET_WIN10)
 #define DECLARE_UNUSED(a,b) a __attribute__((unused)) b;
 #endif
 
@@ -91,14 +91,19 @@
  *****************/
 
 #if defined(TARGET_WINDOWS)
-#ifdef MS_UWP
-#define HAS_WIN10_NETWORK
-#define HAS_IRSERVERSUITE
-#else
 #define HAS_WIN32_NETWORK
 #define HAS_IRSERVERSUITE
 #define HAS_FILESYSTEM_SMB
+#define DECLARE_UNUSED(a,b) a b;
 #endif
+
+ /*****************
+ * Win10 Specific
+ *****************/
+
+#if defined(TARGET_WIN10)
+#define HAS_WIN10_NETWORK
+#define HAS_IRSERVERSUITE
 #define DECLARE_UNUSED(a,b) a b;
 #endif
 
@@ -170,7 +175,10 @@
  ****************************************/
 
 #if defined(TARGET_WINDOWS)
-#include <windows.h>
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN 1
+#endif // WIN32_LEAN_AND_MEAN
+#include <Windows.h>
 #define DIRECTINPUT_VERSION 0x0800
 #include "mmsystem.h"
 #include "DInput.h"
@@ -191,6 +199,25 @@
 #ifdef HAS_SDL
 #include "SDL\SDL.h"
 #endif
+#endif
+
+#if defined(TARGET_WIN10)
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN 1
+#endif // WIN32_LEAN_AND_MEAN
+#include <Windows.h>
+#define DIRECTINPUT_VERSION 0x0800
+#include "mmsystem.h"
+#include "DInput.h"
+#define DSSPEAKER_USE_DEFAULT DSSPEAKER_STEREO
+#define LPDIRECTSOUND8 LPDIRECTSOUND
+#undef GetFreeSpace
+#include "PlatformInclude.h"
+#include "d3d11_1.h"
+#include "dxgi.h"
+#include "d3dcompiler.h"
+#include "directxmath.h"
+#include <d3d9types.h>
 #endif
 
 #if defined(TARGET_POSIX)

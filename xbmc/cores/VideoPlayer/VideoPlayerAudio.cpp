@@ -548,7 +548,7 @@ bool CVideoPlayerAudio::OutputPacket(DVDAudioFrame &audioframe)
 
 void CVideoPlayerAudio::OnExit()
 {
-#ifdef TARGET_WINDOWS
+#if defined(TARGET_WINDOWS) || defined(TARGET_WIN10)
   CoUninitialize();
 #endif
 

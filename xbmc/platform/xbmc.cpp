@@ -25,9 +25,9 @@
 #include "linux/RBP.h"
 #endif
 
-#ifdef TARGET_WINDOWS
+#if defined(TARGET_WINDOWS) || defined(TARGET_WIN10)
 #include <mmdeviceapi.h>
-#ifndef MS_UWP
+#ifndef TARGET_WIN10
 #include "platform/win32/IMMNotificationClient.h"
 #endif
 #endif
@@ -74,7 +74,7 @@ extern "C" int XBMC_Run(bool renderGUI, CFileItemList &playlist)
     return status;
   }
 
-#if defined(TARGET_WINDOWS) && !defined(MS_UWP)
+#if defined(TARGET_WINDOWS)
   IMMDeviceEnumerator *pEnumerator = nullptr;
   CMMNotificationClient cMMNC;
   HRESULT hr = CoCreateInstance(CLSID_MMDeviceEnumerator, nullptr, CLSCTX_ALL, IID_IMMDeviceEnumerator,
@@ -90,7 +90,7 @@ extern "C" int XBMC_Run(bool renderGUI, CFileItemList &playlist)
   {
     status = g_application.Run(playlist);
   }
-#ifdef TARGET_WINDOWS
+#if defined(TARGET_WINDOWS) || defined(TARGET_WIN10)
   catch (const XbmcCommons::UncheckedException &e)
   {
     e.LogThrowMessage("CApplication::Create()");
@@ -104,7 +104,7 @@ extern "C" int XBMC_Run(bool renderGUI, CFileItemList &playlist)
     status = -1;
   }
 
-#if defined(TARGET_WINDOWS) && !defined(MS_UWP)
+#if defined(TARGET_WINDOWS)
   // the end
   hr = CoCreateInstance(CLSID_MMDeviceEnumerator, nullptr, CLSCTX_ALL, IID_IMMDeviceEnumerator,
                         reinterpret_cast<void**>(&pEnumerator));

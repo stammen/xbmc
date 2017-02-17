@@ -156,7 +156,7 @@ bool Win32DllLoader::Load()
 
   std::wstring strDllW;
   g_charsetConverter.utf8ToW(CSpecialProtocol::TranslatePath(strFileName), strDllW, false, false, false);
-#ifdef MS_UWP
+#ifdef TARGET_WIN10
   m_dllHandle = LoadPackagedLibrary(strDllW.c_str(), NULL);
 #else
   m_dllHandle = LoadLibraryExW(strDllW.c_str(), NULL, LOAD_WITH_ALTERED_SEARCH_PATH);
@@ -242,7 +242,7 @@ bool Win32DllLoader::HasSymbols()
 
 void Win32DllLoader::OverrideImports(const std::string &dll)
 {
-#ifndef MS_UWP
+#ifndef TARGET_WIN10
   std::wstring strdllW;
   g_charsetConverter.utf8ToW(CSpecialProtocol::TranslatePath(dll), strdllW, false);
   BYTE* image_base = (BYTE*)GetModuleHandleW(strdllW.c_str());

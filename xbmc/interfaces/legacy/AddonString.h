@@ -24,7 +24,7 @@
 
 namespace XBMCAddon
 {
-#if defined(UNICODE) && !defined(MS_UWP)
+#if defined(UNICODE) && !defined(TARGET_WIN10)
 #error "Unicode set"
   typedef std::basic_string<wchar_t> String;
 #else

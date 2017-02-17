@@ -27,7 +27,7 @@
 // stuff for freetype
 #include <ft2build.h>
 
-#ifdef MS_UWP
+#ifdef TARGET_WIN10
 #define generic GenericFromFreeTypeLibrary
 #endif
 

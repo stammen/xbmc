@@ -63,7 +63,7 @@
 #include "linux/XFileUtils.h"
 #endif
 
-#ifdef MS_UWP
+#ifdef TARGET_WIN10
 #include "filesystem/SpecialProtocol.h"
 #include "utils/CharsetConverter.h"
 #endif
@@ -338,7 +338,7 @@ void CGUIWindowFileManager::OnSort(int iList)
     // Set free space on disc
     if (pItem->m_bIsShareOrDrive)
     {
-#ifdef MS_UWP
+#ifdef TARGET_WIN10
       std::wstring strDllW;
       g_charsetConverter.utf8ToW(CSpecialProtocol::TranslatePath(pItem->GetPath().c_str()), strDllW, false, false, false);
       const wchar_t* path = strDllW.c_str();

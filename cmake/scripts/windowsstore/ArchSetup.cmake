@@ -25,7 +25,7 @@ set(PYTHON_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/project/BuildDependencies/include/pyt
 
 add_options(CXX ALL_BUILDS "/wd\"4996\"")
 add_options(CXX ALL_BUILDS "/wd\"4146\"")
-set(ARCH_DEFINES -D_WINDOWS -DTARGET_WINDOWS -DMS_UWP -D__SSE__ -D__SSE2__)
+set(ARCH_DEFINES -D_WINDOWS -DTARGET_WIN10 -DMS_UWP -D__SSE__ -D__SSE2__)
 set(SYSTEM_DEFINES -DNOMINMAX -D_USE_32BIT_TIME_T -DHAS_DX -D__STDC_CONSTANT_MACROS
                    -DTAGLIB_STATIC -DNPT_CONFIG_ENABLE_LOGGING
                    -DPLT_HTTP_DEFAULT_USER_AGENT="UPnP/1.0 DLNADOC/1.50 Kodi"
@@ -43,9 +43,6 @@ set(gtest_force_shared_crt ON CACHE STRING "" FORCE)
 
 # -------- Linker options ---------
 
-# remove "archiving object file compiled with /ZW into a static library" linker warning for UWP
-set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /SAFESEH:NO /ignore:4264")
-
 # For #pragma comment(lib X)
 # TODO: It would certainly be better to handle these libraries via CMake modules.
 link_directories(${CMAKE_SOURCE_DIR}/lib/win32/ffmpeg/bin
@@ -56,6 +53,7 @@ list(APPEND DEPLIBS d3d11.lib DInput8.lib DSound.lib winmm.lib Mpr.lib Iphlpapi.
                     PowrProf.lib setupapi.lib dwmapi.lib yajl.lib dxguid.lib DelayImp.lib)
 
 # NODEFAULTLIB option
+
 set(_nodefaultlibs_RELEASE libcmt)
 set(_nodefaultlibs_DEBUG libcmt msvcrt)
 foreach(_lib ${_nodefaultlibs_RELEASE})
@@ -64,6 +62,7 @@ endforeach()
 foreach(_lib ${_nodefaultlibs_DEBUG})
   set(CMAKE_EXE_LINKER_FLAGS_DEBUG "${CMAKE_EXE_LINKER_FLAGS_DEBUG} /NODEFAULTLIB:\"${_lib}\"")
 endforeach()
+
 
 # DELAYLOAD option
 set(_delayloadlibs zlib.dll libmysql.dll libxslt.dll dnssd.dll dwmapi.dll ssh.dll sqlite3.dll

@@ -30,7 +30,7 @@
 #include "guilib/GUIShaderDX.h"
 #include "threads/Condition.h"
 #include "threads/CriticalSection.h"
-#ifndef MS_UWP
+#ifndef TARGET_WIN10
 #include "easyhook/easyhook.h"
 #endif
 
@@ -190,7 +190,7 @@ protected:
 #endif
   bool                        m_bDefaultStereoEnabled{false};
   bool                        m_bStereoEnabled{false};
-#ifndef MS_UWP
+#ifndef TARGET_WIN10
   TRACED_HOOK_HANDLE          m_hHook{nullptr};
 #endif
   HMODULE                     m_hDriverModule{nullptr};
