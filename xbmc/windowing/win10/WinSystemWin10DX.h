@@ -25,7 +25,7 @@
 
 #pragma once
 
-#include "windowing/windowsstore/WinSystemWin10.h"
+#include "windowing/win10/WinSystemWin10.h"
 #include "rendering/dx/RenderSystemDXWin10.h"
 #include "utils/GlobalsHandling.h"
 
