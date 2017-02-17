@@ -22,10 +22,6 @@
 #include "Win32Directory.h"
 #include "FileItem.h"
 
-#ifdef TARGET_WIN10
-#include "platform/windowsstore/Win10Util.h"
-#endif
-
 #include "platform/win32/WIN32Util.h"
 #include "utils/SystemInfo.h"
 #include "utils/CharsetConverter.h"
