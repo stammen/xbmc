@@ -4,7 +4,7 @@ xbmc/input/touch             input/touch
 xbmc/input/touch/generic     input/touch/generic
 xbmc/network/windowsstore    network/windowsstore
 xbmc/network/mdns            network/mdns
-xbmc/peripherals/bus/win32   peripherals/bus/win32
+xbmc/peripherals/bus/win10   peripherals/bus/win10
 xbmc/powermanagement/windows powermanagement/windows
 xbmc/storage/windows         storage/windows
 xbmc/filesystem/win32        filesystem/win32
