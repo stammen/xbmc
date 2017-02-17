@@ -11,4 +11,4 @@ xbmc/filesystem/win32        filesystem/win32
 xbmc/utils/win32             utils_win32
 xbmc/rendering/dx            rendering_dx
 xbmc/threads/platform/win    threads_win
-xbmc/windowing/windowsstore  windowing/windowsstore
+xbmc/windowing/win10         windowing/win10
