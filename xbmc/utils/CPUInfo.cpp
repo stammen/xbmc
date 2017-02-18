@@ -21,6 +21,7 @@
 #include <cstdlib>
 
 #include "CPUInfo.h"
+#include "utils/log.h"
 #include "utils/Temperature.h"
 #include <string>
 #include <string.h>
@@ -156,7 +157,7 @@ CCPUInfo::CCPUInfo(void)
     m_cores[core.m_id] = core;
   }
 #elif defined(TARGET_WIN10)
-  assert(false); // not impletmented
+  CLog::Log(LOGERROR, "%s is not implemented", __FUNCTION__);
 #elif defined(TARGET_WINDOWS)
   using KODI::PLATFORM::WINDOWS::FromW;
 
@@ -485,7 +486,7 @@ CCPUInfo::~CCPUInfo()
 
   if (m_fCPUFreq != NULL)
     fclose(m_fCPUFreq);
-#elif defined(TARGET_WINDOWS) && !defined(TARGET_WIN10)
+#elif defined(TARGET_WINDOWS)
   if (m_cpuQueryFreq)
     PdhCloseQuery(m_cpuQueryFreq);
 
@@ -546,8 +547,10 @@ float CCPUInfo::getCPUFrequency()
   if (sysctlbyname("hw.cpufrequency", &hz, &len, NULL, 0) == -1)
     return 0.f;
   return hz / 1000000.0;
-#elif defined(TARGET_WINDOWS) || defined(TARGET_WIN10)
-#ifndef TARGET_WIN10
+#elif defined(TARGET_WIN10) 
+  CLog::Log(LOGERROR, "%s is not implemented", __FUNCTION__);
+  return 0.f;
+#elif defined(TARGET_WINDOWS) 
   if (m_cpuFreqCounter && PdhCollectQueryData(m_cpuQueryFreq) == ERROR_SUCCESS)
   {
     PDH_RAW_COUNTER cnt;
@@ -562,7 +565,6 @@ float CCPUInfo::getCPUFrequency()
   if (!m_cores.empty())
     return float(m_cores.begin()->second.m_fSpeed);
   else
-#endif
     return 0.f;
 #elif defined(TARGET_FREEBSD)
   int hz = 0;
@@ -685,8 +687,10 @@ const CoreInfo &CCPUInfo::GetCoreInfo(int nCoreId)
 bool CCPUInfo::readProcStat(unsigned long long& user, unsigned long long& nice,
     unsigned long long& system, unsigned long long& idle, unsigned long long& io)
 {
-
-#ifdef TARGET_WINDOWS
+#if defined(TARGET_WIN10)
+  CLog::Log(LOGERROR, "%s is not implemented", __FUNCTION__);
+  return false;
+#elif defined (TARGET_WINDOWS) 
   FILETIME idleTime;
   FILETIME kernelTime;
   FILETIME userTime;
