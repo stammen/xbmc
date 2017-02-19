@@ -50,6 +50,9 @@ INT WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR commandLine, INT)
   // need to set it as soon as possible  
   CEnvironment::unsetenv("OPENSSL_CONF");
 
+  int status = 0;
+
+#if 0
   // Initializes CreateMiniDump to handle exceptions.
   char ver[100];
   if (strlen(CCompileInfo::GetSuffix()) > 0)
@@ -60,7 +63,6 @@ INT WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR commandLine, INT)
     CCompileInfo::GetMinor(), CCompileInfo::GetSCMID());
 
 
-#if 0
   if ((g_cpuInfo.GetCPUFeatures() & CPU_FEATURE_SSE2) == 0)
   {
     MessageBox(NULL, "No SSE2 support detected", (appName + ": Fatal Error").c_str(), MB_OK | MB_ICONERROR);
@@ -101,13 +103,12 @@ INT WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR commandLine, INT)
 #endif
 
   // Create and run the app
-  int status = main(argc, argv);
-
+//  status = main(argc, argv);
+#if 0
   for (int i = 0; i < argc; ++i)
     delete[] argv[i];
   delete[] argv;
 
-#if 0
   // clear previously set timer resolution
   timeEndPeriod(1);
 #endif
