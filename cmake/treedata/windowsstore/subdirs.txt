@@ -1,4 +1,4 @@
-xbmc/platform/win32          platform_win32
+xbmc/platform/win10          platform_win10
 xbmc/input/windows           input/windows
 xbmc/input/touch             input/touch
 xbmc/input/touch/generic     input/touch/generic
