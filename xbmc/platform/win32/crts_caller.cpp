@@ -27,8 +27,6 @@
 #include "crts_caller.h"
 #include <cassert>
 
-#ifndef TARGET_WIN10
-
 namespace win32_utils
 {
 
@@ -93,5 +91,3 @@ crts_caller::~crts_caller()
 }
 
 }
-
-#endif

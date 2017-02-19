@@ -25,11 +25,13 @@
 #include "linux/RBP.h"
 #endif
 
-#if defined(TARGET_WINDOWS) || defined(TARGET_WIN10)
+#if defined(TARGET_WINDOWS)
 #include <mmdeviceapi.h>
-#ifndef TARGET_WIN10
 #include "platform/win32/IMMNotificationClient.h"
 #endif
+
+#if defined(TARGET_WIN10)
+#include <mmdeviceapi.h>
 #endif
 
 #include "platform/MessagePrinter.h"
