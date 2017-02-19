@@ -47,9 +47,7 @@ private:
     void         AEChannelsFromSpeakerMask(DWORD speakers);
     static DWORD        SpeakerMaskFromAEChannels(const CAEChannelInfo &channels);
     static void         BuildWaveFormatExtensible(AEAudioFormat &format, WAVEFORMATEXTENSIBLE &wfxex);
-#ifndef TARGET_WIN10
-    static void         BuildWaveFormatExtensibleIEC61397(AEAudioFormat &format, WAVEFORMATEXTENSIBLE_IEC61937 &wfxex);
-#endif
+
     bool IsUSBDevice();
 
     static const char  *WASAPIErrToStr(HRESULT err);

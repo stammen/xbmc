@@ -31,6 +31,11 @@
 #include <Mmreg.h>
 #include "utils/StringUtils.h"
 
+
+// TARGET_WIN10 version will use Windows::Medio::Audio
+// https://docs.microsoft.com/en-us/windows/uwp/audio-video-camera/audio-graphs
+
+
 #ifndef TARGET_WIN10
 #pragma comment(lib, "Avrt.lib")
 #endif
@@ -851,6 +856,7 @@ void CAESinkWASAPIWin10::BuildWaveFormatExtensible(AEAudioFormat &format, WAVEFO
   wfxex.Format.wFormatTag        = WAVE_FORMAT_EXTENSIBLE;
   wfxex.Format.cbSize            = sizeof(WAVEFORMATEXTENSIBLE)-sizeof(WAVEFORMATEX);
 
+#if 0
 
   if (format.m_dataFormat != AE_FMT_RAW) // PCM data
   {
@@ -921,29 +927,14 @@ void CAESinkWASAPIWin10::BuildWaveFormatExtensible(AEAudioFormat &format, WAVEFO
 
   wfxex.Format.nBlockAlign          = wfxex.Format.nChannels * (wfxex.Format.wBitsPerSample >> 3);
   wfxex.Format.nAvgBytesPerSec      = wfxex.Format.nSamplesPerSec * wfxex.Format.nBlockAlign;
-}
-
-#ifndef TARGET_WIN10
-
-void CAESinkWASAPIWin10::BuildWaveFormatExtensibleIEC61397(AEAudioFormat &format, WAVEFORMATEXTENSIBLE_IEC61937 &wfxex)
-{
-  /* Fill the common structure */
-  BuildWaveFormatExtensible(format, wfxex.FormatExt);
-
-  /* Code below kept for future use - preferred for later Windows versions */
-  /* but can cause problems on older Windows versions and drivers          */
-  /*
-  wfxex.FormatExt.Format.cbSize = sizeof(WAVEFORMATEXTENSIBLE_IEC61937)-sizeof(WAVEFORMATEX);
-  wfxex.dwEncodedChannelCount   = format.m_channelLayout.Count();
-  wfxex.dwEncodedSamplesPerSec  = bool(format.m_dataFormat == AE_FMT_TRUEHD ||
-                                       format.m_dataFormat == AE_FMT_DTSHD  ||
-                                       format.m_dataFormat == AE_FMT_EAC3) ? 96000L : 48000L;
-  wfxex.dwAverageBytesPerSec    = 0; //Ignored */
-}
 #endif
+}
+
+
 
 bool CAESinkWASAPIWin10::InitializeExclusive(AEAudioFormat &format)
 {
+#if 0
   WAVEFORMATEXTENSIBLE_IEC61937 wfxex_iec61937;
   WAVEFORMATEXTENSIBLE &wfxex = wfxex_iec61937.FormatExt;
 
@@ -1186,7 +1177,8 @@ initialize:
                                      CAEUtil::DataFormatToStr(format.m_dataFormat),
                                      wfxex.Format.nSamplesPerSec,
                                      wfxex.Format.nChannels);
-  return true;
+#endif
+  return false;
 }
 
 void CAESinkWASAPIWin10::AEChannelsFromSpeakerMask(DWORD speakers)
@@ -1278,6 +1270,7 @@ void CAESinkWASAPIWin10::Drain()
 
 bool CAESinkWASAPIWin10::IsUSBDevice()
 {
+#if 0
   IPropertyStore *pProperty = NULL;
   PROPVARIANT varName;
   PropVariantInit(&varName);
@@ -1293,5 +1286,6 @@ bool CAESinkWASAPIWin10::IsUSBDevice()
   ret = (str == "USB");
   PropVariantClear(&varName);
   SAFE_RELEASE(pProperty);
-  return ret;
+#endif
+  return false;
 }
