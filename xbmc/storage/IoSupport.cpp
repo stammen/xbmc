@@ -84,6 +84,8 @@ HANDLE CIoSupport::OpenCDROM()
   hDevice = CreateFile(g_mediaManager.TranslateDevicePath("",true).c_str(), GENERIC_READ, FILE_SHARE_READ,
                        NULL, OPEN_EXISTING,
                        FILE_FLAG_RANDOM_ACCESS, NULL );
+#elif defined(TARGET_WIN10)
+  CLog::Log(LOGERROR, "%s is not implemented", __FUNCTION__);
 #else
 
   hDevice = CreateFile("\\\\.\\Cdrom0", GENERIC_READ, FILE_SHARE_READ,
@@ -243,6 +245,8 @@ INT CIoSupport::ReadSectorMode2(HANDLE hDevice, DWORD dwSector, LPSTR lpczBuffer
     OutputDebugString("CD Read error\n");
     return -1;
   }
+#elif defined(TARGET_WIN10)
+  CLog::Log(LOGERROR, "%s is not implemented", __FUNCTION__);
 #else
   DWORD dwBytesReturned;
   RAW_READ_INFO rawRead = {0};
