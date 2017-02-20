@@ -44,11 +44,13 @@
 #if defined(TARGET_WINDOWS) || defined(TARGET_WIN10)
 #include "dwmapi.h"
 #include "utils/CharsetConverter.h"
+#include <VersionHelpers.h>
 
 #ifdef TARGET_WIN10
 using namespace Windows::ApplicationModel;
 using namespace Windows::Security::ExchangeActiveSyncProvisioning;
 using namespace Windows::System;
+using namespace Windows::System::Profile;
 #endif
 #endif
 #if defined(TARGET_DARWIN)
@@ -86,7 +88,7 @@ using namespace Windows::System;
 
 using namespace XFILE;
 
-#if defined(TARGET_WINDOWS) || defined(TARGET_WIN10)
+#if defined(TARGET_WINDOWS)
 static bool sysGetVersionExWByRef(OSVERSIONINFOEXW& osVerInfo)
 {
   ZeroMemory(&osVerInfo, sizeof(osVerInfo));
@@ -555,10 +557,14 @@ std::string CSysInfo::GetKernelName(bool emptyIfUnknown /*= false*/)
   static std::string kernelName;
   if (kernelName.empty())
   {
-#if defined(TARGET_WINDOWS) || defined(TARGET_WIN10)
+#if defined(TARGET_WINDOWS)
     OSVERSIONINFOEXW osvi;
     if (sysGetVersionExWByRef(osvi) && osvi.dwPlatformId == VER_PLATFORM_WIN32_NT)
       kernelName = "Windows NT";
+#elif  defined(TARGET_WIN10)
+    auto e = ref new EasClientDeviceInformation();
+    auto os = e->OperatingSystem;
+    g_charsetConverter.wToUTF8(std::wstring(os->Data()), kernelName);
 #elif defined(TARGET_POSIX)
     struct utsname un;
     if (uname(&un) == 0)
@@ -585,6 +591,15 @@ std::string CSysInfo::GetKernelVersionFull(void)
   OSVERSIONINFOEXW osvi;
   if (sysGetVersionExWByRef(osvi))
     kernelVersionFull = StringUtils::Format("%d.%d", osvi.dwMajorVersion, osvi.dwMinorVersion);
+#elif  defined(TARGET_WIN10)
+  // get the system version number
+  auto sv = AnalyticsInfo::VersionInfo->DeviceFamilyVersion;
+  wchar_t* end;
+  unsigned long long  v = wcstoull(sv->Data(), &end, 10);
+  unsigned long long v1 = (v & 0xFFFF000000000000L) >> 48;
+  unsigned long long v2 = (v & 0x0000FFFF00000000L) >> 32;
+  kernelVersionFull = StringUtils::Format("%lld.%lld", v1, v2);
+
 #elif defined(TARGET_POSIX)
   struct utsname un;
   if (uname(&un) == 0)
@@ -689,7 +704,7 @@ std::string CSysInfo::GetOsPrettyNameWithVersion(void)
   if (!osNameVer.empty())
     return osNameVer;
 
-#if defined(TARGET_WINDOWS) || defined(TARGET_WIN10)
+#if defined(TARGET_WINDOWS)
   OSVERSIONINFOEXW osvi = {};
 
   osNameVer = "Windows ";
@@ -747,7 +762,9 @@ std::string CSysInfo::GetOsPrettyNameWithVersion(void)
   }
   else
     osNameVer.append(" unknown");
-#elif defined(TARGET_FREEBSD) || defined(TARGET_DARWIN_IOS) || defined(TARGET_DARWIN_OSX)
+#elif defined(TARGET_WIN10)
+  osNameVer = GetKernelName() + " " + GetOsVersion();
+#elif defined(TARGET_FREEBSD) || defined(TARGET_DARWIN_IOS) || defined(TARGET_DARWIN_OSX) || defined(TARGET_WIN10)
   osNameVer = GetOsName() + " " + GetOsVersion();
 #elif defined(TARGET_ANDROID)
   osNameVer = GetOsName() + " " + GetOsVersion() + " API level " +   StringUtils::Format("%d", CJNIBuild::SDK_INT);
@@ -912,7 +929,7 @@ bool CSysInfo::IsWindowsVersionAtLeast(WindowsVersion ver)
 
 CSysInfo::WindowsVersion CSysInfo::GetWindowsVersion()
 {
-#if defined(TARGET_WINDOWS) || defined(TARGET_WIN10)
+#if defined(TARGET_WINDOWS)
   if (m_WinVer == WindowsVersionUnknown)
   {
     OSVERSIONINFOEXW osvi = {};
@@ -933,6 +950,8 @@ CSysInfo::WindowsVersion CSysInfo::GetWindowsVersion()
         m_WinVer = WindowsVersionFuture;
     }
   }
+#elif  defined(TARGET_WIN10)
+  m_WinVer = WindowsVersionWin10;
 #endif // TARGET_WINDOWS
   return m_WinVer;
 }
