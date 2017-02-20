@@ -29,6 +29,7 @@
 #include "settings/AdvancedSettings.h"
 #include "URL.h"
 #include "StringUtils.h"
+#include "utils/log.h"
 
 #include <cassert>
 #include <netinet/in.h>
@@ -580,9 +581,12 @@ bool URIUtils::IsRemote(const std::string& strFile)
 
 bool URIUtils::IsOnDVD(const std::string& strFile)
 {
-#if defined(TARGET_WINDOWS) || defined(TARGET_WIN10)
+#if defined(TARGET_WINDOWS)
   if (strFile.size() >= 2 && strFile.substr(1,1) == ":")
     return (GetDriveType(strFile.substr(0, 3).c_str()) == DRIVE_CDROM);
+#elif  defined(TARGET_WIN10)
+    CLog::Log(LOGERROR, "%s is not implemented", __FUNCTION__);
+    return false;
 #endif
 
   if (IsProtocol(strFile, "dvd"))
@@ -711,8 +715,10 @@ bool URIUtils::IsDVD(const std::string& strFile)
   if(strFile.size() < 2 || (strFile.substr(1) != ":\\" && strFile.substr(1) != ":"))
     return false;
 
+#ifndef TARGET_WIN10
   if(GetDriveType(strFile.c_str()) == DRIVE_CDROM)
     return true;
+#endif
 #else
   if (strFileLow == "iso9660://" || strFileLow == "udf://" || strFileLow == "dvd://1" )
     return true;
