@@ -40,6 +40,7 @@
 #include "CPUInfo.h"
 #include "CompileInfo.h"
 #include "settings/Settings.h"
+#include "utils/log.h"
 
 #if defined(TARGET_WINDOWS) || defined(TARGET_WIN10)
 #include "dwmapi.h"
@@ -461,7 +462,7 @@ bool CSysInfo::GetDiskSpace(const std::string& drive,int& iTotal, int& iTotalFre
 
   if( !drive.empty() && drive != "*" )
   {
-#if defined(TARGET_WINDOWS) || defined(TARGET_WIN10)
+#if defined(TARGET_WINDOWS)
     UINT uidriveType = GetDriveType(( drive + ":\\" ).c_str());
     if(uidriveType != DRIVE_UNKNOWN && uidriveType != DRIVE_NO_ROOT_DIR)
       bRet= ( 0 != GetDiskFreeSpaceEx( ( drive + ":\\" ).c_str(), NULL, &ULTotal, &ULTotalFree) );
@@ -493,6 +494,8 @@ bool CSysInfo::GetDiskSpace(const std::string& drive,int& iTotal, int& iTotalFre
       }while( strlen( pcBuffer + iPos ) > 0 );
     }
     delete[] pcBuffer;
+#elif defined(TARGET_WIN10)
+    CLog::Log(LOGERROR, "%s is not implemented", __FUNCTION__);
 #else // for linux and osx
     if( GetDiskFreeSpaceEx( "/", NULL, &ULTotal, &ULTotalFree ) )
     {
