@@ -1,6 +1,6 @@
 #pragma once
 /*
- *      Copyright (C) 2005-2014 Team XBMC
+ *      Copyright (C) 2017 Team XBMC
  *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -19,32 +19,23 @@
  *
  */
 
-#if defined(TARGET_WINDOWS) || defined(TARGET_WIN10)
+#if defined(HAS_LIBAMCODEC)
 
-#include "video/videosync/VideoSync.h"
+#include "windowing/VideoSync.h"
 #include "guilib/DispResource.h"
-#include "threads/Event.h"
 
-class CVideoSyncD3D : public CVideoSync, IDispResource
+class CVideoSyncAML : public CVideoSync, IDispResource
 {
 public:
-  CVideoSyncD3D(CVideoReferenceClock *clock) : CVideoSync(clock) {};
-  bool Setup(PUPDATECLOCK func) override;
-  void Run(std::atomic<bool>& stop) override;
-  void Cleanup() override;
-  float GetFps() override;
-  void RefreshChanged() override;
-  // IDispResource overrides
-  void OnLostDisplay() override;
-  void OnResetDisplay() override;
-
+  CVideoSyncAML(void *clock);
+  virtual ~CVideoSyncAML();
+  virtual bool Setup(PUPDATECLOCK func)override;
+  virtual void Run(std::atomic<bool>& stop)override;
+  virtual void Cleanup()override;
+  virtual float GetFps()override;
+  virtual void OnResetDisplay()override;
 private:
-  static std::string GetErrorDescription(HRESULT hr);
-
-  volatile bool m_displayLost;
-  volatile bool m_displayReset;
-  CEvent m_lostEvent;
-  int64_t m_lastUpdateTime;
+  volatile bool m_abort;
 };
 
 #endif

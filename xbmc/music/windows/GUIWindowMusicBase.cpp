@@ -807,6 +807,12 @@ void CGUIWindowMusicBase::GetContextButtons(int itemNumber, CContextButtons &but
         {
             buttons.Add(CONTEXT_BUTTON_PLAY_PARTYMODE, 15216); // Play in Partymode
         }
+        if (item->IsAudioBook())
+        {
+          int bookmark;
+          if (m_musicdatabase.GetResumeBookmarkForAudioBook(item->GetPath(), bookmark) && bookmark > 0)
+            buttons.Add(CONTEXT_BUTTON_RESUME_ITEM, 39016);
+        }
 
         if (item->IsSmartPlayList() || m_vecItems->IsSmartPlayList())
           buttons.Add(CONTEXT_BUTTON_EDIT_SMART_PLAYLIST, 586);
@@ -936,6 +942,19 @@ bool CGUIWindowMusicBase::OnContextButton(int itemNumber, CONTEXT_BUTTON button)
     if (m_musicdatabase.LookupCDDBInfo(true))
       Refresh();
     return true;
+
+  case CONTEXT_BUTTON_RESUME_ITEM: //audiobooks
+    {
+      Update(item->GetPath());
+      int bookmark;
+      m_musicdatabase.GetResumeBookmarkForAudioBook(item->GetPath(), bookmark);
+      int i=0;
+      while (i < m_vecItems->Size() && bookmark > m_vecItems->Get(i)->m_lEndOffset)
+        ++i;
+      CFileItem resItem(*m_vecItems->Get(i));
+      resItem.SetProperty("StartPercent", ((double)bookmark-resItem.m_lStartOffset)/(resItem.m_lEndOffset-resItem.m_lStartOffset)*100);
+      g_application.PlayFile(resItem, "", false);
+    }
 
   default:
     break;
@@ -1308,7 +1327,7 @@ void CGUIWindowMusicBase::OnInitWindow()
   CGUIMediaWindow::OnInitWindow();
   // Prompt for rescan of library to read music file tags that were not processed by previous versions
   // and accomodate any changes to the way some tags are processed
-  if (CMediaSettings::GetInstance().GetMusicNeedsUpdate() != 0)
+  if (m_musicdatabase.GetMusicNeedsTagScan() != 0)
   {
     if (g_infoManager.GetLibraryBool(LIBRARY_HAS_MUSIC) && !g_application.IsMusicScanning())
     {
@@ -1324,15 +1343,13 @@ void CGUIWindowMusicBase::OnInitWindow()
         if (CServiceBroker::GetSettings().GetBool(CSettings::SETTING_MUSICLIBRARY_BACKGROUNDUPDATE))
           flags |= CMusicInfoScanner::SCAN_BACKGROUND;
         g_application.StartMusicScan("", true, flags);
-        CMediaSettings::GetInstance().SetMusicNeedsUpdate(0); // once is enough (user may interrupt, but that's up to them)
-        CServiceBroker::GetSettings().Save();
+        m_musicdatabase.SetMusicTagScanVersion(); // once is enough (user may interrupt, but that's up to them)
       }
     }
     else
     {
       // no need to force a rescan if there's no music in the library or if a library scan is already active
-      CMediaSettings::GetInstance().SetMusicNeedsUpdate(0);
-      CServiceBroker::GetSettings().Save();
+      m_musicdatabase.SetMusicTagScanVersion();
     }
   }
 }

@@ -1,7 +1,6 @@
 #pragma once
 /*
- *      Copyright (C) 2005-2014 Team XBMC
- *      http://xbmc.org
+ *      Copyright (C) 2014 Arne Morten Kvarving
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -19,23 +18,25 @@
  *
  */
 
-#if defined(TARGET_RASPBERRY_PI)
 
-#include "video/videosync/VideoSync.h"
-#include "guilib/DispResource.h"
+#include "IFileDirectory.h"
+extern "C" {
+#include <libavformat/avformat.h>
+}
 
-class CVideoSyncPi : public CVideoSync, IDispResource
+namespace XFILE
 {
-public:
-  CVideoSyncPi(CVideoReferenceClock *clock) : CVideoSync(clock) {};
-  virtual bool Setup(PUPDATECLOCK func);
-  virtual void Run(std::atomic<bool>& stop);
-  virtual void Cleanup();
-  virtual float GetFps();
-  virtual void OnResetDisplay();
-
-private:
-  volatile bool m_abort;
-};
-
-#endif
+  class CAudioBookFileDirectory : public IFileDirectory
+  {
+    public:
+      CAudioBookFileDirectory(void);
+      virtual ~CAudioBookFileDirectory(void);
+      virtual bool GetDirectory(const CURL& url, CFileItemList &items);
+      virtual bool Exists(const CURL& url);
+      virtual bool ContainsFiles(const CURL& url);
+      virtual bool IsAllowed(const CURL& url) const { return true; };
+    protected:
+      AVIOContext* m_ioctx;
+      AVFormatContext* m_fctx;
+  };
+}

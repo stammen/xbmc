@@ -19,38 +19,24 @@
  *
  */
 
-#if defined(HAS_GLX)
+#if defined(TARGET_RASPBERRY_PI)
 
-#include "video/videosync/VideoSync.h"
-#include "system_gl.h"
-#include <X11/X.h>
-#include <X11/Xlib.h>
-#include <GL/glx.h>
+#include "windowing/VideoSync.h"
 #include "guilib/DispResource.h"
-#include "threads/Event.h"
 
-class CVideoSyncGLX : public CVideoSync, IDispResource
+class CVideoSyncPi : public CVideoSync, IDispResource
 {
 public:
-  CVideoSyncGLX(CVideoReferenceClock *clock) : CVideoSync(clock) {};
+  CVideoSyncPi(void *clock) : CVideoSync(clock) {};
   virtual bool Setup(PUPDATECLOCK func);
   virtual void Run(std::atomic<bool>& stop);
   virtual void Cleanup();
   virtual float GetFps();
-  virtual void OnLostDisplay();
   virtual void OnResetDisplay();
+  virtual void RefreshChanged();
 
 private:
-  int  (*m_glXWaitVideoSyncSGI) (int, int, unsigned int*);
-  int  (*m_glXGetVideoSyncSGI)  (unsigned int*);
-
-  static Display* m_Dpy;
-  XVisualInfo *m_vInfo;
-  Window       m_Window;
-  GLXContext   m_Context;
-  volatile bool m_displayLost;
-  volatile bool m_displayReset;
-  CEvent m_lostEvent;
+  volatile bool m_abort;
 };
 
 #endif

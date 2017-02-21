@@ -250,6 +250,13 @@ public:
   bool HasAlbumBeenScraped(int idAlbum);
   int  AddAlbumInfoSong(int idAlbum, const CSong& song);
 
+  /////////////////////////////////////////////////
+  // Audiobook
+  /////////////////////////////////////////////////
+  bool AddAudioBook(const CFileItem& item);
+  bool SetResumeBookmarkForAudioBook(const CFileItem& item, int bookmark);
+  bool GetResumeBookmarkForAudioBook(const std::string& path, int& bookmark);
+
   /*! \brief Checks if the given path is inside a folder that has already been scanned into the library
    \param path the path we want to check
    */
@@ -496,6 +503,26 @@ public:
    \sa GetArtForItem
    */
   std::string GetArtistArtForItem(int mediaId, const std::string &mediaType, const std::string &artType);
+
+  /////////////////////////////////////////////////
+  // Tag Scan Version
+  /////////////////////////////////////////////////
+  /*! \brief Check if music files need all tags rescanning regardless of file being unchanged 
+  because the tag processing has changed (which may happen without db version changes) since they
+  where last scanned.
+  \return -1 if an error occured, 0 if no scan is needed, or the version number of tags if not the same as current.
+  */
+  virtual int GetMusicNeedsTagScan();
+
+  /*! \brief Set minimum version number of db needed when tag data scanned from music files
+  \param version the version number of db
+  */
+  void SetMusicNeedsTagScan(int version);
+
+  /*! \brief Set the version number of tag data 
+  \param version the version number of db when tags last scanned, 0 (default) means current db version
+  */
+  void SetMusicTagScanVersion(int version = 0);
 
 protected:
   std::map<std::string, int> m_artistCache;
