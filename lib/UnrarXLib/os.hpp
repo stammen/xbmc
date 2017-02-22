@@ -1,7 +1,7 @@
 #ifndef _RAR_OS_
 #define _RAR_OS_
 
-#ifdef TARGET_WINDOWS
+#if defined(TARGET_WINDOWS) || defined(TARGET_WIN10)
 #include <windows.h>
 #endif
 
@@ -22,7 +22,12 @@
 #define LITTLE_ENDIAN
 #define NM  1024
 
-#ifdef _WIN_32
+#ifdef MS_UWP
+#if _WIN32_WINNT < 0x0A00
+#undef _WIN32_WINNT
+#define _WIN32_WINNT 0x0A00
+#endif
+#elif defined(_WIN_32)
 
 //#define STRICT
 //#define WINVER 0x0400
