@@ -1048,6 +1048,7 @@ int CDecoder::Check(AVCodecContext* avctx)
   && avctx->codec_id != AV_CODEC_ID_WMV3)
     return 0;
   
+#ifndef TARGET_WIN10
   D3D11_VIDEO_DECODER_EXTENSION data = {0};
   union {
     DXVA_Status_H264 h264;
@@ -1075,6 +1076,7 @@ int CDecoder::Check(AVCodecContext* avctx)
     if(status.vc1.bStatus)
       CLog::Log(LOGWARNING, "DXVA - decoder problem of status %d with %d", status.vc1.bStatus, status.vc1.bBufType);
   }
+#endif
   return 0;
 }
 

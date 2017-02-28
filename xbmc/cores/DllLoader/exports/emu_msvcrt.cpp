@@ -67,9 +67,6 @@
 
 #include "emu_msvcrt.h"
 #include "emu_dummy.h"
-#ifndef TARGET_WIN10
-#include "emu_kernel32.h"
-#endif
 #include "util/EmuFileWrapper.h"
 #include "utils/log.h"
 #include "threads/SingleLock.h"

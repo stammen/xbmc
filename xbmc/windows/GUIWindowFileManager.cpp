@@ -59,6 +59,7 @@
 #include "utils/Variant.h"
 #include "Autorun.h"
 #include "URL.h"
+#include "platform/Filesystem.h"
 #ifdef TARGET_POSIX
 #include "linux/XFileUtils.h"
 #endif
@@ -326,6 +327,7 @@ bool CGUIWindowFileManager::OnMessage(CGUIMessage& message)
 
 void CGUIWindowFileManager::OnSort(int iList)
 {
+  using namespace KODI::PLATFORM::FILESYSTEM;
   // always sort the list by label in ascending order
   for (int i = 0; i < m_vecItems[iList]->Size(); i++)
   {
@@ -347,19 +349,21 @@ void CGUIWindowFileManager::OnSort(int iList)
 #endif
       if (pItem->IsHD())
       {
-        ULARGE_INTEGER ulBytesFree;
-        if (GetDiskFreeSpaceEx(path, &ulBytesFree, NULL, NULL))
+        std::error_code ec;
+        auto freeSpace = space(pItem->GetPath(), ec);
+        if (ec.value() == 0)
         {
-          pItem->m_dwSize = ulBytesFree.QuadPart;
+          pItem->m_dwSize = freeSpace.free;
           pItem->SetFileSizeLabel();
         }
       }
       else if (pItem->IsDVD() && g_mediaManager.IsDiscInDrive())
       {
-        ULARGE_INTEGER ulBytesTotal;
-        if (GetDiskFreeSpaceEx(path, NULL, &ulBytesTotal, NULL))
+        std::error_code ec;
+        auto freeSpace = space(pItem->GetPath(), ec);
+        if (ec.value() == 0)
         {
-          pItem->m_dwSize = ulBytesTotal.QuadPart;
+          pItem->m_dwSize = freeSpace.capacity;
           pItem->SetFileSizeLabel();
         }
       }
