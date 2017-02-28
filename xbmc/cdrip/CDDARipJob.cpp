@@ -38,6 +38,10 @@
 #include "addons/AddonManager.h"
 #include "addons/AudioEncoder.h"
 
+#ifdef TARGET_WIN10
+#include "platform/win32/CharsetConverter.h"
+#endif
+
 using namespace ADDON;
 using namespace MUSIC_INFO;
 using namespace XFILE;
@@ -227,6 +231,13 @@ CEncoder* CCDDARipJob::SetupEncoder(CFile& reader)
 
 std::string CCDDARipJob::SetupTempFile()
 {
+#ifdef TARGET_WIN10
+  wchar_t wtmp[MAX_PATH];
+  using namespace KODI::PLATFORM::WINDOWS;
+  std::wstring wPathName = ToW(CSpecialProtocol::TranslatePath("special://temp/"));
+  GetTempFileName(wPathName.c_str(), L"riptrack", 0, wtmp);
+  return FromW(wtmp, wcslen(wtmp));
+#else
   char tmp[MAX_PATH];
 #ifndef TARGET_POSIX
   GetTempFileName(CSpecialProtocol::TranslatePath("special://temp/").c_str(), "riptrack", 0, tmp);
@@ -239,6 +250,7 @@ std::string CCDDARipJob::SetupTempFile()
     close(fd);
 #endif
   return tmp;
+#endif
 }
 
 bool CCDDARipJob::operator==(const CJob* job) const
