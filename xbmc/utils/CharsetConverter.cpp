@@ -54,13 +54,11 @@
   #define UTF32_CHARSET "UTF-32" ENDIAN_SUFFIX
   #define UTF8_SOURCE "UTF-8"
   #define WCHAR_CHARSET UTF16_CHARSET 
-  #ifndef TARGET_WIN10
   #if _DEBUG
     #pragma comment(lib, "libiconvd.lib")
   #else
     #pragma comment(lib, "libiconv.lib")
   #endif
-#endif
 #elif defined(TARGET_ANDROID)
   #define WCHAR_IS_UCS_4 1
   #define UTF16_CHARSET "UTF-16" ENDIAN_SUFFIX
