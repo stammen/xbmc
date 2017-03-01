@@ -33,6 +33,10 @@
 #include <ctime>
 #endif
 
+#ifdef TARGET_WIN10
+#include "platform/win32/CharsetConverter.h"
+#endif
+
 class CTempFile : public XFILE::CFile
 {
 public:
@@ -55,7 +59,17 @@ public:
     }
     strcpy(tmp, m_ptempFilePath.c_str());
 
-#ifdef TARGET_WINDOWS
+#ifdef TARGET_WIN10
+    wchar_t wtmp[MAX_PATH];
+    using namespace KODI::PLATFORM::WINDOWS;
+    std::wstring wPathName = ToW(CSpecialProtocol::TranslatePath("special://temp/"));
+    if (!GetTempFileName(wPathName.c_str(), L"xbmctempfile", 0, wtmp))
+    {
+      m_ptempFilePath = "";
+      return false;
+    }
+    m_ptempFilePath = FromW(wtmp, wcslen(wtmp));
+#elif definded(TARGET_WINDOWS)
     if (!GetTempFileName(CSpecialProtocol::TranslatePath("special://temp/").c_str(),
                          "xbmctempfile", 0, tmp))
     {

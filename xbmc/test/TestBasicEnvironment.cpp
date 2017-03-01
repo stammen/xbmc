@@ -41,6 +41,11 @@
 #include "platform/win32/WIN32Util.h"
 #endif
 
+#ifdef TARGET_WIN10
+#include "platform/win32/CharsetConverter.h"
+using namespace KODI::PLATFORM::WINDOWS;
+#endif
+
 #include <cstdio>
 #include <cstdlib>
 #include <climits>
@@ -83,7 +88,20 @@ void TestBasicEnvironment::SetUp()
   /* Create a temporary directory and set it to be used throughout the
    * test suite run.
    */
-#ifdef TARGET_WINDOWS
+#if defined(TARGET_WIN10)
+  std::wstring xbmcTempPath;
+  TCHAR lpTempPathBuffer[MAX_PATH];
+  if (!GetTempPath(MAX_PATH, lpTempPathBuffer))
+    SetUpError();
+  xbmcTempPath = lpTempPathBuffer;
+  if (!GetTempFileName(xbmcTempPath.c_str(), L"xbmctempdir", 0, lpTempPathBuffer))
+    SetUpError();
+  DeleteFile(lpTempPathBuffer);
+  if (!CreateDirectory(lpTempPathBuffer, NULL))
+    SetUpError();
+  std::string tmp =  FromW(lpTempPathBuffer, wcslen(lpTempPathBuffer));
+  CSpecialProtocol::SetTempPath(tmp);
+#elif defined(TARGET_WINDOWS)
   std::string xbmcTempPath;
   TCHAR lpTempPathBuffer[MAX_PATH];
   if (!GetTempPath(MAX_PATH, lpTempPathBuffer))
