@@ -1,5 +1,8 @@
 set(SOURCES Win10Main.cpp
+            MessagePrinter.cpp        
+            ../win32/CharsetConverter.cpp
             ../win32/dxerr.cpp
+            ../win32/Filesystem.cpp
             ../win32/pch.cpp
             ../win32/stat_utf8.cpp
             ../win32/stdio_utf8.cpp
