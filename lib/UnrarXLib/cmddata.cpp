@@ -44,7 +44,7 @@ void CommandData::Close()
 }
 
 
-#if !defined(SFX_MODULE) && !defined(_WIN_CE) && !defined(MS_UWP)
+#if !defined(SFX_MODULE) && !defined(_WIN_CE)
 void CommandData::ParseArg(char *Arg,wchar *ArgW)
 {
   if (IsSwitch(*Arg) && !NoMoreSwitches)
