@@ -79,6 +79,31 @@ std::string CNetworkInterfaceWin10::GetMacAddress()
   return result;
 }
 
+bool CNetworkInterfaceWin10::GetHostMacAddress(unsigned long host, std::string& mac)
+{
+  mac = "";
+  CLog::Log(LOGERROR, "%s is not implemented", __FUNCTION__);
+  return false;
+}
+
+void CNetworkInterfaceWin10::GetSettings(NetworkAssignment& assignment, std::string& ipAddress, std::string& networkMask, std::string& defaultGateway, std::string& essId, std::string& key, EncMode& encryptionMode)
+{
+  CLog::Log(LOGERROR, "%s is not implemented", __FUNCTION__);
+}
+
+void CNetworkInterfaceWin10::SetSettings(NetworkAssignment& assignment, std::string& ipAddress, std::string& networkMask, std::string& defaultGateway, std::string& essId, std::string& key, EncMode& encryptionMode)
+{
+  CLog::Log(LOGERROR, "%s is not implemented", __FUNCTION__);
+}
+
+std::vector<NetworkAccessPoint> CNetworkInterfaceWin10::GetAccessPoints(void)
+{
+  CLog::Log(LOGERROR, "%s is not implemented", __FUNCTION__);
+  std::vector<NetworkAccessPoint> accessPoints;
+  return accessPoints;
+}
+
+
 void CNetworkInterfaceWin10::GetMacAddressRaw(char rawMac[6])
 {
   CLog::Log(LOGERROR, "%s is not implemented", __FUNCTION__);
