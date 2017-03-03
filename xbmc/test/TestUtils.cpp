@@ -69,7 +69,7 @@ public:
       return false;
     }
     m_ptempFilePath = FromW(wtmp, wcslen(wtmp));
-#elif definded(TARGET_WINDOWS)
+#elif defined(TARGET_WINDOWS)
     if (!GetTempFileName(CSpecialProtocol::TranslatePath("special://temp/").c_str(),
                          "xbmctempfile", 0, tmp))
     {
