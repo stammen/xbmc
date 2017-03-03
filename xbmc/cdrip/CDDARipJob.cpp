@@ -38,7 +38,11 @@
 #include "addons/AddonManager.h"
 #include "addons/AudioEncoder.h"
 
+<<<<<<< HEAD
 #ifdef TARGET_WIN10
+=======
+#if defined(TARGET_WINDOWS)
+>>>>>>> master
 #include "platform/win32/CharsetConverter.h"
 #endif
 
@@ -239,8 +243,12 @@ std::string CCDDARipJob::SetupTempFile()
   return FromW(wtmp, wcslen(wtmp));
 #else
   char tmp[MAX_PATH];
-#ifndef TARGET_POSIX
-  GetTempFileName(CSpecialProtocol::TranslatePath("special://temp/").c_str(), "riptrack", 0, tmp);
+#if defined(TARGET_WINDOWS)
+  using namespace KODI::PLATFORM::WINDOWS;
+  wchar_t tmpW[MAX_PATH];
+  GetTempFileName(ToW(CSpecialProtocol::TranslatePath("special://temp/")).c_str(), L"riptrack", 0, tmpW);
+  auto tmpString = FromW(tmpW);
+  strncpy_s(tmp, tmpString.length(), tmpString.c_str(), MAX_PATH);
 #else
   int fd;
   strncpy(tmp, CSpecialProtocol::TranslatePath("special://temp/riptrackXXXXXX").c_str(), MAX_PATH);

@@ -344,8 +344,8 @@ bool EnumConfigPaths(char *Path,int Number)
 #elif defined(_WIN_32)
   if (Number!=0)
     return(false);
-#if !defined(TARGET_POSIX) && !defined(MS_UWP)
-  GetModuleFileName(NULL,Path,NM);
+#if !defined(TARGET_POSIX) && !defined(TARGET_WIN10)
+  GetModuleFileName(NULL,(LPWSTR)unrarxlib::ToW(Path).c_str(),NM);
   RemoveNameFromPath(Path);
 #endif
   return(true);

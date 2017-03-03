@@ -3,7 +3,7 @@
 #ifdef _WIN_32 
 int WinNT()
 {
-#ifdef MS_UWP
+#ifdef TARGET_WIN10
   return 1;
 #else
   static int dwPlatformId=-1,dwMajorVersion;

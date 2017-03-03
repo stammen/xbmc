@@ -16,9 +16,7 @@
 
 #include "NptConfig.h"
 #include "NptConsole.h"
-#include "NptUtils.h"
-
-
+#include "NptDebug.h"
 
 /*----------------------------------------------------------------------
 |   NPT_Console::Output
@@ -26,11 +24,7 @@
 void
 NPT_Console::Output(const char* message)
 {
-#ifdef MS_UWP
-  OutputDebugString(win32ConvertUtf8ToW(message).c_str());
-#else
-    OutputDebugString(message);
+    NPT_DebugOutput(message);
     printf("%s", message);
-#endif
 }
 

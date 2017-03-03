@@ -46,7 +46,7 @@ void SetPriority(int Priority)
         PriorityClass=HIGH_PRIORITY_CLASS;
         PriorityLevel=Priority-13;
       }
-#ifndef MS_UWP
+#ifndef TARGET_WIN10
   SetPriorityClass(GetCurrentProcess(),PriorityClass);
 #endif
   SetThreadPriority(GetCurrentThread(),PriorityLevel);

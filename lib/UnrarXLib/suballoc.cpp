@@ -91,12 +91,6 @@ bool SubAllocator::StartSubAllocator(int SASize)
     return FALSE;
   }
 
-  if(AllocSize != AllocSize2)
-#ifdef MS_UWP
-    OutputDebugString(L"ERROR - had to allocate smaller data than required, extract can very well fail");
-#else
-    OutputDebugString("ERROR - had to allocate smaller data than required, extract can very well fail");
-#endif
 
 #endif
   HeapEnd=HeapStart+AllocSize-UNIT_SIZE;

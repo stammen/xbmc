@@ -20,7 +20,11 @@
 
 #include "platform/MessagePrinter.h"
 #include "CompileInfo.h"
+<<<<<<< HEAD
 #include "utils/log.h"
+=======
+#include "platform/win32/CharsetConverter.h"
+>>>>>>> master
 
 #ifdef TARGET_WIN10
 int WINAPI MessageBox(void* hWnd, const char* lpText, const char* lpCaption, UINT uType)
@@ -32,21 +36,25 @@ int WINAPI MessageBox(void* hWnd, const char* lpText, const char* lpCaption, UIN
 
 void CMessagePrinter::DisplayMessage(const std::string& message)
 {
-  MessageBox(NULL, message.c_str(), CCompileInfo::GetAppName(), MB_OK | MB_ICONINFORMATION);
+  using KODI::PLATFORM::WINDOWS::ToW;
+  MessageBox(nullptr, ToW(message).c_str(), ToW(CCompileInfo::GetAppName()).c_str(), MB_OK | MB_ICONINFORMATION);
 }
 
 void CMessagePrinter::DisplayWarning(const std::string& warning)
 {
-  MessageBox(NULL, warning.c_str(), CCompileInfo::GetAppName(), MB_OK | MB_ICONWARNING);
+  using KODI::PLATFORM::WINDOWS::ToW;
+  MessageBox(nullptr, ToW(warning).c_str(), ToW(CCompileInfo::GetAppName()).c_str(), MB_OK | MB_ICONWARNING);
 }
 
 void CMessagePrinter::DisplayError(const std::string& error)
 {
-  MessageBox(NULL, error.c_str(), CCompileInfo::GetAppName(), MB_OK | MB_ICONERROR);
+  using KODI::PLATFORM::WINDOWS::ToW;
+  MessageBox(nullptr, ToW(error).c_str(), ToW(CCompileInfo::GetAppName()).c_str(), MB_OK | MB_ICONERROR);
 }
 
 void CMessagePrinter::DisplayHelpMessage(const std::vector<std::pair<std::string, std::string>>& help)
 {
+  using KODI::PLATFORM::WINDOWS::ToW;
   //very crude implementation, pretty it up when possible
   std::string message;
   for (const auto& line : help)
@@ -54,5 +62,5 @@ void CMessagePrinter::DisplayHelpMessage(const std::vector<std::pair<std::string
     message.append(line.first + "\t" + line.second + "\r\n");
   }
 
-  MessageBox(NULL, message.c_str(), CCompileInfo::GetAppName(), MB_OK | MB_ICONINFORMATION);
+  MessageBox(nullptr, ToW(message).c_str(), ToW(CCompileInfo::GetAppName()).c_str(), MB_OK | MB_ICONINFORMATION);
 }

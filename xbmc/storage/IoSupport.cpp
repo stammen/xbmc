@@ -29,6 +29,7 @@
 #include "utils/log.h"
 #if defined (TARGET_WINDOWS) || defined(TARGET_WIN10)
 #include "my_ntddcdrm.h"
+#include "platform/win32/CharsetConverter.h"
 #endif
 #if defined(TARGET_LINUX)
 #include <linux/limits.h>
@@ -81,11 +82,18 @@ HANDLE CIoSupport::OpenCDROM()
   hDevice->fd = fd;
   hDevice->m_bCDROM = true;
 #elif defined(TARGET_WINDOWS)
+<<<<<<< HEAD
   hDevice = CreateFile(g_mediaManager.TranslateDevicePath("",true).c_str(), GENERIC_READ, FILE_SHARE_READ,
                        NULL, OPEN_EXISTING,
                        FILE_FLAG_RANDOM_ACCESS, NULL );
 #elif defined(TARGET_WIN10)
   CLog::Log(LOGERROR, "%s is not implemented", __FUNCTION__);
+=======
+  auto filename = KODI::PLATFORM::WINDOWS::ToW(g_mediaManager.TranslateDevicePath("", true));
+  hDevice = CreateFile(filename.c_str(), GENERIC_READ, FILE_SHARE_READ,
+                       nullptr, OPEN_EXISTING,
+                       FILE_FLAG_RANDOM_ACCESS, nullptr );
+>>>>>>> master
 #else
 
   hDevice = CreateFile("\\\\.\\Cdrom0", GENERIC_READ, FILE_SHARE_READ,

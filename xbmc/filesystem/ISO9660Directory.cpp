@@ -28,6 +28,9 @@
 #ifdef TARGET_POSIX
 #include "linux/XTimeUtils.h"
 #endif
+#ifdef TARGET_WINDOWS
+#include "platform/win32/CharsetConverter.h"
+#endif
 
 #ifdef TARGET_WIN10
 #include "platform/win32/CharsetConverter.h"
@@ -79,13 +82,13 @@ bool CISO9660Directory::GetDirectory(const CURL& url, CFileItemList &items)
   {
     if (wfd.cFileName[0] != 0)
     {
-#ifdef TARGET_WIN10
-      std::string strDir = FromW(std::wstring(wfd.cFileName));
-#else
-      std::string strDir = wfd.cFileName;
-#endif
-      if ( (wfd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) )
+      if ((wfd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY))
       {
+#if defined(TARGET_WINDOWS) || defined(TARGET_WIN10)
+        auto strDir = KODI::PLATFORM::WINDOWS::FromW(wfd.cFileName);
+#else
+        std::string strDir = wfd.cFileName;
+#endif
         if (strDir != "." && strDir != "..")
         {
           CFileItemPtr pItem(new CFileItem(strDir));
@@ -95,24 +98,28 @@ bool CISO9660Directory::GetDirectory(const CURL& url, CFileItemList &items)
           pItem->m_bIsFolder = true;
           FILETIME localTime;
           FileTimeToLocalFileTime(&wfd.ftLastWriteTime, &localTime);
-          pItem->m_dateTime=localTime;
+          pItem->m_dateTime = localTime;
           items.Add(pItem);
         }
       }
       else
       {
+#if defined(TARGET_WINDOWS) || defined(TARGET_WIN10)
+        auto strDir = KODI::PLATFORM::WINDOWS::FromW(wfd.cFileName);
+#else
+        std::string strDir = wfd.cFileName;
+#endif
         CFileItemPtr pItem(new CFileItem(strDir));
         pItem->SetPath(strRoot + strDir);
         pItem->m_bIsFolder = false;
         pItem->m_dwSize = CUtil::ToInt64(wfd.nFileSizeHigh, wfd.nFileSizeLow);
         FILETIME localTime;
         FileTimeToLocalFileTime(&wfd.ftLastWriteTime, &localTime);
-        pItem->m_dateTime=localTime;
+        pItem->m_dateTime = localTime;
         items.Add(pItem);
       }
     }
-  }
-  while (m_isoReader.FindNextFile(hFind, &wfd));
+  } while (m_isoReader.FindNextFile(hFind, &wfd));
   m_isoReader.FindClose(hFind);
 
   return true;

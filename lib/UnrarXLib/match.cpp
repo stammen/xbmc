@@ -7,7 +7,7 @@ inline uint toupperc(byte ch)
 {
 /*
 */
-#if defined(_WIN_32) && !defined(MS_UWP)
+#if defined(_WIN_32) && !defined(TARGET_WIN10)
   return((uint)CharUpper((LPTSTR)(ch)));
 #elif defined(_UNIX)
   return(ch);

@@ -113,9 +113,9 @@ bool ReadTextFile(char *Name,StringList *List,bool Config,bool AbortOnError,
             CurStr++;
           }
         }
-#if defined(_WIN_32) && !defined(TARGET_POSIX) && !defined(MS_UWP)
-        if (ConvertToAnsi)
-          OemToChar(CurStr,CurStr);
+#if defined(_WIN_32) && !defined(TARGET_POSIX) && !defined(TARGET_WIN10)
+        //if (ConvertToAnsi)
+        //  OemToChar(CurStr,CurStr);
 #endif
         List->AddString(CurStr);
       }

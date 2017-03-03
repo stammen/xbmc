@@ -184,7 +184,7 @@ bool FindFile::FastFind(const char *FindMask,const wchar *FindMaskW,struct FindD
 HANDLE FindFile::Win32Find(HANDLE hFind,const char *Mask,const wchar *MaskW,struct FindData *fd)
 {
 #if !defined(TARGET_POSIX)
-#if !defined(_WIN_CE) && !defined(MS_UWP)
+#if !defined(_WIN_CE) && !defined(TARGET_WIN10)
   if (WinNT())
 #endif
   {
@@ -229,13 +229,13 @@ HANDLE FindFile::Win32Find(HANDLE hFind,const char *Mask,const wchar *MaskW,stru
       fd->atime=FindData.ftLastAccessTime;
       fd->FileTime=fd->mtime.GetDos();
 
-#if !defined(_WIN_CE) && !defined(MS_UWP)
+#if !defined(_WIN_CE) && !defined(TARGET_WIN10)
       if (LowAscii(fd->NameW))
         *fd->NameW=0;
 #endif
     }
   }
-#if !defined(MS_UWP)
+#if !defined(TARGET_WIN10)
 #if !defined(_WIN_CE)
   else
 #endif
@@ -249,7 +249,7 @@ HANDLE FindFile::Win32Find(HANDLE hFind,const char *Mask,const wchar *MaskW,stru
     WIN32_FIND_DATA FindData;
     if (hFind==INVALID_HANDLE_VALUE)
     {
-      hFind=FindFirstFile(CharMask,&FindData);
+      hFind=FindFirstFile(unrarxlib::ToW(CharMask).c_str(),&FindData);
       if (hFind==INVALID_HANDLE_VALUE)
       {
         int SysErr=GetLastError();
@@ -266,11 +266,11 @@ HANDLE FindFile::Win32Find(HANDLE hFind,const char *Mask,const wchar *MaskW,stru
     if (hFind!=INVALID_HANDLE_VALUE)
     {
       strcpy(fd->Name,CharMask);
-      strcpy(PointToName(fd->Name),FindData.cFileName);
+      strcpy(PointToName(fd->Name),unrarxlib::FromW(FindData.cFileName).c_str());
       CharToWide(fd->Name,fd->NameW);
       fd->Size=int32to64(FindData.nFileSizeHigh,FindData.nFileSizeLow);
       fd->FileAttr=FindData.dwFileAttributes;
-      strcpy(fd->ShortName,FindData.cAlternateFileName);
+      strcpy(fd->ShortName,unrarxlib::FromW(FindData.cAlternateFileName).c_str());
       fd->ftCreationTime=FindData.ftCreationTime;
       fd->ftLastAccessTime=FindData.ftLastAccessTime;
       fd->ftLastWriteTime=FindData.ftLastWriteTime;
@@ -282,7 +282,7 @@ HANDLE FindFile::Win32Find(HANDLE hFind,const char *Mask,const wchar *MaskW,stru
         *fd->NameW=0;
     }
   }
-#endif // MS_UWP
+#endif // TARGET_WIN10
 #endif
 
   return(hFind);

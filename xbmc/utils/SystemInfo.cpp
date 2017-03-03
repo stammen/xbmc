@@ -53,6 +53,11 @@ using namespace Windows::Security::ExchangeActiveSyncProvisioning;
 using namespace Windows::System;
 using namespace Windows::System::Profile;
 #endif
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN 1
+#endif // WIN32_LEAN_AND_MEAN
+#include <Windows.h>
+#include "platform/win32/CharsetConverter.h"
 #endif
 #if defined(TARGET_DARWIN)
 #include "platform/darwin/DarwinUtils.h"
@@ -477,11 +482,10 @@ bool CSysInfo::GetDiskSpace(std::string drive,int& iTotal, int& iTotalFree, int&
 #endif
   }
 
-#if defined(TARGET_WINDOWS) || defined(TARGET_WIN10)
-#ifndef TARGET_WIN10
-  UINT uidriveType = GetDriveType((drive + ":\\").c_str());
+#ifdef TARGET_WINDOWS
+  using KODI::PLATFORM::WINDOWS::ToW;
+  UINT uidriveType = GetDriveType(ToW(drive + ":\\").c_str());
   if (uidriveType != DRIVE_UNKNOWN && uidriveType != DRIVE_NO_ROOT_DIR)
-#endif
     total = space(drive + ":\\", ec);
 #elif defined(TARGET_POSIX)
   total = space(drive, ec);
@@ -783,26 +787,7 @@ std::string CSysInfo::GetManufacturerName(void)
     Platform::String^ manufacturer = eas->SystemManufacturer;
     g_charsetConverter.wToUTF8(std::wstring(manufacturer->Data()), manufName);
 #elif defined(TARGET_WINDOWS)
-    HKEY hKey;
-    if (RegOpenKeyExW(HKEY_LOCAL_MACHINE, L"HARDWARE\\DESCRIPTION\\System\\BIOS", 0, KEY_READ, &hKey) == ERROR_SUCCESS)
-    {
-      wchar_t buf[400]; // more than enough
-      DWORD bufSize = sizeof(buf);
-      DWORD valType;
-      if (RegQueryValueExW(hKey, L"SystemManufacturer", NULL, &valType, (LPBYTE)buf, &bufSize) == ERROR_SUCCESS && valType == REG_SZ)
-      {
-        g_charsetConverter.wToUTF8(std::wstring(buf, bufSize / sizeof(wchar_t)), manufName);
-        size_t zeroPos = manufName.find(char(0));
-        if (zeroPos != std::string::npos)
-          manufName.erase(zeroPos); // remove any extra zero-terminations
-        std::string lower(manufName);
-        StringUtils::ToLower(lower);
-        if (lower == "system manufacturer" || lower == "to be filled by o.e.m." || lower == "unknown" ||
-            lower == "unidentified")
-          manufName.clear();
-      }
-      RegCloseKey(hKey);
-    }
+    // We just don't care, might be useful on embedded
 #endif
     inited = true;
   }
@@ -835,26 +820,7 @@ std::string CSysInfo::GetModelName(void)
     Platform::String^ manufacturer = eas->SystemProductName;
     g_charsetConverter.wToUTF8(std::wstring(manufacturer->Data()), modelName);
 #elif defined(TARGET_WINDOWS)
-    HKEY hKey;
-    if (RegOpenKeyExW(HKEY_LOCAL_MACHINE, L"HARDWARE\\DESCRIPTION\\System\\BIOS", 0, KEY_READ, &hKey) == ERROR_SUCCESS)
-    {
-      wchar_t buf[400]; // more than enough
-      DWORD bufSize = sizeof(buf);
-      DWORD valType; 
-      if (RegQueryValueExW(hKey, L"SystemProductName", NULL, &valType, (LPBYTE)buf, &bufSize) == ERROR_SUCCESS && valType == REG_SZ)
-      {
-        g_charsetConverter.wToUTF8(std::wstring(buf, bufSize / sizeof(wchar_t)), modelName);
-        size_t zeroPos = modelName.find(char(0));
-        if (zeroPos != std::string::npos)
-          modelName.erase(zeroPos); // remove any extra zero-terminations
-        std::string lower(modelName);
-        StringUtils::ToLower(lower);
-        if (lower == "system product name" || lower == "to be filled by o.e.m." || lower == "unknown" ||
-            lower == "unidentified")
-            modelName.clear();
-      }
-      RegCloseKey(hKey);
-    }
+    // We just don't care, might be useful on embedded
 #endif
     inited = true;
   }

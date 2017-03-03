@@ -21,9 +21,9 @@
 #include "utils/log.h"
 #include "dll_util.h"
 
-#ifdef TARGET_WIN10
-#include "filesystem/SpecialProtocol.h"
-#include "utils/CharsetConverter.h"
+#if defined(TARGET_WINDOWS) || defined(TARGET_WIN10)
+#include "platform/win32/CharsetConverter.h"
+#include <windows.h>
 #endif
 
 #include <stdlib.h>
@@ -107,10 +107,10 @@ uintptr_t create_dummy_function(const char* strDllName, const char* strFunctionN
 #ifdef TARGET_WIN10
 uintptr_t get_win_function_address(const char* strDllName, const char* strFunctionName)
 {
-  std::wstring strdllW;
-  g_charsetConverter.utf8ToW(CSpecialProtocol::TranslatePath(strDllName), strdllW, false);
+  using KODI::PLATFORM::WINDOWS::ToW;
+  auto strDllNameW = ToW(strDllName);
 
-  HMODULE handle = LoadPackagedLibrary(strdllW.c_str(), NULL);
+  HMODULE handle = LoadPackagedLibrary(strDllNameW.c_str(), NULL);
   if (handle != NULL)
   {
     uintptr_t pGNSI = (uintptr_t)GetProcAddress(handle, strFunctionName);
@@ -123,14 +123,16 @@ uintptr_t get_win_function_address(const char* strDllName, const char* strFuncti
 uintptr_t get_win_function_address(const char* strDllName, const char* strFunctionName)
 {
 #ifdef TARGET_WINDOWS
-  HMODULE handle = GetModuleHandle(strDllName);
-  if(handle == NULL)
+  using KODI::PLATFORM::WINDOWS::ToW;
+  auto strDllNameW = ToW(strDllName);
+  HMODULE handle = GetModuleHandle(strDllNameW.c_str());
+  if(handle == nullptr)
   {
-    handle = LoadLibrary(strDllName);
+    handle = LoadLibrary(strDllNameW.c_str());
   }
-  if(handle != NULL)
+  if(handle != nullptr)
   {
-    uintptr_t pGNSI = (uintptr_t)GetProcAddress(handle, strFunctionName);
+    auto pGNSI = reinterpret_cast<uintptr_t>(GetProcAddress(handle, strFunctionName));
     if(pGNSI != NULL)
       return pGNSI;
   }

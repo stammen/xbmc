@@ -37,8 +37,9 @@
 #include "interfaces/python/XBPython.h"
 #include "pvr/PVRManager.h"
 
-#if defined(TARGET_WINDOWS)
+#if defined(TARGET_WINDOWS) || defined(TARGET_WIN10)
 #include "platform/win32/WIN32Util.h"
+#include "platform/win32/CharsetConverter.h"
 #endif
 
 #ifdef TARGET_WIN10
@@ -88,7 +89,8 @@ void TestBasicEnvironment::SetUp()
   /* Create a temporary directory and set it to be used throughout the
    * test suite run.
    */
-#if defined(TARGET_WIN10)
+#if defined(TARGET_WINDOWS) || defined(TARGET_WIN10)
+using KODI::PLATFORM::WINDOWS::FromW;
   std::wstring xbmcTempPath;
   TCHAR lpTempPathBuffer[MAX_PATH];
   if (!GetTempPath(MAX_PATH, lpTempPathBuffer))
@@ -99,20 +101,7 @@ void TestBasicEnvironment::SetUp()
   DeleteFile(lpTempPathBuffer);
   if (!CreateDirectory(lpTempPathBuffer, NULL))
     SetUpError();
-  std::string tmp =  FromW(lpTempPathBuffer, wcslen(lpTempPathBuffer));
-  CSpecialProtocol::SetTempPath(tmp);
-#elif defined(TARGET_WINDOWS)
-  std::string xbmcTempPath;
-  TCHAR lpTempPathBuffer[MAX_PATH];
-  if (!GetTempPath(MAX_PATH, lpTempPathBuffer))
-    SetUpError();
-  xbmcTempPath = lpTempPathBuffer;
-  if (!GetTempFileName(xbmcTempPath.c_str(), "xbmctempdir", 0, lpTempPathBuffer))
-    SetUpError();
-  DeleteFile(lpTempPathBuffer);
-  if (!CreateDirectory(lpTempPathBuffer, NULL))
-    SetUpError();
-  CSpecialProtocol::SetTempPath(lpTempPathBuffer);
+  CSpecialProtocol::SetTempPath(FromW(lpTempPathBuffer));
 #else
   char buf[MAX_PATH];
   char *tmp;
