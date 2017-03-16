@@ -1,0 +1,206 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Common">
+      <UniqueIdentifier>1f148ed3-c0c1-4bf9-a261-7401b5bc32d2</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Assets">
+      <UniqueIdentifier>8a697ded-4169-4c5e-9cfc-1bb6708c85a0</UniqueIdentifier>
+      <Extensions>bmp;fbx;gif;jpg;jpeg;tga;tiff;tif;png</Extensions>
+    </Filter>
+    <Filter Include="Binaries">
+      <Extensions>dll;</Extensions>
+    </Filter>
+    <Filter Include="Content">
+      <UniqueIdentifier>01ab675b-28bc-4603-8662-aa1c3a27ce51</UniqueIdentifier>
+    </Filter>
+    <ClInclude Include="Common\DirectXHelper.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\StepTimer.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\DeviceResources.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClCompile Include="Common\DeviceResources.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+    <ClInclude Include="Content\Sample3DSceneRenderer.h">
+      <Filter>Content</Filter>
+    </ClInclude>
+    <ClInclude Include="Content\SampleFpsTextRenderer.h">
+      <Filter>Content</Filter>
+    </ClInclude>
+    <ClInclude Include="Content\ShaderStructures.h">
+      <Filter>Content</Filter>
+    </ClInclude>
+    <ClCompile Include="Content\Sample3DSceneRenderer.cpp">
+      <Filter>Content</Filter>
+    </ClCompile>
+    <ClCompile Include="Content\SampleFpsTextRenderer.cpp">
+      <Filter>Content</Filter>
+    </ClCompile>
+    <FxCompile Include="Content\SamplePixelShader.hlsl">
+      <Filter>Content</Filter>
+    </FxCompile>
+    <FxCompile Include="Content\SampleVertexShader.hlsl">
+      <Filter>Content</Filter>
+    </FxCompile>
+    <Image Include="Assets\LockScreenLogo.scale-200.png">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Assets\SplashScreen.scale-200.png">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Assets\Square150x150Logo.scale-200.png">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Assets\Square44x44Logo.scale-200.png">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Assets\Square44x44Logo.targetsize-24_altform-unplated.png">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Assets\Wide310x150Logo.scale-200.png">
+      <Filter>Assets</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <ApplicationDefinition Include="App.xaml" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="App.xaml.cpp" />
+    <ClCompile Include="kodi_win10Main.cpp" />
+    <ClCompile Include="DirectXPage.xaml.cpp" />
+    <ClCompile Include="pch.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="App.xaml.h" />
+    <ClInclude Include="kodi_win10Main.h" />
+    <ClInclude Include="DirectXPage.xaml.h" />
+    <ClInclude Include="pch.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="Assets\StoreLogo.png">
+      <Filter>Assets</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <AppxManifest Include="Package.appxmanifest" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="kodi-win10_TemporaryKey.pfx" />
+    <None Include="$(BinPath)freetyped.dll">
+      <Filter>Binaries</Filter>
+    </None>
+    <None Include="$(BinPath)libnfsd.dll">
+      <Filter>Binaries</Filter>
+    </None>
+    <None Include="$(BinPath)pcred.dll">
+      <Filter>Binaries</Filter>
+    </None>
+    <None Include="$(BinPath)pcre32d.dll">
+      <Filter>Binaries</Filter>
+    </None>
+    <None Include="$(BinPath)pcrecppd.dll">
+      <Filter>Binaries</Filter>
+    </None>
+    <None Include="$(BinPath)pcreposixd.dll">
+      <Filter>Binaries</Filter>
+    </None>
+    <None Include="$(BinPath)zlibd1.dll">
+      <Filter>Binaries</Filter>
+    </None>
+    <None Include="$(BinPath)avcodec-57.dll">
+      <Filter>Binaries</Filter>
+    </None>
+    <None Include="$(BinPath)avdevice-57.dll">
+      <Filter>Binaries</Filter>
+    </None>
+    <None Include="$(BinPath)avfilter-6.dll">
+      <Filter>Binaries</Filter>
+    </None>
+    <None Include="$(BinPath)avformat-57.dll">
+      <Filter>Binaries</Filter>
+    </None>
+    <None Include="$(BinPath)avutil-55.dll">
+      <Filter>Binaries</Filter>
+    </None>
+    <None Include="$(BinPath)expat.dll">
+      <Filter>Binaries</Filter>
+    </None>
+    <None Include="$(BinPath)fontconfig.dll">
+      <Filter>Binaries</Filter>
+    </None>
+    <None Include="$(BinPath)fribidi.dll">
+      <Filter>Binaries</Filter>
+    </None>
+    <None Include="$(BinPath)harfbuzz-vs14.dll">
+      <Filter>Binaries</Filter>
+    </None>
+    <None Include="$(BinPath)libass.dll">
+      <Filter>Binaries</Filter>
+    </None>
+    <None Include="$(BinPath)libbz2.dll">
+      <Filter>Binaries</Filter>
+    </None>
+    <None Include="$(BinPath)libcharset.dll">
+      <Filter>Binaries</Filter>
+    </None>
+    <None Include="$(BinPath)libeay32.dll">
+      <Filter>Binaries</Filter>
+    </None>
+    <None Include="$(BinPath)libiconv.dll">
+      <Filter>Binaries</Filter>
+    </None>
+    <None Include="$(BinPath)libmicrohttpd.dll">
+      <Filter>Binaries</Filter>
+    </None>
+    <None Include="$(BinPath)libxml2.dll">
+      <Filter>Binaries</Filter>
+    </None>
+    <None Include="$(BinPath)libxslt.dll">
+      <Filter>Binaries</Filter>
+    </None>
+    <None Include="$(BinPath)postproc-54.dll">
+      <Filter>Binaries</Filter>
+    </None>
+    <None Include="$(BinPath)sqlite3.dll">
+      <Filter>Binaries</Filter>
+    </None>
+    <None Include="$(BinPath)ssh.dll">
+      <Filter>Binaries</Filter>
+    </None>
+    <None Include="$(BinPath)ssleay32.dll">
+      <Filter>Binaries</Filter>
+    </None>
+    <None Include="$(BinPath)swresample-2.dll">
+      <Filter>Binaries</Filter>
+    </None>
+    <None Include="$(BinPath)swscale-4.dll">
+      <Filter>Binaries</Filter>
+    </None>
+    <None Include="$(BinPath)tag.dll">
+      <Filter>Binaries</Filter>
+    </None>
+    <None Include="$(BinPath)tag_c.dll">
+      <Filter>Binaries</Filter>
+    </None>
+    <None Include="$(BinPath)tinyxmlSTL.dll">
+      <Filter>Binaries</Filter>
+    </None>
+    <None Include="$(BinPath)libcurl.dll">
+      <Filter>Binaries</Filter>
+    </None>
+    <None Include="$(BinPath)libssh2.dll">
+      <Filter>Binaries</Filter>
+    </None>
+    <None Include="..\..\Win32BuildSetup\dependencies\python27.dll">
+      <Filter>Binaries</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Include="DirectXPage.xaml" />
+  </ItemGroup>
+</Project>
