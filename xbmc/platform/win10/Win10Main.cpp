@@ -30,6 +30,16 @@
 #include <dbghelp.h>
 #include <shellapi.h>
 
+#include"Win10Main.h"
+
+
+extern "C"
+{
+  DECLDIR int Add(int a, int b)
+  {
+    return(a + b);
+  }
+}
 
 extern "C" int main(int argc, char* argv[]);
 

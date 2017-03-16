@@ -109,7 +109,7 @@ list(APPEND DEPLIBS ${CMAKE_THREAD_LIBS_INIT})
 # Required dependencies
 set(required_deps Sqlite3 FreeType PCRE Cpluff LibDvd
                   TinyXML Yajl Cdio Fmt
-                  Lzo2 Fribidi TagLib FFMPEG CrossGUID)
+                  Lzo2 Fribidi TagLib FFMPEG CrossGUID iconv)
 if(NOT WIN32)
   list(APPEND required_deps ZLIB)
 else()
@@ -118,6 +118,13 @@ endif()
 if(CORE_SYSTEM_NAME STREQUAL android)
   list(APPEND required_deps Zip)
 endif()
+if(CORE_SYSTEM_NAME STREQUAL windowsstore)
+  #this seems to be missing from the above required_deps list!
+  list(APPEND required_deps iconv)
+  #uses header only version of Fmt
+  list(REMOVE_ITEM required_deps Fmt)
+endif()
+
 
 # Optional dependencies
 set(optional_deps MicroHttpd MySqlClient SSH XSLT
@@ -278,9 +285,11 @@ mark_as_advanced(test_sources)
 add_subdirectory(${CMAKE_SOURCE_DIR}/lib/gtest ${CORE_BUILD_DIR}/gtest EXCLUDE_FROM_ALL)
 set_target_properties(gtest PROPERTIES FOLDER "External Projects")
 
-# copy files to build tree
-copy_files_from_filelist_to_buildtree(${CMAKE_SOURCE_DIR}/cmake/installdata/common/*.txt
-                                      ${CMAKE_SOURCE_DIR}/cmake/installdata/${CORE_SYSTEM_NAME}/*.txt)
+if(NOT CORE_SYSTEM_NAME STREQUAL windowsstore)
+  # copy files to build tree
+  copy_files_from_filelist_to_buildtree(${CMAKE_SOURCE_DIR}/cmake/installdata/common/*.txt
+                                        ${CMAKE_SOURCE_DIR}/cmake/installdata/${CORE_SYSTEM_NAME}/*.txt)
+endif()
 
 list(APPEND SKINS "${CMAKE_SOURCE_DIR}/addons/skin.estuary\;${CMAKE_SOURCE_DIR}")
 list(APPEND SKINS "${CMAKE_SOURCE_DIR}/addons/skin.estouchy\;${CMAKE_SOURCE_DIR}")

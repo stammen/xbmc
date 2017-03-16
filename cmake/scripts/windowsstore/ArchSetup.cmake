@@ -1,7 +1,12 @@
 # -------- Architecture settings ---------
 
-set(ARCH win32)
-
+if(CMAKE_SIZEOF_VOID_P EQUAL 4)
+  set(ARCH win32)
+  set(SDK_TARGET_ARCH x86)
+elseif(CMAKE_SIZEOF_VOID_P EQUAL 8)
+  set(ARCH x64)
+  set(SDK_TARGET_ARCH x64)
+endif()
 
 # -------- Paths (mainly for find_package) ---------
 
@@ -13,11 +18,11 @@ set(PRECOMPILEDHEADER_DIR ${PROJECT_BINARY_DIR}/${CORE_BUILD_CONFIG}/objs)
 set(CMAKE_SYSTEM_NAME WindowsStore)
 set(CORE_SYSTEM_NAME "windowsstore")
 
-list(APPEND CMAKE_SYSTEM_PREFIX_PATH ${CMAKE_SOURCE_DIR}/lib/win32)
-list(APPEND CMAKE_SYSTEM_PREFIX_PATH ${CMAKE_SOURCE_DIR}/lib/win32/ffmpeg)
-list(APPEND CMAKE_SYSTEM_LIBRARY_PATH ${CMAKE_SOURCE_DIR}/lib/win32/ffmpeg/bin)
+list(APPEND CMAKE_SYSTEM_PREFIX_PATH ${CMAKE_SOURCE_DIR}/project/win10/vcpkg/installed/${SDK_TARGET_ARCH}-uwp)
+list(APPEND CMAKE_SYSTEM_PREFIX_PATH ${CMAKE_SOURCE_DIR}/project/win10/vcpkg/installed/${SDK_TARGET_ARCH}-uwp/debug)
 list(APPEND CMAKE_SYSTEM_PREFIX_PATH ${CMAKE_SOURCE_DIR}/project/BuildDependencies)
 
+message(****CMAKE_SYSTEM_PREFIX_PATH:${CMAKE_SYSTEM_PREFIX_PATH})
 set(PYTHON_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/project/BuildDependencies/include/python)
 
 
@@ -27,7 +32,7 @@ add_options(CXX ALL_BUILDS "/wd\"4996\"")
 add_options(CXX ALL_BUILDS "/wd\"4146\"")
 set(ARCH_DEFINES -D_WINDOWS -DTARGET_WIN10 -DMS_UWP -D__SSE__ -D__SSE2__)
 set(SYSTEM_DEFINES -DNOMINMAX -D_USE_32BIT_TIME_T -DHAS_DX -D__STDC_CONSTANT_MACROS
-                   -DTAGLIB_STATIC -DNPT_CONFIG_ENABLE_LOGGING
+                   -DFMT_HEADER_ONLY -DNPT_CONFIG_ENABLE_LOGGING
                    -DPLT_HTTP_DEFAULT_USER_AGENT="UPnP/1.0 DLNADOC/1.50 Kodi"
                    -DPLT_HTTP_DEFAULT_SERVER="UPnP/1.0 DLNADOC/1.50 Kodi"
                    $<$<CONFIG:Debug>:-DD3D_DEBUG_INFO -D_ITERATOR_DEBUG_LEVEL=0>)

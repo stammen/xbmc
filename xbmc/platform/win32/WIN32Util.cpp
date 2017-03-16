@@ -45,9 +45,9 @@
 #include "CompileInfo.h"
 #include "platform/win32/CharsetConverter.h"
 
+#ifndef TARGET_WIN10
 #include <cassert>
-
-
+#endif
 #include <locale.h>
 
 #ifndef TARGET_WIN10
