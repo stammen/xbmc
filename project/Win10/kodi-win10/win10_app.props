@@ -3,7 +3,7 @@
   <ImportGroup Label="PropertySheets" />
   <PropertyGroup Label="APP_DLLS">
     <BuildDependenciesPath Condition="">$(ProjectDir)..\vcpkg\installed\$(PlatformTarget)-uwp\BuildDependencies\bin\</BuildDependenciesPath>
-    <BinPath Condition="'$(Configuration)'=='Release'">$(ProjectDir)..\vcpkg\installed\$(PlatformTarget)-uwp\bin\</BinPath>
+    <BinPath Condition="">$(ProjectDir)..\vcpkg\installed\$(PlatformTarget)-uwp\bin\</BinPath>
   </PropertyGroup>
 
   <ItemGroup Label="Binaries">
@@ -107,9 +107,6 @@
       <DeploymentContent>true</DeploymentContent>
     </None>
     <None Include="$(BinPath)tag_c.dll">
-      <DeploymentContent>true</DeploymentContent>
-    </None>
-    <None Include="$(BinPath)tinyxmlSTL.dll">
       <DeploymentContent>true</DeploymentContent>
     </None>
 

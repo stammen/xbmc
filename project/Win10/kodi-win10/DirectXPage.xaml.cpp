@@ -125,7 +125,8 @@ void DirectXPage::OnVisibilityChanged(CoreWindow^ sender, VisibilityChangedEvent
 	if (m_windowVisible)
 	{
 		m_main->StartRenderLoop();
-    int foo = Add(2, 2);
+        int foo = KodiAdd(2, 2);
+        foo += 2;
 	}
 	else
 	{

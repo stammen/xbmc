@@ -8,7 +8,7 @@
 
 extern "C"
 {
-  DECLDIR int Add(int a, int b);
+  DECLDIR int KodiAdd(int a, int b);
 }
 
 

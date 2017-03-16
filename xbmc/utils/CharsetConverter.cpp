@@ -54,7 +54,7 @@
   #define UTF32_CHARSET "UTF-32" ENDIAN_SUFFIX
   #define UTF8_SOURCE "UTF-8"
   #define WCHAR_CHARSET UTF16_CHARSET 
-  #if _DEBUG
+  #if _DEBUG && !defined(TARGET_WIN10)
     #pragma comment(lib, "libiconvd.lib")
   #else
     #pragma comment(lib, "libiconv.lib")

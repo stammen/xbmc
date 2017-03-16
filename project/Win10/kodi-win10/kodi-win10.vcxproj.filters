@@ -91,27 +91,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="kodi-win10_TemporaryKey.pfx" />
-    <None Include="$(BinPath)freetyped.dll">
-      <Filter>Binaries</Filter>
-    </None>
-    <None Include="$(BinPath)libnfsd.dll">
-      <Filter>Binaries</Filter>
-    </None>
-    <None Include="$(BinPath)pcred.dll">
-      <Filter>Binaries</Filter>
-    </None>
-    <None Include="$(BinPath)pcre32d.dll">
-      <Filter>Binaries</Filter>
-    </None>
-    <None Include="$(BinPath)pcrecppd.dll">
-      <Filter>Binaries</Filter>
-    </None>
-    <None Include="$(BinPath)pcreposixd.dll">
-      <Filter>Binaries</Filter>
-    </None>
-    <None Include="$(BinPath)zlibd1.dll">
-      <Filter>Binaries</Filter>
-    </None>
     <None Include="$(BinPath)avcodec-57.dll">
       <Filter>Binaries</Filter>
     </None>
@@ -187,9 +166,6 @@
     <None Include="$(BinPath)tag_c.dll">
       <Filter>Binaries</Filter>
     </None>
-    <None Include="$(BinPath)tinyxmlSTL.dll">
-      <Filter>Binaries</Filter>
-    </None>
     <None Include="$(BinPath)libcurl.dll">
       <Filter>Binaries</Filter>
     </None>
@@ -197,6 +173,27 @@
       <Filter>Binaries</Filter>
     </None>
     <None Include="..\..\Win32BuildSetup\dependencies\python27.dll">
+      <Filter>Binaries</Filter>
+    </None>
+    <None Include="$(BinPath)freetype.dll">
+      <Filter>Binaries</Filter>
+    </None>
+    <None Include="$(BinPath)libnfs.dll">
+      <Filter>Binaries</Filter>
+    </None>
+    <None Include="$(BinPath)pcre.dll">
+      <Filter>Binaries</Filter>
+    </None>
+    <None Include="$(BinPath)pcre32.dll">
+      <Filter>Binaries</Filter>
+    </None>
+    <None Include="$(BinPath)pcrecpp.dll">
+      <Filter>Binaries</Filter>
+    </None>
+    <None Include="$(BinPath)pcreposix.dll">
+      <Filter>Binaries</Filter>
+    </None>
+    <None Include="$(BinPath)zlib1.dll">
       <Filter>Binaries</Filter>
     </None>
   </ItemGroup>

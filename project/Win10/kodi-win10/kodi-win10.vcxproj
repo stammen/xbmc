@@ -111,7 +111,7 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
     <Link>
-      <AdditionalDependencies>d2d1.lib;d3d11.lib;dxgi.lib;windowscodecs.lib;Iphlpapi.lib;WS2_32.lib;dwrite.lib;dloadhelper.lib;crossguid.lib;sqlite3.lib;freetyped.lib;pcrecppd.lib;pcred.lib;tinyxmlstld.lib;yajld.lib;lzo2.lib;fribidi.lib;tagd.lib;avcodec.lib;avfilter.lib;avformat.lib;avutil.lib;swscale.lib;swresample.lib;postproc.lib;libiconvd.lib;libmicrohttpd.lib;ssh.lib;libxslt.lib;libxml2.lib;zlibd.lib;C:\Python27\libs\python27.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>d2d1.lib;d3d11.lib;dxgi.lib;windowscodecs.lib;Iphlpapi.lib;WS2_32.lib;dwrite.lib;dloadhelper.lib;crossguid.lib;sqlite3.lib;freetyped.lib;pcrecppd.lib;pcred.lib;yajld.lib;lzo2.lib;fribidi.lib;tagd.lib;avcodec.lib;avfilter.lib;avformat.lib;avutil.lib;swscale.lib;swresample.lib;postproc.lib;libiconvd.lib;libmicrohttpd.lib;ssh.lib;libxslt.lib;libxml2.lib;zlibd.lib;C:\Python27\libs\python27.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(ProjectDir)..\vcpkg\installed\$(PlatformTarget)-uwp\debug\lib;%(AdditionalLibraryDirectories); $(VCInstallDir)\lib\store\arm; $(VCInstallDir)\lib\arm</AdditionalLibraryDirectories>
       <IgnoreSpecificDefaultLibraries>libcmt;msvcrt;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
       <DelayLoadDLLs>libkodi.dll</DelayLoadDLLs>
@@ -142,8 +142,8 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Link>
-      <AdditionalDependencies>d2d1.lib;d3d11.lib;dxgi.lib;windowscodecs.lib;Iphlpapi.lib;WS2_32.lib;dwrite.lib;dloadhelper.lib;crossguid.lib;sqlite3.lib;freetyped.lib;pcrecppd.lib;pcred.lib;tinyxmlstld.lib;yajld.lib;lzo2.lib;fribidi.lib;tagd.lib;avcodec.lib;avfilter.lib;avformat.lib;avutil.lib;swscale.lib;swresample.lib;postproc.lib;libiconvd.lib;libmicrohttpd.lib;ssh.lib;libxslt.lib;libxml2.lib;zlib.lib;C:\Python27\libs\python27.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(ProjectDir)..\vcpkg\installed\$(PlatformTarget)-uwp\debug\lib;D:\GitHub\xbmc\kodi-build\Debug\;%(AdditionalLibraryDirectories);$(VCInstallDir)\lib\store;$(VCInstallDir)\lib</AdditionalLibraryDirectories>
+      <AdditionalDependencies>d2d1.lib;d3d11.lib;dxgi.lib;windowscodecs.lib;Iphlpapi.lib;WS2_32.lib;dwrite.lib;dloadhelper.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(ProjectDir)..\..\..\kodi-build\$(Configuration);%(AdditionalLibraryDirectories);$(VCInstallDir)\lib\store;$(VCInstallDir)\lib</AdditionalLibraryDirectories>
       <IgnoreSpecificDefaultLibraries>libcmt;msvcrt;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
       <DelayLoadDLLs>
       </DelayLoadDLLs>
@@ -160,7 +160,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <Link>
       <AdditionalDependencies>d2d1.lib;d3d11.lib;dxgi.lib;windowscodecs.lib;dwrite.lib;C:\Python27\libs\python27.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories); $(VCInstallDir)\lib\store; $(VCInstallDir)\lib</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(ProjectDir)..\..\..\kodi-build\$(Configuration);%(AdditionalLibraryDirectories); $(VCInstallDir)\lib\store; $(VCInstallDir)\lib</AdditionalLibraryDirectories>
       <DelayLoadDLLs>libkodi.dll</DelayLoadDLLs>
     </Link>
     <ClCompile>
@@ -174,7 +174,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <Link>
-      <AdditionalDependencies>d2d1.lib;d3d11.lib;dxgi.lib;windowscodecs.lib;Iphlpapi.lib;WS2_32.lib;dwrite.lib;dloadhelper.lib;crossguid.lib;sqlite3.lib;freetyped.lib;pcrecppd.lib;pcred.lib;tinyxmlstld.lib;yajld.lib;lzo2.lib;fribidi.lib;tagd.lib;avcodec.lib;avfilter.lib;avformat.lib;avutil.lib;swscale.lib;swresample.lib;postproc.lib;libiconvd.lib;libmicrohttpd.lib;ssh.lib;libxslt.lib;libxml2.lib;zlibd.lib;C:\Python27\libs\python27.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>d2d1.lib;d3d11.lib;dxgi.lib;windowscodecs.lib;Iphlpapi.lib;WS2_32.lib;dwrite.lib;dloadhelper.lib;crossguid.lib;sqlite3.lib;freetyped.lib;pcrecppd.lib;pcred.lib;yajld.lib;lzo2.lib;fribidi.lib;tagd.lib;avcodec.lib;avfilter.lib;avformat.lib;avutil.lib;swscale.lib;swresample.lib;postproc.lib;libiconvd.lib;libmicrohttpd.lib;ssh.lib;libxslt.lib;libxml2.lib;zlibd.lib;C:\Python27\libs\python27.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(ProjectDir)..\vcpkg\installed\$(PlatformTarget)-uwp\debug\lib;%(AdditionalLibraryDirectories); $(VCInstallDir)\lib\store\amd64; $(VCInstallDir)\lib\amd64</AdditionalLibraryDirectories>
       <IgnoreSpecificDefaultLibraries>libcmt;msvcrt;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
       <DelayLoadDLLs>libkodi.dll</DelayLoadDLLs>
