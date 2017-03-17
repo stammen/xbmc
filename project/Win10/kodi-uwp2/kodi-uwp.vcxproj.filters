@@ -1,0 +1,152 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Common">
+      <UniqueIdentifier>634e3808-9691-4539-9bc9-81611a1afe3c</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Assets">
+      <UniqueIdentifier>da574325-4c1a-48e8-a0cc-6a838987c92d</UniqueIdentifier>
+      <Extensions>bmp;fbx;gif;jpg;jpeg;tga;tiff;tif;png</Extensions>
+    </Filter>
+    <Filter Include="Content">
+      <UniqueIdentifier>32159588-2d73-4e62-95f1-3dca7c88c540</UniqueIdentifier>
+    </Filter>
+    <ClInclude Include="Common\DirectXHelper.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\StepTimer.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\DeviceResources.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClCompile Include="Common\DeviceResources.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+    <ClInclude Include="Content\Sample3DSceneRenderer.h">
+      <Filter>Content</Filter>
+    </ClInclude>
+    <ClInclude Include="Content\SampleFpsTextRenderer.h">
+      <Filter>Content</Filter>
+    </ClInclude>
+    <ClInclude Include="Content\ShaderStructures.h">
+      <Filter>Content</Filter>
+    </ClInclude>
+    <ClCompile Include="Content\Sample3DSceneRenderer.cpp">
+      <Filter>Content</Filter>
+    </ClCompile>
+    <ClCompile Include="Content\SampleFpsTextRenderer.cpp">
+      <Filter>Content</Filter>
+    </ClCompile>
+    <FxCompile Include="Content\SamplePixelShader.hlsl">
+      <Filter>Content</Filter>
+    </FxCompile>
+    <FxCompile Include="Content\SampleVertexShader.hlsl">
+      <Filter>Content</Filter>
+    </FxCompile>
+    <Image Include="Assets\LockScreenLogo.scale-200.png">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Assets\SplashScreen.scale-200.png">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Assets\Square150x150Logo.scale-200.png">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Assets\Square44x44Logo.scale-200.png">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Assets\Square44x44Logo.targetsize-24_altform-unplated.png">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Assets\Wide310x150Logo.scale-200.png">
+      <Filter>Assets</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <ApplicationDefinition Include="App.xaml" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="App.xaml.cpp" />
+    <ClCompile Include="DirectXPage.xaml.cpp" />
+    <ClCompile Include="pch.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="App.xaml.h" />
+    <ClInclude Include="DirectXPage.xaml.h" />
+    <ClInclude Include="pch.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="Assets\StoreLogo.png">
+      <Filter>Assets</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <AppxManifest Include="Package.appxmanifest" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="kodi-uwp_TemporaryKey.pfx" />
+    <None Include="..\..\..\system\python\DLLs\_bsddb.pyd" />
+    <None Include="..\..\..\system\python\DLLs\_ctypes.pyd" />
+    <None Include="..\..\..\system\python\DLLs\_elementtree.pyd" />
+    <None Include="..\..\..\system\python\DLLs\_hashlib.pyd" />
+    <None Include="..\..\..\system\python\DLLs\_msi.pyd" />
+    <None Include="..\..\..\system\python\DLLs\_multiprocessing.pyd" />
+    <None Include="..\..\..\system\python\DLLs\_socket.pyd" />
+    <None Include="..\..\..\system\python\DLLs\_sqlite3.pyd" />
+    <None Include="..\..\..\system\python\DLLs\_ssl.pyd" />
+    <None Include="..\..\..\system\python\DLLs\bz2.pyd" />
+    <None Include="..\..\..\system\python\DLLs\pyexpat.pyd" />
+    <None Include="..\..\..\system\python\DLLs\select.pyd" />
+    <None Include="..\..\..\system\python\DLLs\unicodedata.pyd" />
+    <None Include="..\..\Win32BuildSetup\dependencies\python27.dll" />
+    <None Include="..\..\..\system\libdvdnav.dll" />
+    <None Include="..\..\..\system\libdvdcss-2.dll" />
+    <None Include="..\..\..\system\cpluff.dll" />
+    <None Include="..\..\..\system\cec.dll" />
+    <None Include="..\..\..\system\libmysql.dll" />
+    <None Include="..\..\..\system\shairplay.dll" />
+    <None Include="..\..\..\system\libcdio.dll" />
+    <None Include="..\..\..\system\libbluray.dll" />
+    <None Include="..\..\..\system\zlib.dll" />
+    <None Include="..\..\..\system\dnssd.dll" />
+    <None Include="$(BinPath)avcodec-57.dll" />
+    <None Include="$(BinPath)avdevice-57.dll" />
+    <None Include="$(BinPath)avfilter-6.dll" />
+    <None Include="$(BinPath)avformat-57..dll" />
+    <None Include="$(BinPath)avutil-55.dll" />
+    <None Include="$(BinPath)expat.dll" />
+    <None Include="$(BinPath)fontconfig.dll" />
+    <None Include="$(BinPath)freetype.dll" />
+    <None Include="$(BinPath)fribidi.dll" />
+    <None Include="$(BinPath)harfbuzz-vs14.dll" />
+    <None Include="$(BinPath)libass.dll" />
+    <None Include="$(BinPath)libbz2.dll" />
+    <None Include="$(BinPath)libcharset.dll" />
+    <None Include="$(BinPath)libcurl.dll" />
+    <None Include="$(BinPath)libeay32.dll" />
+    <None Include="$(BinPath)libiconv.dll" />
+    <None Include="$(BinPath)libmicrohttpd.dll" />
+    <None Include="$(BinPath)libnfs.dll" />
+    <None Include="$(BinPath)libplist.dll" />
+    <None Include="$(BinPath)libxml2.dll" />
+    <None Include="$(BinPath)libxslt.dll" />
+    <None Include="$(BinPath)pcre.dll" />
+    <None Include="$(BinPath)pcre32.dll" />
+    <None Include="$(BinPath)pcrecpp.dll" />
+    <None Include="$(BinPath)pcreposix.dll" />
+    <None Include="$(BinPath)postproc-54.dll" />
+    <None Include="$(BinPath)sqlite3.dll" />
+    <None Include="$(BinPath)ssh.dll" />
+    <None Include="$(BinPath)ssleay32.dll" />
+    <None Include="$(BinPath)swresample-2.dll" />
+    <None Include="$(BinPath)swscale-4.dll" />
+    <None Include="$(BinPath)tag.dll" />
+    <None Include="$(BinPath)tag_c.dll" />
+    <None Include="$(BinPath)tinyxmlSTL.dll" />
+    <None Include="$(BinPath)zlib1.dll" />
+  </ItemGroup>
+  <ItemGroup>
+    <Page Include="DirectXPage.xaml" />
+  </ItemGroup>
+</Project>

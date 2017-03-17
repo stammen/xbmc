@@ -2,31 +2,10 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ImportGroup Label="PropertySheets" />
   <PropertyGroup Label="APP_DLLS">
-    <BuildDependenciesPath Condition="">$(ProjectDir)..\vcpkg\installed\$(PlatformTarget)-uwp\BuildDependencies\bin\</BuildDependenciesPath>
-    <BinPath Condition="">$(ProjectDir)..\vcpkg\installed\$(PlatformTarget)-uwp\bin\</BinPath>
+    <BinPath Condition="'$(Configuration)'=='Debug'">$(ProjectDir)..\vcpkg\installed\x86-uwp\debug\bin\</BinPath>
+    <BinPath Condition="'$(Configuration)'=='Release'">$(ProjectDir)..\vcpkg\installed\x86-uwp\bin\</BinPath>
   </PropertyGroup>
-  <ItemGroup Label="Binaries">
-    <None Include="$(BinPath)freetype.dll">
-      <DeploymentContent>true</DeploymentContent>
-    </None>
-    <None Include="$(BinPath)libnfs.dll">
-      <DeploymentContent>true</DeploymentContent>
-    </None>
-    <None Include="$(BinPath)pcre.dll">
-      <DeploymentContent>true</DeploymentContent>
-    </None>
-    <None Include="$(BinPath)pcre32.dll">
-      <DeploymentContent>true</DeploymentContent>
-    </None>
-    <None Include="$(BinPath)pcrecpp.dll">
-      <DeploymentContent>true</DeploymentContent>
-    </None>
-    <None Include="$(BinPath)pcreposix.dll">
-      <DeploymentContent>true</DeploymentContent>
-    </None>
-    <None Include="$(BinPath)zlib1.dll">
-      <DeploymentContent>true</DeploymentContent>
-    </None>
+  <ItemGroup Label="ANGLE">
     <None Include="$(BinPath)avcodec-57.dll">
       <DeploymentContent>true</DeploymentContent>
     </None>
@@ -36,7 +15,7 @@
     <None Include="$(BinPath)avfilter-6.dll">
       <DeploymentContent>true</DeploymentContent>
     </None>
-    <None Include="$(BinPath)avformat-57.dll">
+    <None Include="$(BinPath)avformat-57..dll">
       <DeploymentContent>true</DeploymentContent>
     </None>
     <None Include="$(BinPath)avutil-55.dll">
@@ -46,6 +25,9 @@
       <DeploymentContent>true</DeploymentContent>
     </None>
     <None Include="$(BinPath)fontconfig.dll">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="$(BinPath)freetype.dll">
       <DeploymentContent>true</DeploymentContent>
     </None>
     <None Include="$(BinPath)fribidi.dll">
@@ -75,10 +57,28 @@
     <None Include="$(BinPath)libmicrohttpd.dll">
       <DeploymentContent>true</DeploymentContent>
     </None>
+    <None Include="$(BinPath)libnfs.dll">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="$(BinPath)libplist.dll">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
     <None Include="$(BinPath)libxml2.dll">
       <DeploymentContent>true</DeploymentContent>
     </None>
     <None Include="$(BinPath)libxslt.dll">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="$(BinPath)pcre.dll">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="$(BinPath)pcre32.dll">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="$(BinPath)pcrecpp.dll">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="$(BinPath)pcreposix.dll">
       <DeploymentContent>true</DeploymentContent>
     </None>
     <None Include="$(BinPath)postproc-54.dll">
@@ -103,6 +103,12 @@
       <DeploymentContent>true</DeploymentContent>
     </None>
     <None Include="$(BinPath)tag_c.dll">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="$(BinPath)tinyxmlSTL.dll">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="$(BinPath)zlib1.dll">
       <DeploymentContent>true</DeploymentContent>
     </None>
 </ItemGroup>
