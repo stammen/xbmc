@@ -5,7 +5,6 @@
     <BuildDependenciesPath Condition="">$(ProjectDir)..\vcpkg\installed\$(PlatformTarget)-uwp\BuildDependencies\bin\</BuildDependenciesPath>
     <BinPath Condition="">$(ProjectDir)..\vcpkg\installed\$(PlatformTarget)-uwp\bin\</BinPath>
   </PropertyGroup>
-
   <ItemGroup Label="Binaries">
     <None Include="$(BinPath)freetype.dll">
       <DeploymentContent>true</DeploymentContent>
@@ -79,9 +78,6 @@
     <None Include="$(BinPath)libxml2.dll">
       <DeploymentContent>true</DeploymentContent>
     </None>
-    <None Include="$(BinPath)libssh2.dll">
-      <DeploymentContent>true</DeploymentContent>
-    </None>
     <None Include="$(BinPath)libxslt.dll">
       <DeploymentContent>true</DeploymentContent>
     </None>
@@ -109,6 +105,5 @@
     <None Include="$(BinPath)tag_c.dll">
       <DeploymentContent>true</DeploymentContent>
     </None>
-
 </ItemGroup>
 </Project>
