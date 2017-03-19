@@ -20,6 +20,7 @@ set(CORE_SYSTEM_NAME "windowsstore")
 
 list(APPEND CMAKE_SYSTEM_PREFIX_PATH ${CMAKE_SOURCE_DIR}/project/win10/vcpkg/installed/${SDK_TARGET_ARCH}-uwp)
 list(APPEND CMAKE_SYSTEM_PREFIX_PATH ${CMAKE_SOURCE_DIR}/project/win10/vcpkg/BuildDependencies)
+list(APPEND CMAKE_SYSTEM_PREFIX_PATH ${CMAKE_SOURCE_DIR}/project/win10/vcpkg/installed/${SDK_TARGET_ARCH}-uwp/debug)
 
 message(****CMAKE_SYSTEM_PREFIX_PATH:${CMAKE_SYSTEM_PREFIX_PATH})
 set(PYTHON_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/project/BuildDependencies/include/python)
@@ -31,7 +32,7 @@ add_options(CXX ALL_BUILDS "/wd\"4996\"")
 add_options(CXX ALL_BUILDS "/wd\"4146\"")
 set(ARCH_DEFINES -D_WINDOWS -DTARGET_WIN10 -DXBMC_EXPORT -DMS_UWP -D__SSE__ -D__SSE2__)
 set(SYSTEM_DEFINES -DNOMINMAX -D_USE_32BIT_TIME_T -DHAS_DX -D__STDC_CONSTANT_MACROS
-                   -DFMT_HEADER_ONLY -DNPT_CONFIG_ENABLE_LOGGING
+                   -DFMT_HEADER_ONLY -DTAGLIB_STATIC -DNPT_CONFIG_ENABLE_LOGGING
                    -DPLT_HTTP_DEFAULT_USER_AGENT="UPnP/1.0 DLNADOC/1.50 Kodi"
                    -DPLT_HTTP_DEFAULT_SERVER="UPnP/1.0 DLNADOC/1.50 Kodi"
                    $<$<CONFIG:Debug>:-DD3D_DEBUG_INFO -D_ITERATOR_DEBUG_LEVEL=0>)
@@ -49,12 +50,13 @@ set(gtest_force_shared_crt ON CACHE STRING "" FORCE)
 
 # For #pragma comment(lib X)
 # TODO: It would certainly be better to handle these libraries via CMake modules.
-link_directories(${CMAKE_SOURCE_DIR}/project/win10/vcpkg/installed/${SDK_TARGET_ARCH}-uwp/bin
-                 ${CMAKE_SOURCE_DIR}/project/win10/vcpkg/installed/${SDK_TARGET_ARCH}-uwp/BuildDependencies/bin)
+link_directories(${CMAKE_SOURCE_DIR}/project/win10/vcpkg/installed/${SDK_TARGET_ARCH}-uwp/lib
+                 ${CMAKE_SOURCE_DIR}/project/win10/vcpkg/installed/${SDK_TARGET_ARCH}-uwp/debug/lib
+                 ${CMAKE_SOURCE_DIR}/project/win10/vcpkg/installed/${SDK_TARGET_ARCH}-uwp/BuildDependencies/lib)
 
 # Additional libraries
 list(APPEND DEPLIBS d3d11.lib DInput8.lib DSound.lib winmm.lib Mpr.lib Iphlpapi.lib WS2_32.lib
-                    PowrProf.lib setupapi.lib dwmapi.lib yajl.lib dxguid.lib dloadhelper.lib)
+                    PowrProf.lib setupapi.lib dwmapi.lib dxguid.lib dloadhelper.lib)
 
 # NODEFAULTLIB option
 
