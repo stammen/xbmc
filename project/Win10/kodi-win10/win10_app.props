@@ -12,18 +12,6 @@
     <None Include="$(BinPath)libnfs.dll">
       <DeploymentContent>true</DeploymentContent>
     </None>
-    <None Include="$(BinPath)pcre.dll">
-      <DeploymentContent>true</DeploymentContent>
-    </None>
-    <None Include="$(BinPath)pcre32.dll">
-      <DeploymentContent>true</DeploymentContent>
-    </None>
-    <None Include="$(BinPath)pcrecpp.dll">
-      <DeploymentContent>true</DeploymentContent>
-    </None>
-    <None Include="$(BinPath)pcreposix.dll">
-      <DeploymentContent>true</DeploymentContent>
-    </None>
     <None Include="$(BinPath)zlib1.dll">
       <DeploymentContent>true</DeploymentContent>
     </None>
@@ -97,12 +85,6 @@
       <DeploymentContent>true</DeploymentContent>
     </None>
     <None Include="$(BinPath)swscale-4.dll">
-      <DeploymentContent>true</DeploymentContent>
-    </None>
-    <None Include="$(BinPath)tag.dll">
-      <DeploymentContent>true</DeploymentContent>
-    </None>
-    <None Include="$(BinPath)tag_c.dll">
       <DeploymentContent>true</DeploymentContent>
     </None>
 </ItemGroup>

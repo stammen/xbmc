@@ -160,16 +160,7 @@
     <None Include="$(BinPath)swscale-4.dll">
       <Filter>Binaries</Filter>
     </None>
-    <None Include="$(BinPath)tag.dll">
-      <Filter>Binaries</Filter>
-    </None>
-    <None Include="$(BinPath)tag_c.dll">
-      <Filter>Binaries</Filter>
-    </None>
     <None Include="$(BinPath)libcurl.dll">
-      <Filter>Binaries</Filter>
-    </None>
-    <None Include="$(BinPath)libssh2.dll">
       <Filter>Binaries</Filter>
     </None>
     <None Include="..\..\Win32BuildSetup\dependencies\python27.dll">
@@ -179,18 +170,6 @@
       <Filter>Binaries</Filter>
     </None>
     <None Include="$(BinPath)libnfs.dll">
-      <Filter>Binaries</Filter>
-    </None>
-    <None Include="$(BinPath)pcre.dll">
-      <Filter>Binaries</Filter>
-    </None>
-    <None Include="$(BinPath)pcre32.dll">
-      <Filter>Binaries</Filter>
-    </None>
-    <None Include="$(BinPath)pcrecpp.dll">
-      <Filter>Binaries</Filter>
-    </None>
-    <None Include="$(BinPath)pcreposix.dll">
       <Filter>Binaries</Filter>
     </None>
     <None Include="$(BinPath)zlib1.dll">
