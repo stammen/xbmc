@@ -110,7 +110,7 @@ INT WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR commandLine, INT)
 
 #ifndef _DEBUG
   // we don't want to see the "no disc in drive" windows message box
-  SetErrorMode(SEM_FAILCRITICALERRORS | SEM_NOOPENFILEERRORBOX);
+  //SetErrorMode(SEM_FAILCRITICALERRORS | SEM_NOOPENFILEERRORBOX);
 #endif
 
   // Create and run the app
