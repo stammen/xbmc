@@ -1,5 +1,7 @@
 vcpkg/
 cpython/
+system/
+BuildDependencies/
 
 # Ignore thumbnails created by windows
 Thumbs.db

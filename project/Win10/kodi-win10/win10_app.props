@@ -2,10 +2,13 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ImportGroup Label="PropertySheets" />
   <PropertyGroup Label="APP_DLLS">
-    <BuildDependenciesPath Condition="">$(ProjectDir)..\vcpkg\installed\$(PlatformTarget)-uwp\BuildDependencies\bin\</BuildDependenciesPath>
+    <BuildDependenciesPath Condition="">$(ProjectDir)..\BuildDependencies\bin\</BuildDependenciesPath>
     <BinPath Condition="">$(ProjectDir)..\vcpkg\installed\$(PlatformTarget)-uwp\bin\</BinPath>
   </PropertyGroup>
   <ItemGroup Label="Binaries">
+    <None Include="$(BuildDependenciesPath)python27.dll">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
     <None Include="$(BinPath)freetype.dll">
       <DeploymentContent>true</DeploymentContent>
     </None>

@@ -19,7 +19,7 @@ set(CMAKE_SYSTEM_NAME WindowsStore)
 set(CORE_SYSTEM_NAME "windowsstore")
 
 list(APPEND CMAKE_SYSTEM_PREFIX_PATH ${CMAKE_SOURCE_DIR}/project/win10/vcpkg/installed/${SDK_TARGET_ARCH}-uwp)
-list(APPEND CMAKE_SYSTEM_PREFIX_PATH ${CMAKE_SOURCE_DIR}/project/win10/vcpkg/BuildDependencies)
+list(APPEND CMAKE_SYSTEM_PREFIX_PATH ${CMAKE_SOURCE_DIR}/project/win10/BuildDependencies)
 list(APPEND CMAKE_SYSTEM_PREFIX_PATH ${CMAKE_SOURCE_DIR}/project/win10/vcpkg/installed/${SDK_TARGET_ARCH}-uwp/debug)
 
 message(****CMAKE_SYSTEM_PREFIX_PATH:${CMAKE_SYSTEM_PREFIX_PATH})
