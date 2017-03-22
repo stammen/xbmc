@@ -1033,7 +1033,7 @@ bool CApplication::InitDirectoriesOSX()
 
 bool CApplication::InitDirectoriesWin32()
 {
-#ifdef TARGET_WINDOWS
+#if defined(TARGET_WINDOWS) || defined(TARGET_WIN10)
   std::string xbmcPath = CUtil::GetHomePath();
   CEnvironment::setenv("KODI_HOME", xbmcPath);
   CSpecialProtocol::SetXBMCBinPath(xbmcPath);
