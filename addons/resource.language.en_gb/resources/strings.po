@@ -9002,7 +9002,7 @@ msgid "Folder with channel icons"
 msgstr ""
 
 #. label for PVR backend number of channels in system information's PVR section
-#: addons/skin.estuary/xml/DialogPVRGuideOSD.xml
+#: addons/skin.estuary/xml/DialogPVRChannelGuide.xml
 #: addons/skin.estuary/xml/DialogPVRChannelManager.xml
 #: addons/skin.estuary/xml/DialogPVRChannelsOSD.xml
 #: addons/skin.estuary/xml/Variables.xml
@@ -9746,7 +9746,7 @@ msgctxt "#19135"
 msgid "Case sensitive"
 msgstr ""
 
-#. unused?
+#: xbmc/pvr/dialogs/GUIDialogPVRGuideInfo.cpp
 msgctxt "#19136"
 msgid "Channel unavailable"
 msgstr ""
@@ -9957,7 +9957,19 @@ msgctxt "#19172"
 msgid "Instant recording duration"
 msgstr ""
 
-#empty strings from id 19173 to 19174
+#. generic label for 'Live TV channel groups' used in different places
+#: addons/skin.estuary/xml/DialogPVRGroupManager.xml
+#: addons/skin.estuary/xml/Variables.xml
+msgctxt "#19173"
+msgid "TV channel groups"
+msgstr ""
+
+#. generic label for pvr-provided 'Radio channel groups' used in different places
+#: addons/skin.estuary/xml/DialogPVRGroupManager.xml
+#: addons/skin.estuary/xml/Variables.xml
+msgctxt "#19174"
+msgid "Radio channel groups"
+msgstr ""
 
 #. pvr settings "default time to add before the start of an event to record (according to its epg data)" setting label
 #: system/settings/settings.xml
@@ -11241,7 +11253,11 @@ msgctxt "#19685"
 msgid "Confirm shutdown"
 msgstr ""
 
-#empty string with id 19686
+#: Label for buttons to open channel guide dialog
+#: addons/skin.estuary/xml/DialogPVRInfo.xml
+msgctxt "#19686"
+msgid "Channel guide"
+msgstr ""
 
 #: Label for context menu entries, dialog heading, button to start playing a recording
 #: xbmc/pvr/PVRContextMenus.cpp

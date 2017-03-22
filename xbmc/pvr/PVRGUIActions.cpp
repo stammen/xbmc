@@ -19,6 +19,7 @@
  */
 
 #include "Application.h"
+#include "dialogs/GUIDialogBusy.h"
 #include "dialogs/GUIDialogKaiToast.h"
 #include "dialogs/GUIDialogNumeric.h"
 #include "dialogs/GUIDialogOK.h"
@@ -38,6 +39,7 @@
 #include "pvr/addons/PVRClients.h"
 #include "pvr/channels/PVRChannelGroupsContainer.h"
 #include "pvr/dialogs/GUIDialogPVRGuideInfo.h"
+#include "pvr/dialogs/GUIDialogPVRChannelGuide.h"
 #include "pvr/dialogs/GUIDialogPVRRecordingInfo.h"
 #include "pvr/dialogs/GUIDialogPVRTimerSettings.h"
 #include "pvr/PVRDatabase.h"
@@ -50,6 +52,7 @@
 #include "ServiceBroker.h"
 #include "settings/MediaSettings.h"
 #include "settings/Settings.h"
+#include "threads/Thread.h"
 #include "utils/StringUtils.h"
 #include "utils/URIUtils.h"
 #include "utils/log.h"
@@ -62,6 +65,68 @@ using namespace KODI::MESSAGING;
 
 namespace PVR
 {
+  class AsyncRecordingAction : private IRunnable
+  {
+  public:
+    bool Execute(const CFileItemPtr &item);
+
+  protected:
+    AsyncRecordingAction() : m_bSuccess(false) {}
+
+  private:
+    // IRunnable implementation
+    void Run() override;
+
+    // the worker function
+    virtual bool DoRun(const CFileItemPtr &item) = 0;
+
+    CFileItemPtr m_item;
+    bool m_bSuccess;
+  };
+
+  bool AsyncRecordingAction::Execute(const CFileItemPtr &item)
+  {
+    m_item = item;
+    CGUIDialogBusy::Wait(this, 100, false);
+    return m_bSuccess;
+  }
+
+  void AsyncRecordingAction::Run()
+  {
+    m_bSuccess = DoRun(m_item);
+
+    if (m_bSuccess)
+      g_PVRManager.TriggerRecordingsUpdate();
+  }
+
+  class AsyncRenameRecording : public AsyncRecordingAction
+  {
+  public:
+    AsyncRenameRecording(const std::string &strNewName) : m_strNewName(strNewName) {}
+
+  private:
+    bool DoRun(const CFileItemPtr &item) override { return g_PVRRecordings->RenameRecording(*item, m_strNewName); }
+    std::string m_strNewName;
+  };
+
+  class AsyncDeleteRecording : public AsyncRecordingAction
+  {
+  private:
+    bool DoRun(const CFileItemPtr &item) override { return g_PVRRecordings->Delete(*item); }
+  };
+
+  class AsyncEmptyRecordingsTrash : public AsyncRecordingAction
+  {
+  private:
+    bool DoRun(const CFileItemPtr &item) override { return g_PVRRecordings->DeleteAllRecordingsFromTrash(); }
+  };
+
+  class AsyncUndeleteRecording : public AsyncRecordingAction
+  {
+  private:
+    bool DoRun(const CFileItemPtr &item) override { return g_PVRRecordings->Undelete(*item); }
+  };
+
   CPVRGUIActions& CPVRGUIActions::GetInstance()
   {
     static CPVRGUIActions instance;
@@ -86,7 +151,7 @@ namespace PVR
       return false;
     }
 
-    CGUIDialogPVRGuideInfo* pDlgInfo = dynamic_cast<CGUIDialogPVRGuideInfo*>(g_windowManager.GetWindow(WINDOW_DIALOG_PVR_GUIDE_INFO));
+    CGUIDialogPVRGuideInfo* pDlgInfo = g_windowManager.GetWindow<CGUIDialogPVRGuideInfo>();
     if (!pDlgInfo)
     {
       CLog::Log(LOGERROR, "CPVRGUIActions - %s - unable to get WINDOW_DIALOG_PVR_GUIDE_INFO!", __FUNCTION__);
@@ -98,6 +163,25 @@ namespace PVR
     return true;
   }
 
+
+  bool CPVRGUIActions::ShowChannelEPG(const CFileItemPtr &item) const
+  {
+    const CPVRChannelPtr channel(CPVRItem(item).GetChannel());
+    if (channel && !CheckParentalLock(channel))
+      return false;
+
+    CGUIDialogPVRChannelGuide* pDlgInfo = g_windowManager.GetWindow<CGUIDialogPVRChannelGuide>();
+    if (!pDlgInfo)
+    {
+      CLog::Log(LOGERROR, "CPVRGUIActions - %s - unable to get WINDOW_DIALOG_PVR_CHANNEL_GUIDE!", __FUNCTION__);
+      return false;
+    }
+
+    pDlgInfo->Open(channel);
+    return true;
+  }
+
+
   bool CPVRGUIActions::ShowRecordingInfo(const CFileItemPtr &item) const
   {
     if (!item->IsPVRRecording())
@@ -106,7 +190,7 @@ namespace PVR
       return false;
     }
 
-    CGUIDialogPVRRecordingInfo* pDlgInfo = dynamic_cast<CGUIDialogPVRRecordingInfo*>(g_windowManager.GetWindow(WINDOW_DIALOG_PVR_RECORDING_INFO));
+    CGUIDialogPVRRecordingInfo* pDlgInfo = g_windowManager.GetWindow<CGUIDialogPVRRecordingInfo>();
     if (!pDlgInfo)
     {
       CLog::Log(LOGERROR, "CPVRGUIActions - %s - unable to get WINDOW_DIALOG_PVR_RECORDING_INFO!", __FUNCTION__);
@@ -123,7 +207,7 @@ namespace PVR
     const bool bRadio(CPVRItem(item).IsRadio());
 
     int windowSearchId = bRadio ? WINDOW_RADIO_SEARCH : WINDOW_TV_SEARCH;
-    CGUIWindowPVRSearch *windowSearch = dynamic_cast<CGUIWindowPVRSearch*>(g_windowManager.GetWindow(windowSearchId));
+    CGUIWindowPVRSearch *windowSearch = g_windowManager.GetWindow<CGUIWindowPVRSearch>();
     if (!windowSearch)
     {
       CLog::Log(LOGERROR, "PVRGUIActions - %s - unable to get %s!", __FUNCTION__, bRadio ? "WINDOW_RADIO_SEARCH" : "WINDOW_TV_SEARCH");
@@ -140,7 +224,7 @@ namespace PVR
 
   bool CPVRGUIActions::ShowTimerSettings(const CPVRTimerInfoTagPtr &timer) const
   {
-    CGUIDialogPVRTimerSettings* pDlgInfo = dynamic_cast<CGUIDialogPVRTimerSettings*>(g_windowManager.GetWindow(WINDOW_DIALOG_PVR_TIMER_SETTING));
+    CGUIDialogPVRTimerSettings* pDlgInfo = g_windowManager.GetWindow<CGUIDialogPVRTimerSettings>();
     if (!pDlgInfo)
     {
       CLog::Log(LOGERROR, "CPVRGUIActions - %s - unable to get WINDOW_DIALOG_PVR_TIMER_SETTING!", __FUNCTION__);
@@ -271,7 +355,7 @@ namespace PVR
     };
 
     InstantRecordingActionSelector::InstantRecordingActionSelector()
-    : m_pDlgSelect(dynamic_cast<CGUIDialogSelect *>(g_windowManager.GetWindow(WINDOW_DIALOG_SELECT)))
+    : m_pDlgSelect(g_windowManager.GetWindow<CGUIDialogSelect>())
     {
       if (m_pDlgSelect)
       {
@@ -574,7 +658,7 @@ namespace PVR
         return false;
     }
 
-    CGUIWindowPVRBase *pvrWindow = dynamic_cast<CGUIWindowPVRBase *>(g_windowManager.GetWindow(g_windowManager.GetActiveWindow()));
+    CGUIWindowPVRBase *pvrWindow = dynamic_cast<CGUIWindowPVRBase*>(g_windowManager.GetWindow(g_windowManager.GetActiveWindow()));
     if (pvrWindow)
       pvrWindow->DoRefresh();
     else
@@ -690,13 +774,12 @@ namespace PVR
     if (!CGUIKeyboardFactory::ShowAndGetInput(strNewName, CVariant{g_localizeStrings.Get(19041)}, false))
       return false;
 
-    if (!g_PVRRecordings->RenameRecording(*item, strNewName))
+    if (!AsyncRenameRecording(strNewName).Execute(item))
     {
       CGUIDialogOK::ShowAndGetInput(CVariant{257}, CVariant{19111}); // "Error", "PVR backend error. Check the log for more information about this message."
       return false;
     }
 
-    g_PVRManager.TriggerRecordingsUpdate();
     return true;
   }
 
@@ -708,13 +791,12 @@ namespace PVR
     if (!ConfirmDeleteRecording(item))
       return false;
 
-    if (!g_PVRRecordings->Delete(*item))
+    if (!AsyncDeleteRecording().Execute(item))
     {
       CGUIDialogOK::ShowAndGetInput(CVariant{257}, CVariant{19111}); // "Error", "PVR backend error. Check the log for more information about this message."
       return false;
     }
 
-    g_PVRManager.TriggerRecordingsUpdate();
     return true;
   }
 
@@ -735,10 +817,9 @@ namespace PVR
     if (!ConfirmDeleteAllRecordingsFromTrash())
       return false;
 
-    if (!g_PVRRecordings->DeleteAllRecordingsFromTrash())
+    if (!AsyncEmptyRecordingsTrash().Execute(CFileItemPtr()))
       return false;
 
-    g_PVRManager.TriggerRecordingsUpdate();
     return true;
   }
 
@@ -753,14 +834,12 @@ namespace PVR
     if (!item->IsDeletedPVRRecording())
       return false;
 
-    /* undelete the recording */
-    if (!g_PVRRecordings->Undelete(*item))
+    if (!AsyncUndeleteRecording().Execute(item))
     {
       CGUIDialogOK::ShowAndGetInput(CVariant{257}, CVariant{19111}); // "Error", "PVR backend error. Check the log for more information about this message."
       return false;
     }
 
-    g_PVRManager.TriggerRecordingsUpdate();
     return true;
   }
 
@@ -1124,7 +1203,7 @@ namespace PVR
     if (!g_PVRChannelGroups->GetGroupAll(channel->IsRadio())->RemoveFromGroup(channel))
       return false;
 
-    CGUIWindowPVRBase *pvrWindow = dynamic_cast<CGUIWindowPVRBase *>(g_windowManager.GetWindow(g_windowManager.GetActiveWindow()));
+    CGUIWindowPVRBase *pvrWindow = dynamic_cast<CGUIWindowPVRBase*>(g_windowManager.GetWindow(g_windowManager.GetActiveWindow()));
     if (pvrWindow)
       pvrWindow->DoRefresh();
     else
@@ -1145,7 +1224,7 @@ namespace PVR
     /* multiple clients found */
     if (possibleScanClients.size() > 1)
     {
-      CGUIDialogSelect* pDialog= dynamic_cast<CGUIDialogSelect*>(g_windowManager.GetWindow(WINDOW_DIALOG_SELECT));
+      CGUIDialogSelect* pDialog= g_windowManager.GetWindow<CGUIDialogSelect>();
       if (!pDialog)
       {
         CLog::Log(LOGERROR, "CPVRGUIActions - %s - unable to get WINDOW_DIALOG_SELECT!", __FUNCTION__);
@@ -1250,7 +1329,7 @@ namespace PVR
       else if (clients.size() > 1)
       {
         // have user select client
-        CGUIDialogSelect* pDialog= dynamic_cast<CGUIDialogSelect*>(g_windowManager.GetWindow(WINDOW_DIALOG_SELECT));
+        CGUIDialogSelect* pDialog= g_windowManager.GetWindow<CGUIDialogSelect>();
         if (!pDialog)
         {
           CLog::Log(LOGERROR, "CPVRGUIActions - %s - unable to get WINDOW_DIALOG_SELECT!", __FUNCTION__);
@@ -1283,7 +1362,7 @@ namespace PVR
     PVR_CLIENT client;
     if (g_PVRClients->GetCreatedClient(iClientID, client) && client->HasMenuHooks(menuCategory))
     {
-      CGUIDialogSelect* pDialog= dynamic_cast<CGUIDialogSelect*>(g_windowManager.GetWindow(WINDOW_DIALOG_SELECT));
+      CGUIDialogSelect* pDialog= g_windowManager.GetWindow<CGUIDialogSelect>();
       if (!pDialog)
       {
         CLog::Log(LOGERROR, "CPVRGUIActions - %s - unable to get WINDOW_DIALOG_SELECT!", __FUNCTION__);
@@ -1325,7 +1404,7 @@ namespace PVR
   {
     CLog::Log(LOGNOTICE,"CPVRGUIActions - %s - clearing the PVR database", __FUNCTION__);
 
-    CGUIDialogProgress* pDlgProgress = dynamic_cast<CGUIDialogProgress*>(g_windowManager.GetWindow(WINDOW_DIALOG_PROGRESS));
+    CGUIDialogProgress* pDlgProgress = g_windowManager.GetWindow<CGUIDialogProgress>();
     if (!pDlgProgress)
     {
       CLog::Log(LOGERROR, "CPVRGUIActions - %s - unable to get WINDOW_DIALOG_PROGRESS!", __FUNCTION__);
@@ -1466,8 +1545,7 @@ namespace PVR
   CPVRChannelNumberInputHandler &CPVRGUIActions::GetChannelNumberInputHandler()
   {
     // window/dialog specific input handler
-    CPVRChannelNumberInputHandler *windowInputHandler
-      = dynamic_cast<CPVRChannelNumberInputHandler *>(g_windowManager.GetWindow(g_windowManager.GetFocusedWindow()));
+    CPVRChannelNumberInputHandler *windowInputHandler = dynamic_cast<CPVRChannelNumberInputHandler*>(g_windowManager.GetWindow(g_windowManager.GetFocusedWindow()));
     if (windowInputHandler)
       return *windowInputHandler;
 

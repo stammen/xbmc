@@ -159,13 +159,16 @@ CPVRManager::CPVRManager(void) :
     m_progressBar(nullptr),
     m_progressHandle(nullptr),
     m_managerState(ManagerStateStopped),
-    m_isChannelPreview(false)
+    m_isChannelPreview(false),
+    m_bSettingPowerManagementEnabled(CServiceBroker::GetSettings().GetBool(CSettings::SETTING_PVRPOWERMANAGEMENT_ENABLED)),
+    m_strSettingWakeupCommand(CServiceBroker::GetSettings().GetString(CSettings::SETTING_PVRPOWERMANAGEMENT_SETWAKEUPCMD))
 {
   CAnnouncementManager::GetInstance().AddAnnouncer(this);
 }
 
 CPVRManager::~CPVRManager(void)
 {
+  CServiceBroker::GetSettings().UnregisterCallback(this);
   CAnnouncementManager::GetInstance().RemoveAnnouncer(this);
   CLog::Log(LOGDEBUG,"PVRManager - destroyed");
 }
@@ -249,6 +252,28 @@ CPVRClientsPtr CPVRManager::Clients(void) const
   return m_addons;
 }
 
+void CPVRManager::OnSettingChanged(const CSetting *setting)
+{
+  if (setting == nullptr)
+    return;
+
+  const std::string &settingId = setting->GetId();
+  if (settingId == CSettings::SETTING_EPG_DAYSTODISPLAY)
+  {
+    m_addons->SetEPGTimeFrame(static_cast<const CSettingInt*>(setting)->GetValue());
+  }
+  else if (settingId == CSettings::SETTING_PVRPOWERMANAGEMENT_ENABLED)
+  {
+    CSingleLock lock(m_critSection);
+    m_bSettingPowerManagementEnabled = static_cast<const CSettingBool*>(setting)->GetValue();
+  }
+  else if (settingId == CSettings::SETTING_PVRPOWERMANAGEMENT_SETWAKEUPCMD)
+  {
+    CSingleLock lock(m_critSection);
+    m_strSettingWakeupCommand = static_cast<const CSettingString*>(setting)->GetValue();
+  }
+}
+
 void CPVRManager::Clear(void)
 {
   g_application.UnregisterActionListener(&CPVRActionListener::GetInstance());
@@ -286,13 +311,19 @@ void CPVRManager::ResetProperties(void)
 
 void CPVRManager::Init()
 {
+  std::set<std::string> settingSet;
+  settingSet.insert(CSettings::SETTING_EPG_DAYSTODISPLAY);
+  settingSet.insert(CSettings::SETTING_PVRPOWERMANAGEMENT_ENABLED);
+  settingSet.insert(CSettings::SETTING_PVRPOWERMANAGEMENT_SETWAKEUPCMD);
+  CServiceBroker::GetSettings().RegisterCallback(this, settingSet);
+
   // Create and init action listener
   CPVRActionListener::GetInstance().Init();
 
   // Note: we're holding the progress bar dialog instance pointer in a member because it is needed by pvr core
   //       components. The latter might run in a different thread than the gui and g_windowManager.GetWindow()
   //       locks the global graphics mutex, which easily can lead to deadlocks.
-  m_progressBar = dynamic_cast<CGUIDialogExtendedProgressBar *>(g_windowManager.GetWindow(WINDOW_DIALOG_EXT_PROGRESS));
+  m_progressBar = g_windowManager.GetWindow<CGUIDialogExtendedProgressBar>();
 
   if (!m_progressBar)
     CLog::Log(LOGERROR, "CPVRManager - %s - unable to get WINDOW_DIALOG_EXT_PROGRESS!", __FUNCTION__);
@@ -528,14 +559,19 @@ void CPVRManager::Process(void)
 
 bool CPVRManager::SetWakeupCommand(void)
 {
-#ifdef TARGET_WIN10
-  assert(false); // will need to investigate how to wake up a UWP app
-#else
-  if (!CServiceBroker::GetSettings().GetBool(CSettings::SETTING_PVRPOWERMANAGEMENT_ENABLED))
+  bool bSettingPowerManagementEnabled;
+  std::string strSettingWakeupCommand;
+
+  {
+    CSingleLock lock(m_critSection);
+    bSettingPowerManagementEnabled = m_bSettingPowerManagementEnabled;
+    strSettingWakeupCommand = m_strSettingWakeupCommand;
+  }
+
+  if (!bSettingPowerManagementEnabled)
     return false;
 
-  const std::string strWakeupCommand = CServiceBroker::GetSettings().GetString(CSettings::SETTING_PVRPOWERMANAGEMENT_SETWAKEUPCMD);
-  if (!strWakeupCommand.empty() && m_timers)
+  if (!strSettingWakeupCommand.empty() && m_timers)
   {
     time_t iWakeupTime;
     const CDateTime nextEvent = m_timers->GetNextEventTime();
@@ -543,7 +579,7 @@ bool CPVRManager::SetWakeupCommand(void)
     {
       nextEvent.GetAsTime(iWakeupTime);
 
-      std::string strExecCommand = StringUtils::Format("%s %ld", strWakeupCommand.c_str(), iWakeupTime);
+      std::string strExecCommand = StringUtils::Format("%s %ld", strSettingWakeupCommand.c_str(), iWakeupTime);
 
       const int iReturn = system(strExecCommand.c_str());
       if (iReturn != 0)
