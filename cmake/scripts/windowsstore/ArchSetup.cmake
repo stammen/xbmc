@@ -23,7 +23,7 @@ list(APPEND CMAKE_SYSTEM_PREFIX_PATH ${CMAKE_SOURCE_DIR}/project/win10/BuildDepe
 list(APPEND CMAKE_SYSTEM_PREFIX_PATH ${CMAKE_SOURCE_DIR}/project/win10/vcpkg/installed/${SDK_TARGET_ARCH}-uwp/debug)
 
 message(****CMAKE_SYSTEM_PREFIX_PATH:${CMAKE_SYSTEM_PREFIX_PATH})
-set(PYTHON_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/project/BuildDependencies/include/python)
+set(PYTHON_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/project/Win10/BuildDependencies/include/python)
 
 
 # -------- Compiler options ---------
