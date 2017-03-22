@@ -274,7 +274,7 @@ std::string CEnvironment::getenv(const std::string &name)
     result = win32ConvertWToUtf8(std::wstring(value->Data()));
   }
 
-  return nullptr;
+  return "";
 }
 #else
 std::string CEnvironment::getenv(const std::string &name)
