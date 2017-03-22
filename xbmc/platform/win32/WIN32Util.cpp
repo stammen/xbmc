@@ -501,8 +501,10 @@ std::string CWIN32Util::GetSystemPath()
 #ifdef TARGET_WIN10
 std::string CWIN32Util::GetProfilePath()
 {
-  CLog::Log(LOGERROR, "%s is not implemented", __FUNCTION__);
-  return "";
+  std::string result;
+  auto f = Windows::Storage::ApplicationData::Current->LocalFolder;
+  g_charsetConverter.wToUTF8(f->Path->Data(), result);
+  return result;
 }
 #else
 std::string CWIN32Util::GetProfilePath()
