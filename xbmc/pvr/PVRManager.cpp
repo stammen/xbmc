@@ -559,6 +559,10 @@ void CPVRManager::Process(void)
 
 bool CPVRManager::SetWakeupCommand(void)
 {
+#ifdef TARGET_WIN10
+  CLog::Log(LOGERROR, "%s is not implemented", __FUNCTION__);
+  return false;
+#else
   bool bSettingPowerManagementEnabled;
   std::string strSettingWakeupCommand;
 

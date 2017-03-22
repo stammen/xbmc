@@ -52,6 +52,7 @@ void CWin32StorageProvider::Initialize()
 
 void CWin32StorageProvider::GetLocalDrives(VECSOURCES &localDrives)
 {
+#ifndef TARGET_WIN10
   using namespace KODI::PLATFORM::WINDOWS;
   CMediaSource share;
   wchar_t profilePath[MAX_PATH];
@@ -66,6 +67,7 @@ void CWin32StorageProvider::GetLocalDrives(VECSOURCES &localDrives)
   localDrives.push_back(share);
 
   CWIN32Util::GetDrivesByType(localDrives, LOCAL_DRIVES);
+#endif
 }
 
 void CWin32StorageProvider::GetRemovableDrives(VECSOURCES &removableDrives)
