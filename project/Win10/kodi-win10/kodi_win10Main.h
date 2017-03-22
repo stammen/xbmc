@@ -14,10 +14,17 @@ namespace kodi_win10
 		kodi_win10Main(const std::shared_ptr<DX::DeviceResources>& deviceResources);
 		~kodi_win10Main();
 		void CreateWindowSizeDependentResources();
-		void StartTracking() { m_sceneRenderer->StartTracking(); }
+		void StartTracking() {
+      // m_sceneRenderer->StartTracking(); 
+    }
 		void TrackingUpdate(float positionX) { m_pointerLocationX = positionX; }
-		void StopTracking() { m_sceneRenderer->StopTracking(); }
-		bool IsTracking() { return m_sceneRenderer->IsTracking(); }
+		void StopTracking() { 
+      // m_sceneRenderer->StopTracking(); 
+    }
+		bool IsTracking() { 
+      // return m_sceneRenderer->IsTracking()
+      return false; 
+    }
 		void StartRenderLoop();
 		void StopRenderLoop();
 		Concurrency::critical_section& GetCriticalSection() { return m_criticalSection; }
@@ -35,8 +42,8 @@ namespace kodi_win10
 		std::shared_ptr<DX::DeviceResources> m_deviceResources;
 
 		// TODO: Replace with your own content renderers.
-		std::unique_ptr<Sample3DSceneRenderer> m_sceneRenderer;
-		std::unique_ptr<SampleFpsTextRenderer> m_fpsTextRenderer;
+		//std::unique_ptr<Sample3DSceneRenderer> m_sceneRenderer;
+		//std::unique_ptr<SampleFpsTextRenderer> m_fpsTextRenderer;
 
 		Windows::Foundation::IAsyncAction^ m_renderLoopWorker;
 		Concurrency::critical_section m_criticalSection;

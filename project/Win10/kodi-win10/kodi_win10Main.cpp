@@ -7,6 +7,9 @@ using namespace Windows::Foundation;
 using namespace Windows::System::Threading;
 using namespace Concurrency;
 
+#include "xbmc/platform/win10/Win10Main.h"
+#pragma comment(lib, "libkodi.lib")
+
 // Loads and initializes application assets when the application is loaded.
 kodi_win10Main::kodi_win10Main(const std::shared_ptr<DX::DeviceResources>& deviceResources) :
 	m_deviceResources(deviceResources), m_pointerLocationX(0.0f)
@@ -15,9 +18,9 @@ kodi_win10Main::kodi_win10Main(const std::shared_ptr<DX::DeviceResources>& devic
 	m_deviceResources->RegisterDeviceNotify(this);
 
 	// TODO: Replace this with your app's content initialization.
-	m_sceneRenderer = std::unique_ptr<Sample3DSceneRenderer>(new Sample3DSceneRenderer(m_deviceResources));
+	//m_sceneRenderer = std::unique_ptr<Sample3DSceneRenderer>(new Sample3DSceneRenderer(m_deviceResources));
 
-	m_fpsTextRenderer = std::unique_ptr<SampleFpsTextRenderer>(new SampleFpsTextRenderer(m_deviceResources));
+	//m_fpsTextRenderer = std::unique_ptr<SampleFpsTextRenderer>(new SampleFpsTextRenderer(m_deviceResources));
 
 	// TODO: Change the timer settings if you want something other than the default variable timestep mode.
 	// e.g. for 60 FPS fixed timestep update logic, call:
@@ -37,7 +40,7 @@ kodi_win10Main::~kodi_win10Main()
 void kodi_win10Main::CreateWindowSizeDependentResources() 
 {
 	// TODO: Replace this with the size-dependent initialization of your app's content.
-	m_sceneRenderer->CreateWindowSizeDependentResources();
+	//m_sceneRenderer->CreateWindowSizeDependentResources();
 }
 
 void kodi_win10Main::StartRenderLoop()
@@ -51,16 +54,20 @@ void kodi_win10Main::StartRenderLoop()
 	// Create a task that will be run on a background thread.
 	auto workItemHandler = ref new WorkItemHandler([this](IAsyncAction ^ action)
 	{
-		// Calculate the updated frame and render once per vertical blanking interval.
-		while (action->Status == AsyncStatus::Started)
-		{
-			critical_section::scoped_lock lock(m_criticalSection);
-			Update();
-			if (Render())
-			{
-				m_deviceResources->Present();
-			}
-		}
+    Win10Main(nullptr);
+#if 0
+    // Calculate the updated frame and render once per vertical blanking interval.
+    while (action->Status == AsyncStatus::Started)
+    {
+      critical_section::scoped_lock lock(m_criticalSection);
+      Update();
+      if (Render())
+      {
+        m_deviceResources->Present();
+      }
+    }
+#endif // 0
+
 	});
 
 	// Run task on a dedicated high priority background thread.
@@ -81,8 +88,8 @@ void kodi_win10Main::Update()
 	m_timer.Tick([&]()
 	{
 		// TODO: Replace this with your app's content update functions.
-		m_sceneRenderer->Update(m_timer);
-		m_fpsTextRenderer->Update(m_timer);
+		//m_sceneRenderer->Update(m_timer);
+		//m_fpsTextRenderer->Update(m_timer);
 	});
 }
 
@@ -90,7 +97,7 @@ void kodi_win10Main::Update()
 void kodi_win10Main::ProcessInput()
 {
 	// TODO: Add per frame input handling here.
-	m_sceneRenderer->TrackingUpdate(m_pointerLocationX);
+	//m_sceneRenderer->TrackingUpdate(m_pointerLocationX);
 }
 
 // Renders the current frame according to the current application state.
@@ -119,8 +126,8 @@ bool kodi_win10Main::Render()
 
 	// Render the scene objects.
 	// TODO: Replace this with your app's content rendering functions.
-	m_sceneRenderer->Render();
-	m_fpsTextRenderer->Render();
+	//m_sceneRenderer->Render();
+	//m_fpsTextRenderer->Render();
 
 	return true;
 }
@@ -128,14 +135,14 @@ bool kodi_win10Main::Render()
 // Notifies renderers that device resources need to be released.
 void kodi_win10Main::OnDeviceLost()
 {
-	m_sceneRenderer->ReleaseDeviceDependentResources();
-	m_fpsTextRenderer->ReleaseDeviceDependentResources();
+	//m_sceneRenderer->ReleaseDeviceDependentResources();
+	//m_fpsTextRenderer->ReleaseDeviceDependentResources();
 }
 
 // Notifies renderers that device resources may now be recreated.
 void kodi_win10Main::OnDeviceRestored()
 {
-	m_sceneRenderer->CreateDeviceDependentResources();
-	m_fpsTextRenderer->CreateDeviceDependentResources();
+	//m_sceneRenderer->CreateDeviceDependentResources();
+	//m_fpsTextRenderer->CreateDeviceDependentResources();
 	CreateWindowSizeDependentResources();
 }

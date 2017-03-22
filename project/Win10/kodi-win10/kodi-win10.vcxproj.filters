@@ -172,9 +172,6 @@
     <None Include="$(BinPath)zlib1.dll">
       <Filter>Binaries</Filter>
     </None>
-    <None Include="$(BuildDependenciesPath)python27.dll">
-      <Filter>Binaries</Filter>
-    </None>
     <None Include="$(BuildDependenciesPath)python27_d.dll">
       <Filter>Binaries</Filter>
     </None>

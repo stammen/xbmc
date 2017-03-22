@@ -6,9 +6,7 @@
 #include "pch.h"
 #include "DirectXPage.xaml.h"
 
-#include "xbmc/platform/win10/Win10Main.h"
 
-#pragma comment(lib, "libkodi.lib")
 
 
 using namespace kodi_win10;
@@ -125,8 +123,6 @@ void DirectXPage::OnVisibilityChanged(CoreWindow^ sender, VisibilityChangedEvent
 	if (m_windowVisible)
 	{
 		m_main->StartRenderLoop();
-        int foo = KodiAdd(2, 2);
-        foo += 2;
 	}
 	else
 	{

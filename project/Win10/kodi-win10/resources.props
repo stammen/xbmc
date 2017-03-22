@@ -3,16 +3,86 @@
   <ImportGroup Label="PropertySheets" />
   
   <ItemGroup>
-    <_CustomResource Include="$(ProjectDir)..\vcpkg\installed\x86-uwp\bin\**\*">
-      <Link>%(RecursiveDir)%(FileName)%(Extension)</Link>
+    <_KeyboardLayouts Include="$(ProjectDir)..\..\..\system\keyboardlayouts\**\*">
+      <Link>system\keyboardlayouts\%(RecursiveDir)%(FileName)%(Extension)</Link>
       <DeploymentContent>true</DeploymentContent>
-    </_CustomResource>
+    </_KeyboardLayouts>
   </ItemGroup>
-
+  <ItemGroup>
+    <_Keymaps Include="$(ProjectDir)..\..\..\system\keymaps\**\*">
+      <Link>system\keymaps\%(RecursiveDir)%(FileName)%(Extension)</Link>
+      <DeploymentContent>true</DeploymentContent>
+    </_Keymaps>
+  </ItemGroup>
+  <ItemGroup>
+    <_Library Include="$(ProjectDir)..\..\..\system\library\**\*">
+      <Link>system\library\%(RecursiveDir)%(FileName)%(Extension)</Link>
+      <DeploymentContent>true</DeploymentContent>
+    </_Library>
+  </ItemGroup>
+  <ItemGroup>
+    <_Settings Include="$(ProjectDir)..\..\..\system\settings\**\*">
+      <Link>system\settings\%(RecursiveDir)%(FileName)%(Extension)</Link>
+      <DeploymentContent>true</DeploymentContent>
+    </_Settings>
+  </ItemGroup>
+  <ItemGroup>
+    <_Shaders Include="$(ProjectDir)..\..\..\system\shaders\**\*">
+      <Link>system\shaders\%(RecursiveDir)%(FileName)%(Extension)</Link>
+      <DeploymentContent>true</DeploymentContent>
+    </_Shaders>
+  </ItemGroup>
+  <ItemGroup>
+    <_Python Include="$(ProjectDir)..\..\..\project\Win10\system\python\**\*">
+      <Link>system\python\%(RecursiveDir)%(FileName)%(Extension)</Link>
+      <DeploymentContent>true</DeploymentContent>
+    </_Python>
+  </ItemGroup>
+  <ItemGroup>
+    <_Xml Include="$(ProjectDir)..\..\..\system\*.xml">
+      <Link>system\%(RecursiveDir)%(FileName)%(Extension)</Link>
+      <DeploymentContent>true</DeploymentContent>
+    </_Xml>
+  </ItemGroup>
+  <ItemGroup>
+    <_Media Include="$(ProjectDir)..\..\..\media\**\*">
+      <Link>media\%(RecursiveDir)%(FileName)%(Extension)</Link>
+      <DeploymentContent>true</DeploymentContent>
+    </_Media>
+  </ItemGroup>
+  <ItemGroup>
+    <_Userdata Include="$(ProjectDir)..\..\..\userdata\**\*">
+      <Link>userdata\%(RecursiveDir)%(FileName)%(Extension)</Link>
+      <DeploymentContent>true</DeploymentContent>
+    </_Userdata>
+  </ItemGroup>
   <Target Name="_CollectCustomResources" BeforeTargets="AssignTargetPaths">
-    <Message Text="Adding resource: %(_CustomResource.Identity) -&gt; %(_CustomResource.Link)" />
     <ItemGroup>
-      <None Include="@(_CustomResource)" />
+      <None Include="@(_KeyboardLayouts)" />
+    </ItemGroup>
+    <ItemGroup>
+      <None Include="@(_Keymaps)" />
+    </ItemGroup>
+    <ItemGroup>
+      <None Include="@(_Library)" />
+    </ItemGroup>
+    <ItemGroup>
+      <None Include="@(_Settings)" />
+    </ItemGroup>
+    <ItemGroup>
+      <None Include="@(_Shaders)" />
+    </ItemGroup>
+    <ItemGroup>
+      <None Include="@(_Python)" />
+    </ItemGroup>
+    <ItemGroup>
+      <None Include="@(_Xml)" />
+    </ItemGroup>
+    <ItemGroup>
+      <None Include="@(_Media)" />
+    </ItemGroup>
+    <ItemGroup>
+      <None Include="@(_Userdata)" />
     </ItemGroup>
   </Target>
 </Project>
