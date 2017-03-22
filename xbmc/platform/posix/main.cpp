@@ -45,7 +45,12 @@
 #ifdef __cplusplus
 extern "C"
 #endif
+
+#ifdef TARGET_WIN10
+int win10_main(int argc, char* argv[])
+#else
 int main(int argc, char* argv[])
+#endif
 {
   // set up some xbmc specific relationships
   XBMC::Context context;
