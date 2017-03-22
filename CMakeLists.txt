@@ -434,6 +434,11 @@ if(EXISTS ${CMAKE_SOURCE_DIR}/cmake/scripts/${CORE_SYSTEM_NAME}/ExtraTargets.cma
   include(${CMAKE_SOURCE_DIR}/cmake/scripts/${CORE_SYSTEM_NAME}/ExtraTargets.cmake)
 endif()
 
+if(CORE_SYSTEM_NAME STREQUAL windowsstore)
+  include_external_msproject(kodi-win10 ${CMAKE_SOURCE_DIR}/project/Win10/kodi-win10/kodi-win10.vcxproj PLATFORM Win32)
+  set_property(DIRECTORY PROPERTY VS_STARTUP_PROJECT kodi-win10)
+endif()
+
 include(cmake/scripts/${CORE_SYSTEM_NAME}/Install.cmake)
 
 # Add uninstall target
