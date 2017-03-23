@@ -19,6 +19,7 @@
  */
 
 #include <string.h>
+#include <algorithm>
 
 #include "JSONRPC.h"
 #include "ServiceDescription.h"
@@ -161,7 +162,7 @@ JSONRPC_STATUS CJSONRPC::Permission(const std::string &method, ITransportLayer *
 JSONRPC_STATUS CJSONRPC::Ping(const std::string &method, ITransportLayer *transport, IClient *client, const CVariant& parameterObject, CVariant &result)
 {
   CVariant temp = "pong";
-  result.swap(temp);
+  std::swap(result, temp);
   return OK;
 }
 
