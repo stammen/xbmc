@@ -90,6 +90,6 @@ class CGUIKeyboard : public ITimerCallback
     CTimer m_idleTimer;
 };
 
-#ifdef TARGET_WINDOWS
+#if defined(TARGET_WINDOWS) || defined(TARGET_WIN10)
 #pragma warning(pop)
 #endif
