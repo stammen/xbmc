@@ -23,9 +23,29 @@
 #include "utils/log.h"
 
 #ifdef TARGET_WIN10
+#include "platform/win32/CharsetConverter.h"
+#include "windowing/win10/WinSystemWin10DX.h"
+#endif
+
+#ifdef TARGET_WIN10
 int WINAPI MessageBox(void* hWnd, const char* lpText, const char* lpCaption, UINT uType)
 {
-  CLog::Log(LOGERROR, "%s is not implemented", __FUNCTION__);
+  auto dispatcher = g_Windowing.GetDispatcher();
+  using KODI::PLATFORM::WINDOWS::ToW;
+  auto wText = ToW(lpText);
+  auto wCaption = ToW(lpCaption);
+
+  dispatcher->RunAsync(Windows::UI::Core::CoreDispatcherPriority::Normal, ref new Windows::UI::Core::DispatchedHandler([wText, wCaption]()
+  {
+    auto message = ref new Platform::String(wText.c_str());
+    auto title = ref new Platform::String(wCaption.c_str());
+    // Show the message dialog
+    auto msg = ref new Windows::UI::Popups::MessageDialog(message, title);
+    // Set the command to be invoked when a user presses 'ESC'
+    msg->CancelCommandIndex = 1;
+    msg->ShowAsync();
+  }));
+
   return IDOK;
 }
 #endif // TARGET_WIN10
