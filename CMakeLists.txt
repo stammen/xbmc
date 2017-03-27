@@ -116,11 +116,10 @@ set(required_deps Cdio
                   LibDvd
                   Lzo2
                   PCRE
+                  RapidJSON
                   Sqlite3
                   TagLib
-                  TinyXML
-                  Yajl)
-
+                  TinyXML)
 if(NOT WIN32)
   list(APPEND required_deps ZLIB)
 else()
@@ -374,6 +373,7 @@ endif()
 # main binary
 if(NOT CORE_SYSTEM_NAME STREQUAL android)
   add_executable(${APP_NAME_LC} ${CORE_MAIN_SOURCE} "${RESOURCES}" ${OTHER_FILES})
+  set_target_properties(${APP_NAME_LC} PROPERTIES ENABLE_EXPORTS ON)
 else()
   set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--no-undefined")
   add_library(${APP_NAME_LC} SHARED ${CORE_MAIN_SOURCE} "${RESOURCES}" ${OTHER_FILES})

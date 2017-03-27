@@ -307,6 +307,11 @@ CVariant::CVariant(CVariant&& rhs)
 
 bool CVariant::isInteger() const
 {
+  return isSignedInteger() || isUnsignedInteger();
+}
+
+bool CVariant::isSignedInteger() const
+{
   return m_type == VariantTypeInteger;
 }
 
