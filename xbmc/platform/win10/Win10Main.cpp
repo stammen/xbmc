@@ -26,11 +26,15 @@
 #include "utils/Environment.h"
 #include "utils/CharsetConverter.h" // Required to initialize converters before usage
 #include "utils/log.h" 
+#include "windowing/win10/WinSystemWin10DX.h"
 
 #include <dbghelp.h>
 #include <shellapi.h>
 
 #include"Win10Main.h"
+
+using namespace Windows::UI::Core;
+using namespace Windows::UI::Xaml::Controls;
 
 #ifdef __cplusplus
 extern "C" int win10_main(int argc, char* argv[]);
@@ -48,7 +52,7 @@ extern "C"
   // Minidump creation function
   LONG WINAPI CreateMiniDump(EXCEPTION_POINTERS* pEp)
   {
-    CLog::Log(LOGNOTICE, "Windows Store apps starcktrace and minidump are collected by the Windows Store");
+    CLog::Log(LOGNOTICE, "Windows Store app stacktraces and minidumps are collected by the Windows Store");
     return pEp->ExceptionRecord->ExceptionCode;
   }
 
@@ -56,7 +60,7 @@ extern "C"
   // Name: WinMain()
   // Desc: The application's entry point
   //-----------------------------------------------------------------------------
-  DECLDIR int Win10Main(LPWSTR commandLine)
+  DECLDIR int Win10Main(CoreDispatcher^ dispatcher, Panel^ swapChainPanel)
   {
     // this fixes crash if OPENSSL_CONF is set to existed openssl.cfg  
     // need to set it as soon as possible  
@@ -69,6 +73,10 @@ extern "C"
     WSAStartup(MAKEWORD(2, 2), &wd);
 
     // Create and run the app
+
+    g_Windowing.SetDispatcher(dispatcher);
+    g_Windowing.SetSwapChainPanel(swapChainPanel);
+
     status = win10_main(0, nullptr);
 
     WSACleanup();

@@ -9,7 +9,7 @@
 extern "C"
 {
   DECLDIR int KodiAdd(int a, int b);
-  DECLDIR int Win10Main(LPWSTR commandLine);
+  DECLDIR int Win10Main(Windows::UI::Core::CoreDispatcher^ dispatcher, Windows::UI::Xaml::Controls::Panel^ swapChainPanel);
 }
 
 
