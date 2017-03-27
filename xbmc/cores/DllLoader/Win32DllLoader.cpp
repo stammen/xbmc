@@ -129,11 +129,12 @@ bool Win32DllLoader::Load()
     return true;
 
   std::string strFileName = GetFileName();
-
   auto strDllW = ToW(CSpecialProtocol::TranslatePath(strFileName));
 
 #ifdef TARGET_WIN10
-  m_dllHandle = LoadPackagedLibrary(strDllW.c_str(), NULL);
+  std::string strName = GetName();
+  auto strDllNameW = ToW(strName);
+  m_dllHandle = LoadPackagedLibrary(strDllNameW.c_str(), 0);
 #else
   m_dllHandle = LoadLibraryExW(strDllW.c_str(), NULL, LOAD_WITH_ALTERED_SEARCH_PATH);
 #endif
