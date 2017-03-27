@@ -22,7 +22,7 @@
 #include <vector>
 #include <string>
 #include <stdint.h>
-#include <wchar.h>
+//#include <wchar.h>
 
 int64_t str2int64(const std::string &str, int64_t fallback = 0);
 int64_t str2int64(const std::wstring &str, int64_t fallback = 0);
@@ -68,9 +68,8 @@ public:
   CVariant(const std::vector<std::string> &strArray);
   CVariant(const std::map<std::string, std::string> &strMap);
   CVariant(const std::map<std::string, CVariant> &variantMap);
-  CVariant(const CVariant &variant);
-  CVariant(CVariant &&rhs);
-  ~CVariant();
+  //CVariant(const CVariant &variant);
+  //CVariant(CVariant &&rhs);
 
 
   
@@ -100,7 +99,6 @@ public:
   const CVariant &operator[](unsigned int position) const;
 
   CVariant &operator=(const CVariant &rhs);
-  CVariant &operator=(CVariant &&rhs);
   bool operator==(const CVariant &rhs) const;
   bool operator!=(const CVariant &rhs) const { return !(*this == rhs); }
 
@@ -111,7 +109,6 @@ public:
 
   const char *c_str() const;
 
-  void swap(CVariant &rhs);
 
 private:
   typedef std::vector<CVariant> VariantArray;
@@ -145,19 +142,15 @@ public:
   static CVariant ConstNullVariant;
 
 private:
-  void cleanup();
-  union VariantUnion
-  {
-    int64_t integer;
-    uint64_t unsignedinteger;
-    bool boolean;
-    double dvalue;
-    std::string *string;
-    std::wstring *wstring;
-    VariantArray *array;
-    VariantMap *map;
-  };
-
   VariantType m_type;
-  VariantUnion m_data;
+
+  std::string m_string;
+  std::wstring m_wstring;
+  VariantMap m_map;
+  VariantArray m_array;
+  int64_t m_integer;
+  uint64_t m_unsignedinteger;
+  bool m_boolean;
+  double m_dvalue;
+
 };
