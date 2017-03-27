@@ -30,8 +30,7 @@
 #include "guilib/GUIShaderDX.h"
 #include "threads/Condition.h"
 #include "threads/CriticalSection.h"
-#ifndef TARGET_WIN10
-#include "easyhook/easyhook.h"
+#ifdef TARGET_WIN10
 #endif
 
 enum PCI_Vendors
@@ -84,6 +83,11 @@ public:
   void FlushGPU() const;
   void RequestDecodingTime();
   void ReleaseDecodingTime();
+
+  void SetDispatcher(Windows::UI::Core::CoreDispatcher^ dispatcher) { m_dispatcher = dispatcher; }
+  Windows::UI::Core::CoreDispatcher^ GetDispatcher() { return m_dispatcher; }
+  void SetSwapChainPanel(Windows::UI::Xaml::Controls::Panel^ panel) { m_swapChainPanel = panel; }
+  Windows::UI::Xaml::Controls::Panel^ GetSwapChainPanel() { return m_swapChainPanel; }
 
   ID3D11Device*           Get3D11Device() const       { return m_pD3DDev; }
   ID3D11DeviceContext*    Get3D11Context() const      { return m_pContext; }
@@ -196,6 +200,9 @@ protected:
   CCriticalSection m_decoderSection;
   XbmcThreads::EndTime m_decodingTimer;
   XbmcThreads::ConditionVariable m_decodingEvent;
+
+  Windows::UI::Core::CoreDispatcher^ m_dispatcher;
+  Windows::UI::Xaml::Controls::Panel^ m_swapChainPanel;
 };
 
 #endif
