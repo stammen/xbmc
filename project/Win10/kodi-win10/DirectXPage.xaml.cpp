@@ -84,7 +84,7 @@ DirectXPage::DirectXPage():
 	m_inputLoopWorker = ThreadPool::RunAsync(workItemHandler, WorkItemPriority::High, WorkItemOptions::TimeSliced);
 
 	m_main = std::unique_ptr<kodi_win10Main>(new kodi_win10Main(m_deviceResources));
-	m_main->StartRenderLoop();
+	m_main->StartRenderLoop(swapChainPanel);
 }
 
 DirectXPage::~DirectXPage()
@@ -112,7 +112,7 @@ void DirectXPage::LoadInternalState(IPropertySet^ state)
 	// Put code to load app state here.
 
 	// Start rendering when the app is resumed.
-	m_main->StartRenderLoop();
+	m_main->StartRenderLoop(swapChainPanel);
 }
 
 // Window event handlers.
@@ -122,7 +122,7 @@ void DirectXPage::OnVisibilityChanged(CoreWindow^ sender, VisibilityChangedEvent
 	m_windowVisible = args->Visible;
 	if (m_windowVisible)
 	{
-		m_main->StartRenderLoop();
+		m_main->StartRenderLoop(swapChainPanel);
 	}
 	else
 	{

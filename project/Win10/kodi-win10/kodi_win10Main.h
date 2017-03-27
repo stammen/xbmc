@@ -25,7 +25,7 @@ namespace kodi_win10
       // return m_sceneRenderer->IsTracking()
       return false; 
     }
-		void StartRenderLoop();
+		void StartRenderLoop(Windows::UI::Xaml::Controls::Panel^ swapChainPanel);
 		void StopRenderLoop();
 		Concurrency::critical_section& GetCriticalSection() { return m_criticalSection; }
 

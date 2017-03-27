@@ -40,6 +40,9 @@
     <None Include="$(BinPath)avutil-55.dll">
       <DeploymentContent>true</DeploymentContent>
     </None>
+    <None Include="$(BinPath)cpluff.dll">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
     <None Include="$(BinPath)expat.dll">
       <DeploymentContent>true</DeploymentContent>
     </None>

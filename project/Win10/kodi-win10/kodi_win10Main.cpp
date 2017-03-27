@@ -43,7 +43,7 @@ void kodi_win10Main::CreateWindowSizeDependentResources()
 	//m_sceneRenderer->CreateWindowSizeDependentResources();
 }
 
-void kodi_win10Main::StartRenderLoop()
+void kodi_win10Main::StartRenderLoop(Windows::UI::Xaml::Controls::Panel^ swapChainPanel)
 {
 	// If the animation render loop is already running then do not start another thread.
 	if (m_renderLoopWorker != nullptr && m_renderLoopWorker->Status == AsyncStatus::Started)
@@ -51,10 +51,11 @@ void kodi_win10Main::StartRenderLoop()
 		return;
 	}
 
+  auto dispatcher = Windows::UI::Xaml::Window::Current->CoreWindow->Dispatcher;
 	// Create a task that will be run on a background thread.
-	auto workItemHandler = ref new WorkItemHandler([this](IAsyncAction ^ action)
+	auto workItemHandler = ref new WorkItemHandler([this, dispatcher, swapChainPanel](IAsyncAction ^ action)
 	{
-    Win10Main(nullptr);
+    Win10Main(dispatcher, swapChainPanel);
 #if 0
     // Calculate the updated frame and render once per vertical blanking interval.
     while (action->Status == AsyncStatus::Started)

@@ -56,6 +56,16 @@
       <DeploymentContent>true</DeploymentContent>
     </_Userdata>
   </ItemGroup>
+  <ItemGroup>
+    <_Addons Include="$(ProjectDir)..\..\..\addons\**\*">
+      <Link>addons\%(RecursiveDir)%(FileName)%(Extension)</Link>
+      <DeploymentContent>true</DeploymentContent>
+    </_Addons>
+    <_Addons2 Include="$(ProjectDir)..\..\..\build-win32\addons\**\*">
+      <Link>addons\%(RecursiveDir)%(FileName)%(Extension)</Link>
+      <DeploymentContent>true</DeploymentContent>
+    </_Addons2>
+  </ItemGroup>
   <Target Name="_CollectCustomResources" BeforeTargets="AssignTargetPaths">
     <ItemGroup>
       <None Include="@(_KeyboardLayouts)" />
@@ -84,6 +94,9 @@
     <ItemGroup>
       <None Include="@(_Userdata)" />
     </ItemGroup>
+    <ItemGroup>
+      <None Include="@(_Addons2)" />
+    </ItemGroup> 
   </Target>
 </Project>
 
