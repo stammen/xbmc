@@ -27,6 +27,7 @@
 #include "utils/CharsetConverter.h" // Required to initialize converters before usage
 #include "utils/log.h" 
 #include "windowing/win10/WinSystemWin10DX.h"
+#include "rendering/dx/DeviceResources.h"
 
 #include <dbghelp.h>
 #include <shellapi.h>
@@ -35,53 +36,51 @@
 
 using namespace Windows::UI::Core;
 using namespace Windows::UI::Xaml::Controls;
+using namespace DX;
 
 #ifdef __cplusplus
 extern "C" int win10_main(int argc, char* argv[]);
 #endif
 
-extern "C"
+
+// Minidump creation function
+LONG WINAPI CreateMiniDump(EXCEPTION_POINTERS* pEp)
 {
-  DECLDIR int KodiAdd(int a, int b)
-  {
-    //CLog::Log(LOGNOTICE, "KodiAdd");
-    return(a + b);
-  }
-
-
-  // Minidump creation function
-  LONG WINAPI CreateMiniDump(EXCEPTION_POINTERS* pEp)
-  {
-    CLog::Log(LOGNOTICE, "Windows Store app stacktraces and minidumps are collected by the Windows Store");
-    return pEp->ExceptionRecord->ExceptionCode;
-  }
-
-  //-----------------------------------------------------------------------------
-  // Name: WinMain()
-  // Desc: The application's entry point
-  //-----------------------------------------------------------------------------
-  DECLDIR int Win10Main(CoreDispatcher^ dispatcher, Panel^ swapChainPanel)
-  {
-    // this fixes crash if OPENSSL_CONF is set to existed openssl.cfg  
-    // need to set it as soon as possible  
-    CEnvironment::unsetenv("OPENSSL_CONF");
-
-    int status = 0;
-
-    // Initialise Winsock
-    WSADATA wd;
-    WSAStartup(MAKEWORD(2, 2), &wd);
-
-    // Create and run the app
-
-    g_Windowing.SetDispatcher(dispatcher);
-    g_Windowing.SetSwapChainPanel(swapChainPanel);
-
-    status = win10_main(0, nullptr);
-
-    WSACleanup();
-
-    return status;
-  }
+  CLog::Log(LOGNOTICE, "Windows Store app stacktraces and minidumps are collected by the Windows Store");
+  return pEp->ExceptionRecord->ExceptionCode;
 }
+
+//-----------------------------------------------------------------------------
+// Name: WinMain()
+// Desc: The application's entry point
+//-----------------------------------------------------------------------------
+DECLDIR int Win10Main(CoreDispatcher^ dispatcher)
+{
+  // this fixes crash if OPENSSL_CONF is set to existed openssl.cfg  
+  // need to set it as soon as possible  
+  CEnvironment::unsetenv("OPENSSL_CONF");
+
+  int status = 0;
+
+  // Initialise Winsock
+  WSADATA wd;
+  WSAStartup(MAKEWORD(2, 2), &wd);
+
+  // Create and run the app
+
+  g_Windowing.SetDispatcher(dispatcher);
+  //g_Windowing.SetDeviceResources(m_deviceResources);
+
+  status = win10_main(0, nullptr);
+
+  WSACleanup();
+
+  return status;
+}
+
+DECLDIR std::shared_ptr<DX::DeviceResources> getKodiDeviceResources()
+{
+  return DX::DeviceResources::getInstance();
+}
+
 

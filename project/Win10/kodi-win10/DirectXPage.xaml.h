@@ -7,9 +7,6 @@
 
 #include "DirectXPage.g.h"
 
-#include "Common\DeviceResources.h"
-#include "kodi_win10Main.h"
-
 namespace kodi_win10
 {
 	/// <summary>
@@ -25,6 +22,9 @@ namespace kodi_win10
 		void LoadInternalState(Windows::Foundation::Collections::IPropertySet^ state);
 
 	private:
+    void StartRenderLoop(Windows::UI::Xaml::Controls::Panel^ swapChainPanel);
+    void StopRenderLoop();
+
 		// XAML low-level rendering event handler.
 		void OnRendering(Platform::Object^ sender, Platform::Object^ args);
 
@@ -50,9 +50,8 @@ namespace kodi_win10
 		void OnPointerMoved(Platform::Object^ sender, Windows::UI::Core::PointerEventArgs^ e);
 		void OnPointerReleased(Platform::Object^ sender, Windows::UI::Core::PointerEventArgs^ e);
 
-		// Resources used to render the DirectX content in the XAML page background.
-		std::shared_ptr<DX::DeviceResources> m_deviceResources;
-		std::unique_ptr<kodi_win10Main> m_main; 
+    Windows::Foundation::IAsyncAction^ m_renderLoopWorker;
+
 		bool m_windowVisible;
 	};
 }

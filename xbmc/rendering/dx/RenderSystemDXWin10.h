@@ -25,13 +25,13 @@
 
 #pragma once
 
+#include <memory>
 #include <vector>
 #include "rendering/RenderSystem.h"
 #include "guilib/GUIShaderDX.h"
 #include "threads/Condition.h"
 #include "threads/CriticalSection.h"
-#ifdef TARGET_WIN10
-#endif
+
 
 enum PCI_Vendors
 {
@@ -86,14 +86,14 @@ public:
 
   void SetDispatcher(Windows::UI::Core::CoreDispatcher^ dispatcher) { m_dispatcher = dispatcher; }
   Windows::UI::Core::CoreDispatcher^ GetDispatcher() { return m_dispatcher; }
-  void SetSwapChainPanel(Windows::UI::Xaml::Controls::Panel^ panel) { m_swapChainPanel = panel; }
-  Windows::UI::Xaml::Controls::Panel^ GetSwapChainPanel() { return m_swapChainPanel; }
 
-  ID3D11Device*           Get3D11Device() const       { return m_pD3DDev; }
-  ID3D11DeviceContext*    Get3D11Context() const      { return m_pContext; }
-  ID3D11DeviceContext*    GetImmediateContext() const { return m_pImdContext; }
+  ID3D11Device*           Get3D11Device() const;
+  ID3D11DeviceContext*    Get3D11Context() const;
+  ID3D11DeviceContext*    GetImmediateContext() const;
+
   CGUIShaderDX*           GetGUIShader() const        { return m_pGUIShader; }
-  unsigned                GetFeatureLevel() const     { return m_featureLevel; }
+  unsigned                GetFeatureLevel() const;
+
   D3D11_USAGE             DefaultD3DUsage() const     { return m_defaultD3DUsage; }
   DXGI_ADAPTER_DESC       GetAIdentifier() const      { return m_adapterDesc; }
   bool                    Interlaced() const          { return m_interlaced; }
@@ -159,13 +159,8 @@ protected:
   D3D_DRIVER_TYPE             m_driverType{D3D_DRIVER_TYPE_HARDWARE};
   D3D_FEATURE_LEVEL           m_featureLevel{D3D_FEATURE_LEVEL_11_1};
   IDXGIFactory1*              m_dxgiFactory{nullptr};
-  ID3D11Device*               m_pD3DDev{nullptr};
   IDXGIAdapter1*              m_adapter{nullptr};
   IDXGIOutput*                m_pOutput{nullptr};
-  ID3D11DeviceContext*        m_pContext{nullptr};
-  ID3D11DeviceContext*        m_pImdContext{nullptr};
-  IDXGISwapChain*             m_pSwapChain{nullptr};
-  IDXGISwapChain1*            m_pSwapChain1{nullptr};
   ID3D11RenderTargetView*     m_pRenderTargetView{nullptr};
   ID3D11DepthStencilState*    m_depthStencilState{nullptr};
   ID3D11DepthStencilView*     m_depthStencilView{nullptr};
@@ -202,7 +197,6 @@ protected:
   XbmcThreads::ConditionVariable m_decodingEvent;
 
   Windows::UI::Core::CoreDispatcher^ m_dispatcher;
-  Windows::UI::Xaml::Controls::Panel^ m_swapChainPanel;
 };
 
 #endif

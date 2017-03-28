@@ -27,6 +27,7 @@
 #include "settings/Settings.h"
 #include "threads/SingleLock.h"
 #include "utils/CharsetConverter.h"
+#include "utils/log.h"
 
 #ifdef HAS_DX
 
@@ -82,9 +83,12 @@ bool CWinSystemWin10DX::CreateNewWindow(std::string name, bool fullScreen, RESOL
 
 void CWinSystemWin10DX::UpdateMonitor()
 {
+  CLog::Log(LOGERROR, "%s is not implemented", __FUNCTION__);
+#if 0
   const MONITOR_DETAILS* monitor = GetMonitor(m_nScreen);
   if (monitor)
     SetMonitor(monitor->hMonitor);
+#endif
 }
 
 bool CWinSystemWin10DX::ResizeWindow(int newWidth, int newHeight, int newLeft, int newTop)
@@ -112,7 +116,7 @@ bool CWinSystemWin10DX::SetFullScreen(bool fullScreen, RESOLUTION_INFO& res, boo
   if (!monitor)
     return false;
 
-  SetMonitor(monitor->hMonitor);
+  //SetMonitor(monitor->hMonitor);
   CRenderSystemDX::m_interlaced = ((res.dwFlags & D3DPRESENTFLAG_INTERLACED) != 0);
   CRenderSystemDX::m_useWindowedDX = UseWindowedDX(fullScreen);
 

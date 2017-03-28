@@ -1,16 +1,11 @@
 #pragma once
 
-#if defined XBMC_EXPORT
-#define DECLDIR __declspec(dllexport)
-#else
-#define DECLDIR __declspec(dllimport)
-#endif
+#include "xbmcexport.h"
+#include "rendering/dx/DeviceResources.h"
+#include <memory>
 
-extern "C"
-{
-  DECLDIR int KodiAdd(int a, int b);
-  DECLDIR int Win10Main(Windows::UI::Core::CoreDispatcher^ dispatcher, Windows::UI::Xaml::Controls::Panel^ swapChainPanel);
-}
+DECLDIR std::shared_ptr<DX::DeviceResources> getKodiDeviceResources();
+DECLDIR int Win10Main(Windows::UI::Core::CoreDispatcher^ dispatcher);
 
 
 

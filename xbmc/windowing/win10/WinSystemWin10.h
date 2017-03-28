@@ -28,6 +28,9 @@
 #include <string>
 #include <vector>
 
+#pragma pack(push)
+#pragma pack(8)
+
 struct MONITOR_DETAILS
 {
   // Windows desktop info
@@ -36,11 +39,6 @@ struct MONITOR_DETAILS
   int       RefreshRate;
   int       Bpp;
   bool      Interlaced;
-
-  HMONITOR  hMonitor;
-  std::wstring MonitorNameW;
-  std::wstring CardNameW;
-  std::wstring DeviceNameW;
   int       ScreenNumber; // XBMC POV, not Windows. Windows primary is XBMC #0, then each secondary is +1.
 };
 
@@ -192,6 +190,7 @@ protected:
   XbmcThreads::EndTime m_dispResetTimer;
 };
 
+#pragma pack(pop)
 
 #endif // WINDOW_SYSTEM_WIN10_H
 

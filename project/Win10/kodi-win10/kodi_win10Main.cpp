@@ -1,39 +1,28 @@
 ﻿#include "pch.h"
 #include "kodi_win10Main.h"
-#include "Common\DirectXHelper.h"
 
 using namespace kodi_win10;
 using namespace Windows::Foundation;
 using namespace Windows::System::Threading;
 using namespace Concurrency;
 
-#include "xbmc/platform/win10/Win10Main.h"
+#include "platform/win10/Win10Main.h"
 #pragma comment(lib, "libkodi.lib")
 
 // Loads and initializes application assets when the application is loaded.
-kodi_win10Main::kodi_win10Main(const std::shared_ptr<DX::DeviceResources>& deviceResources) :
-	m_deviceResources(deviceResources), m_pointerLocationX(0.0f)
+kodi_win10Main::kodi_win10Main() :
+	m_pointerLocationX(0.0f)
 {
 	// Register to be notified if the Device is lost or recreated
-	m_deviceResources->RegisterDeviceNotify(this);
-
-	// TODO: Replace this with your app's content initialization.
-	//m_sceneRenderer = std::unique_ptr<Sample3DSceneRenderer>(new Sample3DSceneRenderer(m_deviceResources));
-
-	//m_fpsTextRenderer = std::unique_ptr<SampleFpsTextRenderer>(new SampleFpsTextRenderer(m_deviceResources));
-
-	// TODO: Change the timer settings if you want something other than the default variable timestep mode.
-	// e.g. for 60 FPS fixed timestep update logic, call:
-	/*
-	m_timer.SetFixedTimeStep(true);
-	m_timer.SetTargetElapsedSeconds(1.0 / 60);
-	*/
+  auto deviceResources = getKodiDeviceResources();
+  deviceResources->RegisterDeviceNotify(this);
 }
 
 kodi_win10Main::~kodi_win10Main()
 {
 	// Deregister device notification
-	m_deviceResources->RegisterDeviceNotify(nullptr);
+  auto deviceResources = getKodiDeviceResources();
+  deviceResources->RegisterDeviceNotify(nullptr);
 }
 
 // Updates application state when the window size changes (e.g. device orientation change)
@@ -55,7 +44,7 @@ void kodi_win10Main::StartRenderLoop(Windows::UI::Xaml::Controls::Panel^ swapCha
 	// Create a task that will be run on a background thread.
 	auto workItemHandler = ref new WorkItemHandler([this, dispatcher, swapChainPanel](IAsyncAction ^ action)
 	{
-    Win10Main(dispatcher, swapChainPanel);
+    Win10Main(dispatcher);
 #if 0
     // Calculate the updated frame and render once per vertical blanking interval.
     while (action->Status == AsyncStatus::Started)
@@ -80,20 +69,6 @@ void kodi_win10Main::StopRenderLoop()
 	m_renderLoopWorker->Cancel();
 }
 
-// Updates the application state once per frame.
-void kodi_win10Main::Update() 
-{
-	ProcessInput();
-
-	// Update scene objects.
-	m_timer.Tick([&]()
-	{
-		// TODO: Replace this with your app's content update functions.
-		//m_sceneRenderer->Update(m_timer);
-		//m_fpsTextRenderer->Update(m_timer);
-	});
-}
-
 // Process all input from the user before updating game state
 void kodi_win10Main::ProcessInput()
 {
@@ -101,6 +76,7 @@ void kodi_win10Main::ProcessInput()
 	//m_sceneRenderer->TrackingUpdate(m_pointerLocationX);
 }
 
+#if 0
 // Renders the current frame according to the current application state.
 // Returns true if the frame was rendered and is ready to be displayed.
 bool kodi_win10Main::Render() 
@@ -132,6 +108,8 @@ bool kodi_win10Main::Render()
 
 	return true;
 }
+
+#endif
 
 // Notifies renderers that device resources need to be released.
 void kodi_win10Main::OnDeviceLost()

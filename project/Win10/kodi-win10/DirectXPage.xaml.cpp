@@ -5,9 +5,7 @@
 
 #include "pch.h"
 #include "DirectXPage.xaml.h"
-
-
-
+#include "platform/win10/Win10Main.h"
 
 using namespace kodi_win10;
 
@@ -26,6 +24,8 @@ using namespace Windows::UI::Xaml::Input;
 using namespace Windows::UI::Xaml::Media;
 using namespace Windows::UI::Xaml::Navigation;
 using namespace concurrency;
+
+#pragma comment(lib, "libkodi.lib")
 
 DirectXPage::DirectXPage():
 	m_windowVisible(true),
@@ -58,8 +58,8 @@ DirectXPage::DirectXPage():
 
 	// At this point we have access to the device. 
 	// We can create the device-dependent resources.
-	m_deviceResources = std::make_shared<DX::DeviceResources>();
-	m_deviceResources->SetSwapChainPanel(swapChainPanel);
+  auto deviceResources = getKodiDeviceResources();
+  deviceResources->SetSwapChainPanel(swapChainPanel);
 
 	// Register our SwapChainPanel to get independent input pointer events
 	auto workItemHandler = ref new WorkItemHandler([this] (IAsyncAction ^)
@@ -83,25 +83,63 @@ DirectXPage::DirectXPage():
 	// Run task on a dedicated high priority background thread.
 	m_inputLoopWorker = ThreadPool::RunAsync(workItemHandler, WorkItemPriority::High, WorkItemOptions::TimeSliced);
 
-	m_main = std::unique_ptr<kodi_win10Main>(new kodi_win10Main(m_deviceResources));
-	m_main->StartRenderLoop(swapChainPanel);
+	StartRenderLoop(swapChainPanel);
 }
 
 DirectXPage::~DirectXPage()
 {
 	// Stop rendering and processing events on destruction.
-	m_main->StopRenderLoop();
+	StopRenderLoop();
 	m_coreInput->Dispatcher->StopProcessEvents();
 }
+
+void DirectXPage::StartRenderLoop(Windows::UI::Xaml::Controls::Panel^ swapChainPanel)
+{
+  // If the animation render loop is already running then do not start another thread.
+  if (m_renderLoopWorker != nullptr && m_renderLoopWorker->Status == AsyncStatus::Started)
+  {
+    return;
+  }
+
+  auto dispatcher = Windows::UI::Xaml::Window::Current->CoreWindow->Dispatcher;
+  // Create a task that will be run on a background thread.
+  auto workItemHandler = ref new WorkItemHandler([this, dispatcher, swapChainPanel](IAsyncAction ^ action)
+  {
+    Win10Main(dispatcher);
+#if 0
+    // Calculate the updated frame and render once per vertical blanking interval.
+    while (action->Status == AsyncStatus::Started)
+    {
+      critical_section::scoped_lock lock(m_criticalSection);
+      Update();
+      if (Render())
+      {
+        m_deviceResources->Present();
+      }
+    }
+#endif // 0
+
+  });
+
+  // Run task on a dedicated high priority background thread.
+  m_renderLoopWorker = ThreadPool::RunAsync(workItemHandler, WorkItemPriority::High, WorkItemOptions::TimeSliced);
+}
+
+void DirectXPage::StopRenderLoop()
+{
+  m_renderLoopWorker->Cancel();
+}
+
 
 // Saves the current state of the app for suspend and terminate events.
 void DirectXPage::SaveInternalState(IPropertySet^ state)
 {
-	critical_section::scoped_lock lock(m_main->GetCriticalSection());
-	m_deviceResources->Trim();
+  auto deviceResources = getKodiDeviceResources();
+	critical_section::scoped_lock lock(deviceResources->GetCriticalSection());
+  deviceResources->Trim();
 
 	// Stop rendering when the app is suspended.
-	m_main->StopRenderLoop();
+	StopRenderLoop();
 
 	// Put code to save app state here.
 }
@@ -112,7 +150,7 @@ void DirectXPage::LoadInternalState(IPropertySet^ state)
 	// Put code to load app state here.
 
 	// Start rendering when the app is resumed.
-	m_main->StartRenderLoop(swapChainPanel);
+	StartRenderLoop(swapChainPanel);
 }
 
 // Window event handlers.
@@ -122,11 +160,11 @@ void DirectXPage::OnVisibilityChanged(CoreWindow^ sender, VisibilityChangedEvent
 	m_windowVisible = args->Visible;
 	if (m_windowVisible)
 	{
-		m_main->StartRenderLoop(swapChainPanel);
+		StartRenderLoop(swapChainPanel);
 	}
 	else
 	{
-		m_main->StopRenderLoop();
+		StopRenderLoop();
 	}
 }
 
@@ -134,26 +172,29 @@ void DirectXPage::OnVisibilityChanged(CoreWindow^ sender, VisibilityChangedEvent
 
 void DirectXPage::OnDpiChanged(DisplayInformation^ sender, Object^ args)
 {
-	critical_section::scoped_lock lock(m_main->GetCriticalSection());
+  auto deviceResources = getKodiDeviceResources();
+	critical_section::scoped_lock lock(deviceResources->GetCriticalSection());
 	// Note: The value for LogicalDpi retrieved here may not match the effective DPI of the app
 	// if it is being scaled for high resolution devices. Once the DPI is set on DeviceResources,
 	// you should always retrieve it using the GetDpi method.
 	// See DeviceResources.cpp for more details.
-	m_deviceResources->SetDpi(sender->LogicalDpi);
-	m_main->CreateWindowSizeDependentResources();
+  deviceResources->SetDpi(sender->LogicalDpi);
+	//m_main->CreateWindowSizeDependentResources();
 }
 
 void DirectXPage::OnOrientationChanged(DisplayInformation^ sender, Object^ args)
 {
-	critical_section::scoped_lock lock(m_main->GetCriticalSection());
-	m_deviceResources->SetCurrentOrientation(sender->CurrentOrientation);
-	m_main->CreateWindowSizeDependentResources();
+  auto deviceResources = getKodiDeviceResources();
+  critical_section::scoped_lock lock(deviceResources->GetCriticalSection());
+  deviceResources->SetCurrentOrientation(sender->CurrentOrientation);
+	//m_main->CreateWindowSizeDependentResources();
 }
 
 void DirectXPage::OnDisplayContentsInvalidated(DisplayInformation^ sender, Object^ args)
 {
-	critical_section::scoped_lock lock(m_main->GetCriticalSection());
-	m_deviceResources->ValidateDevice();
+  auto deviceResources = getKodiDeviceResources();
+  critical_section::scoped_lock lock(deviceResources->GetCriticalSection());
+  deviceResources->ValidateDevice();
 }
 
 // Called when the app bar button is clicked.
@@ -165,35 +206,28 @@ void DirectXPage::AppBarButton_Click(Object^ sender, RoutedEventArgs^ e)
 
 void DirectXPage::OnPointerPressed(Object^ sender, PointerEventArgs^ e)
 {
-	// When the pointer is pressed begin tracking the pointer movement.
-	m_main->StartTracking();
 }
 
 void DirectXPage::OnPointerMoved(Object^ sender, PointerEventArgs^ e)
 {
-	// Update the pointer tracking code.
-	if (m_main->IsTracking())
-	{
-		m_main->TrackingUpdate(e->CurrentPoint->Position.X);
-	}
 }
 
 void DirectXPage::OnPointerReleased(Object^ sender, PointerEventArgs^ e)
 {
-	// Stop tracking pointer movement when the pointer is released.
-	m_main->StopTracking();
 }
 
 void DirectXPage::OnCompositionScaleChanged(SwapChainPanel^ sender, Object^ args)
 {
-	critical_section::scoped_lock lock(m_main->GetCriticalSection());
-	m_deviceResources->SetCompositionScale(sender->CompositionScaleX, sender->CompositionScaleY);
-	m_main->CreateWindowSizeDependentResources();
+  auto deviceResources = getKodiDeviceResources();
+  critical_section::scoped_lock lock(deviceResources->GetCriticalSection());
+  deviceResources->SetCompositionScale(sender->CompositionScaleX, sender->CompositionScaleY);
+	//m_main->CreateWindowSizeDependentResources();
 }
 
 void DirectXPage::OnSwapChainPanelSizeChanged(Object^ sender, SizeChangedEventArgs^ e)
 {
-	critical_section::scoped_lock lock(m_main->GetCriticalSection());
-	m_deviceResources->SetLogicalSize(e->NewSize);
-	m_main->CreateWindowSizeDependentResources();
+  auto deviceResources = getKodiDeviceResources();
+  critical_section::scoped_lock lock(deviceResources->GetCriticalSection());
+  deviceResources->SetLogicalSize(e->NewSize);
+	//m_main->CreateWindowSizeDependentResources();
 }
