@@ -34,7 +34,7 @@ using namespace PERIPHERALS;
 #define MAX_BUS_DEVICES 2000
 
 CPeripheralBusUSB::CPeripheralBusUSB(CPeripherals *manager) :
-    CPeripheralBus("PeripBusUSB", manager, PERIPHERAL_BUS_USB)
+    CPeripheralBus("PeripBusUSB", *manager, PERIPHERAL_BUS_USB)
 {
   /* device removals aren't always triggering OnDeviceRemoved events, so poll for changes every 5 seconds to be sure we don't miss anything */
   m_iRescanTime = 5000;
