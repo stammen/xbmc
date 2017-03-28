@@ -135,6 +135,21 @@ CVariant::CVariant()
 {
 }
 
+CVariant::CVariant(const CVariant &variant)
+{
+  m_type = VariantTypeNull;
+  *this = variant;
+}
+
+CVariant::CVariant(CVariant&& rhs)
+{
+  //Set this so that operator= don't try and run cleanup
+  //when we're not initialized.
+  m_type = VariantTypeNull;
+
+  *this = std::move(rhs);
+}
+
 CVariant CVariant::ConstNullVariant = CVariant::VariantTypeConstNull;
 
 CVariant::CVariant(VariantType type)

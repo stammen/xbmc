@@ -68,10 +68,8 @@ public:
   CVariant(const std::vector<std::string> &strArray);
   CVariant(const std::map<std::string, std::string> &strMap);
   CVariant(const std::map<std::string, CVariant> &variantMap);
-  //CVariant(const CVariant &variant);
-  //CVariant(CVariant &&rhs);
-
-
+  CVariant(const CVariant &variant);
+  CVariant(CVariant &&rhs);
   
   bool isInteger() const;
   bool isSignedInteger() const;
@@ -98,6 +96,8 @@ public:
   const CVariant &operator[](const std::string &key) const;
   CVariant &operator[](unsigned int position);
   const CVariant &operator[](unsigned int position) const;
+
+
 
   CVariant &operator=(const CVariant &rhs);
   bool operator==(const CVariant &rhs) const;
@@ -144,14 +144,12 @@ public:
 
 private:
   VariantType m_type;
-
-  std::string m_string;
-  std::wstring m_wstring;
   VariantMap m_map;
   VariantArray m_array;
+  std::string m_string;
+  std::wstring m_wstring;
   int64_t m_integer;
   uint64_t m_unsignedinteger;
-  bool m_boolean;
   double m_dvalue;
-
+  bool m_boolean;
 };
