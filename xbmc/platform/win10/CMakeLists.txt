@@ -7,7 +7,8 @@ set(SOURCES Win10Main.cpp
             ../win32/stat_utf8.cpp
             ../win32/stdio_utf8.cpp
             ../win32/strverscmp.cpp
-            ../win32/WIN32Util.cpp)
+            ../win32/WIN32Util.cpp
+            ../posix/main.cpp)
 
 set(HEADERS ../win32/CharsetConverter.h
             ../win32/dirent.h
