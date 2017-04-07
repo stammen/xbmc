@@ -1,5 +1,5 @@
 /*
- *      Copyright (C) 2014-2016 Team Kodi
+ *      Copyright (C) 2014-2017 Team Kodi
  *      http://kodi.tv
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -232,8 +232,7 @@ void CGUIControllerWindow::OnInitWindow(void)
   OnMessage(msgFocus);
 
   // Enable button mapping support
-  if (!CServiceBroker::GetPeripherals().EnableButtonMapping())
-    CLog::Log(LOGDEBUG, "Joystick support not found");
+  CServiceBroker::GetPeripherals().EnableButtonMapping();
 
   // FIXME: not thread safe
 //  ADDON::CRepositoryUpdater::GetInstance().Events().Subscribe(this, &CGUIControllerWindow::OnEvent);

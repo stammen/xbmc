@@ -39,12 +39,12 @@ namespace PVR
 
 bool CPVRSetRecordingOnChannelJob::DoWork()
 {
-  return CPVRGUIActions::GetInstance().SetRecordingOnChannel(m_channel, m_bOnOff);
+  return CServiceBroker::GetPVRManager().GUIActions()->SetRecordingOnChannel(m_channel, m_bOnOff);
 }
 
 bool CPVRContinueLastChannelJob::DoWork()
 {
-  return CPVRGUIActions::GetInstance().ContinueLastPlayedChannel();
+  return CServiceBroker::GetPVRManager().GUIActions()->ContinueLastPlayedChannel();
 }
 
 CPVREventlogJob::CPVREventlogJob(bool bNotifyUser, bool bError, const std::string &label, const std::string &msg, const std::string &icon)
@@ -69,28 +69,6 @@ bool CPVREventlogJob::DoWork()
     CEventLog::GetInstance().Add(
       EventPtr(new CNotificationEvent(event.m_label, event.m_msg, event.m_icon, event.m_bError ? EventLevel::Error : EventLevel::Information)));
   }
-  return true;
-}
-
-bool CPVRChannelSwitchJob::DoWork(void)
-{
-  // announce OnStop and delete m_previous when done
-  if (m_previous)
-  {
-    CVariant data(CVariant::VariantTypeObject);
-    data["end"] = true;
-    ANNOUNCEMENT::CAnnouncementManager::GetInstance().Announce(ANNOUNCEMENT::Player, "xbmc", "OnStop", CFileItemPtr(m_previous), data);
-  }
-
-  // announce OnPlay if the switch was successful
-  if (m_next)
-  {
-    CVariant param;
-    param["player"]["speed"] = 1;
-    param["player"]["playerid"] = CServiceBroker::GetPlaylistPlayer().GetCurrentPlaylist();
-    ANNOUNCEMENT::CAnnouncementManager::GetInstance().Announce(ANNOUNCEMENT::Player, "xbmc", "OnPlay", CFileItemPtr(new CFileItem(*m_next)), param);
-  }
-
   return true;
 }
 

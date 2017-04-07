@@ -1,5 +1,5 @@
 /*
- *      Copyright (C) 2014-2016 Team Kodi
+ *      Copyright (C) 2014-2017 Team Kodi
  *      http://kodi.tv
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -83,7 +83,7 @@ namespace PERIPHERALS
     virtual size_t       GetNumberOfPeripheralsWithId(const int iVendorId, const int iProductId) const override;
     virtual void         GetDirectory(const std::string &strPath, CFileItemList &items) const override;
     virtual void         ProcessEvents(void) override;
-    virtual bool         EnableButtonMapping() override;
+    virtual void         EnableButtonMapping() override;
     virtual void         PowerOff(const std::string& strLocation) override;
 
     // implementation of IAddonMgrCallback
@@ -100,7 +100,7 @@ namespace PERIPHERALS
   private:
     void OnEvent(const ADDON::AddonEvent& event);
 
-    bool PromptEnableAddons(const ADDON::VECADDONS& disabledAddons);
+    void PromptEnableAddons(const ADDON::VECADDONS& disabledAddons);
 
     PeripheralAddonVector m_addons;
     PeripheralAddonVector m_failedAddons;

@@ -1,8 +1,7 @@
 #pragma once
-
 /*
- *      Copyright (C) 2005-2013 Team XBMC
- *      http://xbmc.org
+ *      Copyright (C) 2005-2012 Team XBMC
+ *      http://www.xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -20,21 +19,21 @@
  *
  */
 
-#include "DynamicDll.h"
-#include "lib/libexif/libexif.h"
+#include "filesystem/OverrideFile.h"
+#include "video/VideoDatabase.h"
 
-class DllLibExifInterface
+namespace XFILE
+{
+class CVideoDatabaseFile : public COverrideFile
 {
 public:
-    virtual bool process_jpeg(const char *, ExifInfo_t *, IPTCInfo_t *)=0;
-    virtual ~DllLibExifInterface() {}
-};
+  CVideoDatabaseFile(void);
+  virtual ~CVideoDatabaseFile(void);
 
-class DllLibExif : public DllDynamic, DllLibExifInterface
-{
-  DECLARE_DLL_WRAPPER(DllLibExif, DLL_PATH_LIBEXIF)
-  DEFINE_METHOD3(bool, process_jpeg, (const char *p1, ExifInfo_t *p2, IPTCInfo_t *p3))
-  BEGIN_METHOD_RESOLVE()
-    RESOLVE_METHOD(process_jpeg)
-  END_METHOD_RESOLVE()
+  static CVideoInfoTag GetVideoTag(const CURL& url);
+  
+protected:
+  virtual std::string TranslatePath(const CURL& url);
+  static VIDEODB_CONTENT_TYPE GetType(const CURL& url);
 };
+}

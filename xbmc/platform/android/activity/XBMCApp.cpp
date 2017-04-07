@@ -61,7 +61,6 @@
 
 #include "AndroidKey.h"
 #include "settings/AdvancedSettings.h"
-#include "cores/AudioEngine/AEFactory.h"
 #include "Application.h"
 #include "AppParamParser.h"
 #include "messaging/ApplicationMessenger.h"
@@ -69,6 +68,8 @@
 #include "settings/DisplaySettings.h"
 #include "guilib/GraphicContext.h"
 #include "guilib/GUIWindowManager.h"
+#include "cores/AudioEngine/Interfaces/AE.h"
+#include "ServiceBroker.h"
 #include "platform/android/activity/IInputDeviceCallbacks.h"
 #include "platform/android/activity/IInputDeviceEventHandler.h"
 #include "input/Key.h"
@@ -77,6 +78,8 @@
 #include "cores/VideoPlayer/VideoRenderers/RenderManager.h"
 #include "filesystem/SpecialProtocol.h"
 #include "utils/StringUtils.h"
+#include "filesystem/VideoDatabaseFile.h"
+#include "utils/URIUtils.h"
 #include "utils/Variant.h"
 #include "windowing/egl/VideoSyncAndroid.h"
 #include "windowing/WinEvents.h"
@@ -84,7 +87,6 @@
 #include "platform/XbmcContext.h"
 #include "windowing/XBMC_events.h"
 #include "input/XBMC_keysym.h"
-
 
 #define GIGABYTES       1073741824
 
@@ -161,6 +163,7 @@ void CXBMCApp::onResume()
   intentFilter.addAction("android.intent.action.BATTERY_CHANGED");
   intentFilter.addAction("android.intent.action.SCREEN_ON");
   intentFilter.addAction("android.intent.action.HEADSET_PLUG");
+  intentFilter.addAction("android.intent.action.HDMI_AUDIO_PLUG");
   registerReceiver(*this, intentFilter);
 
   if (!g_application.IsInScreenSaver())
@@ -183,6 +186,7 @@ void CXBMCApp::onResume()
 void CXBMCApp::onPause()
 {
   android_printf("%s: ", __PRETTY_FUNCTION__);
+  
   if (g_application.m_pPlayer->IsPlaying())
   {
     if (g_application.m_pPlayer->IsPlayingVideo())
@@ -289,7 +293,7 @@ bool CXBMCApp::EnableWakeLock(bool on)
   {
     std::string appName = CCompileInfo::GetAppName();
     StringUtils::ToLower(appName);
-    std::string className = "org.xbmc." + appName;
+    std::string className = CCompileInfo::GetPackage();
     // SCREEN_BRIGHT_WAKE_LOCK is marked as deprecated but there is no real alternatives for now
     m_wakeLock = new CJNIWakeLock(CJNIPowerManager(getSystemService("power")).newWakeLock(CJNIPowerManager::SCREEN_BRIGHT_WAKE_LOCK, className.c_str()));
     if (m_wakeLock)
@@ -349,11 +353,6 @@ bool CXBMCApp::ReleaseAudioFocus()
     return false;
   }
   return true;
-}
-
-bool CXBMCApp::HasFocus()
-{
-  return m_hasFocus;
 }
 
 bool CXBMCApp::IsHeadsetPlugged()
@@ -785,18 +784,20 @@ void CXBMCApp::onReceive(CJNIIntent intent)
     if (HasFocus())
       g_application.WakeUpScreenSaverAndDPMS();
   }
-  else if (action == "android.intent.action.HEADSET_PLUG" || action == "android.bluetooth.a2dp.profile.action.CONNECTION_STATE_CHANGED")
+  else if (action == "android.intent.action.HEADSET_PLUG" ||
+    action == "android.bluetooth.a2dp.profile.action.CONNECTION_STATE_CHANGED" ||
+    action == "android.intent.action.HDMI_AUDIO_PLUG")
   {
     bool newstate;
-    if (action == "android.intent.action.HEADSET_PLUG")
+    if (action == "android.intent.action.HEADSET_PLUG" || action == "android.intent.action.HDMI_AUDIO_PLUG")
       newstate = (intent.getIntExtra("state", 0) != 0);
-    else
+    else if (action == "android.bluetooth.a2dp.profile.action.CONNECTION_STATE_CHANGED")
       newstate = (intent.getIntExtra("android.bluetooth.profile.extra.STATE", 0) == 2 /* STATE_CONNECTED */);
 
     if (newstate != m_headsetPlugged)
     {
       m_headsetPlugged = newstate;
-      CAEFactory::DeviceChange();
+      CServiceBroker::GetActiveAE().DeviceChange();
     }
   }
   else if (action == "android.intent.action.MEDIA_BUTTON")
@@ -833,10 +834,36 @@ void CXBMCApp::onReceive(CJNIIntent intent)
 void CXBMCApp::onNewIntent(CJNIIntent intent)
 {
   std::string action = intent.getAction();
+  CXBMCApp::android_printf("Got Intent: %s", action.c_str());
+  std::string targetFile = GetFilenameFromIntent(intent);
+  CXBMCApp::android_printf("-- targetFile: %s", targetFile.c_str());
   if (action == "android.intent.action.VIEW")
   {
-    CApplicationMessenger::GetInstance().SendMsg(TMSG_MEDIA_PLAY, 1, 0, static_cast<void*>(
-                                                 new CFileItem(GetFilenameFromIntent(intent), false)));
+    CFileItem* item = new CFileItem(targetFile, false);
+    if (item->IsVideoDb())
+    {
+      *(item->GetVideoInfoTag()) = XFILE::CVideoDatabaseFile::GetVideoTag(CURL(item->GetPath()));
+      item->SetPath(item->GetVideoInfoTag()->m_strFileNameAndPath);
+    }
+    CApplicationMessenger::GetInstance().PostMsg(TMSG_MEDIA_PLAY, 0, 0, static_cast<void*>(item));
+  }
+  else if (action == "android.intent.action.GET_CONTENT")
+  {
+    CURL targeturl(targetFile);
+    if (targeturl.IsProtocol("videodb"))
+    {
+      std::vector<std::string> params;
+      params.push_back(targeturl.Get());
+      params.push_back("return");
+      CApplicationMessenger::GetInstance().PostMsg(TMSG_GUI_ACTIVATE_WINDOW, WINDOW_VIDEO_NAV, 0, nullptr, "", params);
+    }
+    else if (targeturl.IsProtocol("musicdb"))
+    {
+      std::vector<std::string> params;
+      params.push_back(targeturl.Get());
+      params.push_back("return");
+      CApplicationMessenger::GetInstance().PostMsg(TMSG_GUI_ACTIVATE_WINDOW, WINDOW_MUSIC_NAV, 0, nullptr, "", params);
+    }
   }
 }
 
@@ -891,7 +918,7 @@ void CXBMCApp::SetupEnv()
 
   std::string appName = CCompileInfo::GetAppName();
   StringUtils::ToLower(appName);
-  std::string className = "org.xbmc." + appName;
+  std::string className = CCompileInfo::GetPackage();
 
   std::string xbmcHome = CJNISystem::getProperty("xbmc.home", "");
   if (xbmcHome.empty())
