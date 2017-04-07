@@ -621,6 +621,19 @@ CVariant &CVariant::operator=(const CVariant &rhs)
   return *this;
 }
 
+CVariant& CVariant::operator=(CVariant&& rhs)
+{
+  if (m_type == VariantTypeConstNull || this == &rhs)
+    return *this;
+
+  m_string = std::move(rhs.m_string);
+  m_wstring = std::move(rhs.m_wstring);
+  m_array = std::move(rhs.m_array);
+  m_map = std::move(rhs.m_map);
+
+  return *this;
+}
+
 
 bool CVariant::operator==(const CVariant &rhs) const
 {
@@ -651,6 +664,7 @@ bool CVariant::operator==(const CVariant &rhs) const
 
   return false;
 }
+
 
 void CVariant::push_back(const CVariant &variant)
 {

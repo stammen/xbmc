@@ -100,6 +100,7 @@ public:
 
 
   CVariant &operator=(const CVariant &rhs);
+  CVariant &operator=(CVariant &&rhs);
   bool operator==(const CVariant &rhs) const;
   bool operator!=(const CVariant &rhs) const { return !(*this == rhs); }
 
