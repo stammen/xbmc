@@ -131,7 +131,7 @@
       <AdditionalIncludeDirectories>$(ProjectDir)..\..\..\xbmc;$(ProjectDir);$(IntermediateOutputPath);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
       <DisableSpecificWarnings>4453;28204;4251;</DisableSpecificWarnings>
-      <PreprocessorDefinitions>_DEBUG;_ITERATOR_DEBUG_LEVEL=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">
@@ -164,7 +164,7 @@
       <AdditionalIncludeDirectories>$(ProjectDir)..\..\..\xbmc;$(ProjectDir);$(IntermediateOutputPath);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
       <DisableSpecificWarnings>4453;28204;4251;</DisableSpecificWarnings>
-      <PreprocessorDefinitions>_DEBUG;_ITERATOR_DEBUG_LEVEL=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -195,7 +195,7 @@
       <AdditionalIncludeDirectories>$(ProjectDir)..\..\..\xbmc;$(ProjectDir);$(IntermediateOutputPath);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
       <DisableSpecificWarnings>4453;28204;4251;</DisableSpecificWarnings>
-      <PreprocessorDefinitions>_DEBUG;_ITERATOR_DEBUG_LEVEL=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -264,9 +264,6 @@
   <ItemGroup>
     <ProjectReference Include="..\..\..\kodi-build\build\Effects11\effects11.vcxproj">
       <Project>{c25b7dc3-ca41-344f-a12b-06c5b5082a21}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\..\..\kodi-build\build\exif\exif.vcxproj">
-      <Project>{cff3f3d9-4e8d-3536-8018-3b4a3925ad53}</Project>
     </ProjectReference>
     <ProjectReference Include="..\..\..\kodi-build\build\unrarxlib\unrarxlib.vcxproj">
       <Project>{08766ab7-cea8-376c-b389-da2a175f759b}</Project>
