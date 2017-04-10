@@ -49,8 +49,6 @@
 #include "pvr/recordings/PVRRecordingsPath.h"
 #include "pvr/timers/PVRTimers.h"
 #include "pvr/windows/GUIWindowPVRBase.h"
-#include "settings/lib/Setting.h"
-#include "settings/MediaSettings.h"
 #include "settings/Settings.h"
 #include "threads/SingleLock.h"
 #include "threads/SystemClock.h"
@@ -161,15 +159,22 @@ CPVRManager::CPVRManager(void) :
     m_progressHandle(nullptr),
     m_managerState(ManagerStateStopped),
     m_isChannelPreview(false),
-    m_bSettingPowerManagementEnabled(CServiceBroker::GetSettings().GetBool(CSettings::SETTING_PVRPOWERMANAGEMENT_ENABLED)),
-    m_strSettingWakeupCommand(CServiceBroker::GetSettings().GetString(CSettings::SETTING_PVRPOWERMANAGEMENT_SETWAKEUPCMD))
+    m_settings({
+      CSettings::SETTING_PVRPOWERMANAGEMENT_ENABLED,
+      CSettings::SETTING_PVRPOWERMANAGEMENT_SETWAKEUPCMD,
+      CSettings::SETTING_PVRPARENTAL_ENABLED,
+      CSettings::SETTING_PVRPARENTAL_DURATION,
+      CSettings::SETTING_EPG_HIDENOINFOAVAILABLE,
+      CSettings::SETTING_PVRPLAYBACK_CHANNELENTRYTIMEOUT,
+      CSettings::SETTING_PVRPOWERMANAGEMENT_DAILYWAKEUPTIME,
+      CSettings::SETTING_PVRPOWERMANAGEMENT_BACKENDIDLETIME
+    })
 {
   CAnnouncementManager::GetInstance().AddAnnouncer(this);
 }
 
 CPVRManager::~CPVRManager(void)
 {
-  CServiceBroker::GetSettings().UnregisterCallback(this);
   CAnnouncementManager::GetInstance().RemoveAnnouncer(this);
   CLog::Log(LOGDEBUG,"PVRManager - destroyed");
 }
@@ -228,28 +233,6 @@ CPVRClientsPtr CPVRManager::Clients(void) const
   return m_addons;
 }
 
-void CPVRManager::OnSettingChanged(const CSetting *setting)
-{
-  if (setting == nullptr)
-    return;
-
-  const std::string &settingId = setting->GetId();
-  if (settingId == CSettings::SETTING_EPG_DAYSTODISPLAY)
-  {
-    m_addons->SetEPGTimeFrame(static_cast<const CSettingInt*>(setting)->GetValue());
-  }
-  else if (settingId == CSettings::SETTING_PVRPOWERMANAGEMENT_ENABLED)
-  {
-    CSingleLock lock(m_critSection);
-    m_bSettingPowerManagementEnabled = static_cast<const CSettingBool*>(setting)->GetValue();
-  }
-  else if (settingId == CSettings::SETTING_PVRPOWERMANAGEMENT_SETWAKEUPCMD)
-  {
-    CSingleLock lock(m_critSection);
-    m_strSettingWakeupCommand = static_cast<const CSettingString*>(setting)->GetValue();
-  }
-}
-
 CPVRGUIActionsPtr CPVRManager::GUIActions(void) const
 {
   // note: m_guiActions is const (only set/reset in ctor/dtor). no need for a lock here.
@@ -291,12 +274,6 @@ void CPVRManager::ResetProperties(void)
 
 void CPVRManager::Init()
 {
-  std::set<std::string> settingSet;
-  settingSet.insert(CSettings::SETTING_EPG_DAYSTODISPLAY);
-  settingSet.insert(CSettings::SETTING_PVRPOWERMANAGEMENT_ENABLED);
-  settingSet.insert(CSettings::SETTING_PVRPOWERMANAGEMENT_SETWAKEUPCMD);
-  CServiceBroker::GetSettings().RegisterCallback(this, settingSet);
-
   // Note: we're holding the progress bar dialog instance pointer in a member because it is needed by pvr core
   //       components. The latter might run in a different thread than the gui and g_windowManager.GetWindow()
   //       locks the global graphics mutex, which easily can lead to deadlocks.
@@ -526,23 +503,15 @@ void CPVRManager::Process(void)
 
 bool CPVRManager::SetWakeupCommand(void)
 {
+  if (!m_settings.GetBoolValue(CSettings::SETTING_PVRPOWERMANAGEMENT_ENABLED))
+    return false;
+
 #ifdef TARGET_WIN10
   CLog::Log(LOGERROR, "%s is not implemented", __FUNCTION__);
   return false;
 #else
-  bool bSettingPowerManagementEnabled;
-  std::string strSettingWakeupCommand;
-
-  {
-    CSingleLock lock(m_critSection);
-    bSettingPowerManagementEnabled = m_bSettingPowerManagementEnabled;
-    strSettingWakeupCommand = m_strSettingWakeupCommand;
-  }
-
-  if (!bSettingPowerManagementEnabled)
-    return false;
-
-  if (!strSettingWakeupCommand.empty() && m_timers)
+  bool  const std::string strWakeupCommand(m_settings.GetStringValue(CSettings::SETTING_PVRPOWERMANAGEMENT_SETWAKEUPCMD));
+  if (!strWakeupCommand.empty() && m_timers)
   {
     time_t iWakeupTime;
     const CDateTime nextEvent = m_timers->GetNextEventTime();
@@ -550,7 +519,7 @@ bool CPVRManager::SetWakeupCommand(void)
     {
       nextEvent.GetAsTime(iWakeupTime);
 
-      std::string strExecCommand = StringUtils::Format("%s %ld", strSettingWakeupCommand.c_str(), iWakeupTime);
+      std::string strExecCommand = StringUtils::Format("%s %ld", strWakeupCommand.c_str(), iWakeupTime);
 
       const int iReturn = system(strExecCommand.c_str());
       if (iReturn != 0)
@@ -801,11 +770,11 @@ bool CPVRManager::IsParentalLocked(const CPVRChannelPtr &channel)
   if (// different channel
       (!currentChannel || channel != currentChannel) &&
       // parental control enabled
-      CServiceBroker::GetSettings().GetBool(CSettings::SETTING_PVRPARENTAL_ENABLED) &&
+      m_settings.GetBoolValue(CSettings::SETTING_PVRPARENTAL_ENABLED) &&
       // channel is locked
       channel && channel->IsLocked())
   {
-    float parentalDurationMs = CServiceBroker::GetSettings().GetInt(CSettings::SETTING_PVRPARENTAL_DURATION) * 1000.0f;
+    float parentalDurationMs = m_settings.GetIntValue(CSettings::SETTING_PVRPARENTAL_DURATION) * 1000.0f;
     bReturn = m_parentalTimer &&
         (!m_parentalTimer->IsRunning() ||
           m_parentalTimer->GetElapsedMilliseconds() > parentalDurationMs);
@@ -957,11 +926,11 @@ bool CPVRManager::UpdateItem(CFileItem& item)
     CMusicInfoTag* musictag = item.GetMusicInfoTag();
     if (musictag)
     {
-      musictag->SetTitle(epgTagNow ?
-          epgTagNow->Title() :
-          CServiceBroker::GetSettings().GetBool(CSettings::SETTING_EPG_HIDENOINFOAVAILABLE) ?
-              "" :
-              g_localizeStrings.Get(19055)); // no information available
+      musictag->SetTitle(epgTagNow
+                         ? epgTagNow->Title()
+                         : m_settings.GetBoolValue(CSettings::SETTING_EPG_HIDENOINFOAVAILABLE)
+                            ? ""
+                            : g_localizeStrings.Get(19055)); // no information available
       if (epgTagNow)
         musictag->SetGenre(epgTagNow->Genre());
       musictag->SetDuration(epgTagNow ? epgTagNow->GetDuration() : 3600);
@@ -978,11 +947,11 @@ bool CPVRManager::UpdateItem(CFileItem& item)
     CVideoInfoTag *videotag = item.GetVideoInfoTag();
     if (videotag)
     {
-      videotag->m_strTitle = epgTagNow ?
-          epgTagNow->Title() :
-          CServiceBroker::GetSettings().GetBool(CSettings::SETTING_EPG_HIDENOINFOAVAILABLE) ?
-              "" :
-              g_localizeStrings.Get(19055); // no information available
+      videotag->m_strTitle = epgTagNow
+        ? epgTagNow->Title()
+        : m_settings.GetBoolValue(CSettings::SETTING_EPG_HIDENOINFOAVAILABLE)
+          ? ""
+          : g_localizeStrings.Get(19055); // no information available
       if (epgTagNow)
         videotag->m_genre = epgTagNow->Genre();
       videotag->m_strPath = channelTag->Path();
@@ -1021,8 +990,7 @@ bool CPVRManager::PerformChannelSwitch(const CPVRChannelPtr &channel, bool bPrev
 
     if (bPreview)
     {
-      if (!g_infoManager.GetShowInfo() &&
-          CServiceBroker::GetSettings().GetInt(CSettings::SETTING_PVRPLAYBACK_CHANNELENTRYTIMEOUT) == 0)
+      if (!g_infoManager.GetShowInfo() && m_settings.GetIntValue(CSettings::SETTING_PVRPLAYBACK_CHANNELENTRYTIMEOUT) == 0)
       {
         // no need to do anything
         return true;
@@ -1199,7 +1167,7 @@ bool CPVRManager::CanSystemPowerdown(bool bAskUser /*= true*/) const
           const CDateTime now(CDateTime::GetUTCDateTime());
 
           CDateTime dailywakeuptime;
-          dailywakeuptime.SetFromDBTime(CServiceBroker::GetSettings().GetString(CSettings::SETTING_PVRPOWERMANAGEMENT_DAILYWAKEUPTIME));
+          dailywakeuptime.SetFromDBTime(m_settings.GetStringValue(CSettings::SETTING_PVRPOWERMANAGEMENT_DAILYWAKEUPTIME));
           dailywakeuptime = dailywakeuptime.GetAsUTCDateTime();
 
           const CDateTimeSpan diff(dailywakeuptime - now);
@@ -1288,8 +1256,7 @@ bool CPVRManager::IsNextEventWithinBackendIdleTime(void) const
 {
   // timers going off soon?
   const CDateTime now(CDateTime::GetUTCDateTime());
-  const CDateTimeSpan idle(
-    0, 0, CServiceBroker::GetSettings().GetInt(CSettings::SETTING_PVRPOWERMANAGEMENT_BACKENDIDLETIME), 0);
+  const CDateTimeSpan idle(0, 0, m_settings.GetIntValue(CSettings::SETTING_PVRPOWERMANAGEMENT_BACKENDIDLETIME), 0);
   const CDateTime next(m_timers->GetNextEventTime());
   const CDateTimeSpan delta(next - now);
 
