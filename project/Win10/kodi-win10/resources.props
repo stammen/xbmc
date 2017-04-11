@@ -61,7 +61,7 @@
       <Link>addons\%(RecursiveDir)%(FileName)%(Extension)</Link>
       <DeploymentContent>true</DeploymentContent>
     </_Addons>
-    <_Addons2 Include="$(ProjectDir)..\..\..\build-win32\addons\**\*">
+    <_Addons2 Include="$(ProjectDir)..\..\Win32BuildSetup\BUILD_WIN32\addons\**\*">
       <Link>addons\%(RecursiveDir)%(FileName)%(Extension)</Link>
       <DeploymentContent>true</DeploymentContent>
     </_Addons2>
@@ -94,6 +94,9 @@
     <ItemGroup>
       <None Include="@(_Userdata)" />
     </ItemGroup>
+    <ItemGroup>
+      <None Include="@(_Addons)" />
+    </ItemGroup> 
     <ItemGroup>
       <None Include="@(_Addons2)" />
     </ItemGroup> 

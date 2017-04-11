@@ -265,9 +265,6 @@
     <ProjectReference Include="..\..\..\kodi-build\build\Effects11\effects11.vcxproj">
       <Project>{c25b7dc3-ca41-344f-a12b-06c5b5082a21}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\..\..\kodi-build\build\unrarxlib\unrarxlib.vcxproj">
-      <Project>{08766ab7-cea8-376c-b389-da2a175f759b}</Project>
-    </ProjectReference>
     <ProjectReference Include="..\..\..\kodi-build\build\upnp\upnp.vcxproj">
       <Project>{2a028bfe-c648-3eec-b9b5-3aa44203aad6}</Project>
     </ProjectReference>
