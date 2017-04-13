@@ -20,11 +20,7 @@
 
 #include "platform/MessagePrinter.h"
 #include "CompileInfo.h"
-<<<<<<< HEAD
-#include "utils/log.h"
-=======
 #include "platform/win32/CharsetConverter.h"
->>>>>>> master
 
 #ifdef TARGET_WIN10
 int WINAPI MessageBox(void* hWnd, const char* lpText, const char* lpCaption, UINT uType)

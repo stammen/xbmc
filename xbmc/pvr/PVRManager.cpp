@@ -507,10 +507,8 @@ bool CPVRManager::SetWakeupCommand(void)
     return false;
 
 #ifdef TARGET_WIN10
-  CLog::Log(LOGERROR, "%s is not implemented", __FUNCTION__);
-  return false;
-#else
-  bool  const std::string strWakeupCommand(m_settings.GetStringValue(CSettings::SETTING_PVRPOWERMANAGEMENT_SETWAKEUPCMD));
+
+  const std::string strWakeupCommand(m_settings.GetStringValue(CSettings::SETTING_PVRPOWERMANAGEMENT_SETWAKEUPCMD));
   if (!strWakeupCommand.empty() && m_timers)
   {
     time_t iWakeupTime;
@@ -528,9 +526,12 @@ bool CPVRManager::SetWakeupCommand(void)
       return iReturn == 0;
     }
   }
+#else
+  CLog::Log(LOGERROR, "%s is not implemented", __FUNCTION__);
 #endif
   return false;
 }
+
 
 void CPVRManager::OnSleep()
 {

@@ -38,11 +38,7 @@
 #include "addons/AddonManager.h"
 #include "addons/AudioEncoder.h"
 
-<<<<<<< HEAD
-#ifdef TARGET_WIN10
-=======
-#if defined(TARGET_WINDOWS)
->>>>>>> master
+#if defined(TARGET_WINDOWS) || defined(TARGET_WIN10)
 #include "platform/win32/CharsetConverter.h"
 #endif
 
