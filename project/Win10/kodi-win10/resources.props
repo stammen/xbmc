@@ -61,7 +61,9 @@
       <Link>addons\%(RecursiveDir)%(FileName)%(Extension)</Link>
       <DeploymentContent>true</DeploymentContent>
     </_Addons>
-    <_Addons2 Include="$(ProjectDir)..\..\Win32BuildSetup\BUILD_WIN32\addons\**\*">
+  </ItemGroup>
+  <ItemGroup>
+    <_Addons2 Include="$(ProjectDir)..\..\..\kodi-build\addons\**\*">
       <Link>addons\%(RecursiveDir)%(FileName)%(Extension)</Link>
       <DeploymentContent>true</DeploymentContent>
     </_Addons2>
