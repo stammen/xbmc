@@ -345,7 +345,7 @@ failed:
     m_needDataEvent = 0;
   }
 
-  return false;
+  return true;
 }
 
 void CAESinkWASAPIWin10::Deinitialize()
