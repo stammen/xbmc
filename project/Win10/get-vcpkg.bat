@@ -5,7 +5,7 @@ if exist vcpkg (
 )
 
 echo Building and installing vcpkg...
-call git clone git@github.com:stammen/vcpkg.git
+call git clone https://github.com/stammen/vcpkg.git
 pushd vcpkg
   call git checkout xbmc
   echo A | powershell -exec bypass scripts\bootstrap.ps1

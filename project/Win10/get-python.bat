@@ -37,7 +37,7 @@ rem goto:install
 
 echo Cloning cpython...
 
-call git clone git@github.com:stammen/cpython.git
+call git clone https://github.com/stammen/cpython.git
 pushd cpython
   call git checkout 2.7-winrt
   pushd PCBuild
