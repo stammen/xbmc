@@ -598,11 +598,10 @@ void DX::DeviceResources::ValidateDevice()
 	ComPtr<IDXGIAdapter> deviceAdapter;
 	DX::ThrowIfFailed(dxgiDevice->GetAdapter(&deviceAdapter));
 
-	ComPtr<IDXGIFactory2> deviceFactory;
-	DX::ThrowIfFailed(deviceAdapter->GetParent(IID_PPV_ARGS(&deviceFactory)));
+	DX::ThrowIfFailed(deviceAdapter->GetParent(IID_PPV_ARGS(&m_dxgiFactory)));
 
 	ComPtr<IDXGIAdapter1> previousDefaultAdapter;
-	DX::ThrowIfFailed(deviceFactory->EnumAdapters1(0, &previousDefaultAdapter));
+	DX::ThrowIfFailed(m_dxgiFactory->EnumAdapters1(0, &previousDefaultAdapter));
 
 	DXGI_ADAPTER_DESC1 previousDesc;
 	DX::ThrowIfFailed(previousDefaultAdapter->GetDesc1(&previousDesc));
@@ -612,11 +611,10 @@ void DX::DeviceResources::ValidateDevice()
 	ComPtr<IDXGIFactory4> currentFactory;
 	DX::ThrowIfFailed(CreateDXGIFactory1(IID_PPV_ARGS(&currentFactory)));
 
-	ComPtr<IDXGIAdapter1> currentDefaultAdapter;
-	DX::ThrowIfFailed(currentFactory->EnumAdapters1(0, &currentDefaultAdapter));
+	DX::ThrowIfFailed(currentFactory->EnumAdapters1(0, &m_adapter));
 
 	DXGI_ADAPTER_DESC1 currentDesc;
-	DX::ThrowIfFailed(currentDefaultAdapter->GetDesc1(&currentDesc));
+	DX::ThrowIfFailed(m_adapter->GetDesc1(&currentDesc));
 
 	// If the adapter LUIDs don't match, or if the device reports that it has been removed,
 	// a new D3D device must be created.
@@ -628,7 +626,7 @@ void DX::DeviceResources::ValidateDevice()
 		// Release references to resources related to the old device.
 		dxgiDevice = nullptr;
 		deviceAdapter = nullptr;
-		deviceFactory = nullptr;
+        m_dxgiFactory = nullptr;
 		previousDefaultAdapter = nullptr;
 
 		// Create a new device and swap chain.
