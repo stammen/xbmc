@@ -61,9 +61,8 @@ CRenderSystemDX::CRenderSystemDX() : CRenderSystemBase()
   m_enumRenderingSystem = RENDERING_SYSTEM_DIRECTX;
 
   m_bVSync = true;
-
+  m_bRenderCreated = false;
   ZeroMemory(&m_cachedMode, sizeof(m_cachedMode));
-  ZeroMemory(&m_viewPort, sizeof(m_viewPort));
   ZeroMemory(&m_scissor, sizeof(CRect));
   ZeroMemory(&m_adapterDesc, sizeof(DXGI_ADAPTER_DESC));
   s_windowing = this;
@@ -101,22 +100,16 @@ bool CRenderSystemDX::InitRenderSystem()
   
   CLog::Log(LOGDEBUG, __FUNCTION__" - Initializing D3D11 Factory...");
 
-  HRESULT hr = CreateDXGIFactory1(__uuidof(IDXGIFactory1), reinterpret_cast<void**>(&m_dxgiFactory));
-  if (FAILED(hr)) 
-  {
-    CLog::Log(LOGERROR, __FUNCTION__" - D3D11 initialization failed.");
-    return false;
-  }
-  
   UpdateMonitor();
-  //return CreateDevice();
-  return true;
+  return CreateDevice();
 }
 
 void CRenderSystemDX::SetRenderParams(unsigned int width, unsigned int height, bool fullScreen, float refreshRate)
 {
-  m_nBackBufferWidth  = width;
-  m_nBackBufferHeight = height;
+  CLog::Log(LOGERROR, "%s is not fully implemented", __FUNCTION__);
+
+  //m_nBackBufferWidth  = width;
+  //m_nBackBufferHeight = height;
   m_bFullScreenDevice = fullScreen;
   m_refreshRate       = refreshRate;
 }
@@ -241,6 +234,12 @@ void CRenderSystemDX::OnResize(unsigned int width, unsigned int height)
 #endif // 0
 
 }
+
+CRect CRenderSystemDX::GetBackBufferRect() { 
+  auto vp = DX::DeviceResources::getInstance()->GetScreenViewport();
+  return CRect(0.f, 0.f, static_cast<float>(vp.Width), static_cast<float>(vp.Height));
+}
+
 
 void CRenderSystemDX::GetClosestDisplayModeToCurrent(IDXGIOutput* output, DXGI_MODE_DESC* outCurrentDisplayMode, bool useCached /*= false*/)
 {
@@ -430,15 +429,13 @@ bool CRenderSystemDX::DestroyRenderSystem()
     SetDisplayStereoEnabled(m_bDefaultStereoEnabled);
 
   SAFE_RELEASE(m_pOutput);
-  SAFE_RELEASE(m_adapter);
-  SAFE_RELEASE(m_dxgiFactory);
   return true;
 }
 
 void CRenderSystemDX::DeleteDevice()
 {
   CLog::Log(LOGERROR, "%s is not implemented", __FUNCTION__);
-#if 0
+
   CSingleLock lock(m_resourceSection);
 
   if (m_pGUIShader)
@@ -455,35 +452,14 @@ void CRenderSystemDX::DeleteDevice()
     (*i)->OnDestroyDevice(DXGI_ERROR_DEVICE_REMOVED == m_nDeviceStatus);
   }
 
-  if (m_pSwapChain)
-    m_pSwapChain->SetFullscreenState(false, nullptr);
 
   SAFE_DELETE(m_pGUIShader);
-  SAFE_RELEASE(m_pTextureRight);
-  SAFE_RELEASE(m_pRenderTargetViewRight);
-  SAFE_RELEASE(m_pShaderResourceViewRight);
   SAFE_RELEASE(m_BlendEnableState);
   SAFE_RELEASE(m_BlendDisableState);
   SAFE_RELEASE(m_RSScissorDisable);
   SAFE_RELEASE(m_RSScissorEnable);
   SAFE_RELEASE(m_depthStencilState);
-  SAFE_RELEASE(m_depthStencilView);
-  SAFE_RELEASE(m_pRenderTargetView);
-  if (pContext && pContext != m_pImdContext)
-  {
-    pContext->ClearState();
-    pContext->Flush();
-    SAFE_RELEASE(pContext);
-  }
-  if (m_pImdContext)
-  {
-    m_pImdContext->ClearState();
-    m_pImdContext->Flush();
-    SAFE_RELEASE(m_pImdContext);
-  }
-  SAFE_RELEASE(m_pSwapChain);
-  SAFE_RELEASE(m_pSwapChain1);
-  SAFE_RELEASE(m_pD3DDev);
+
 #ifdef _DEBUG
   if (m_d3dDebug)
   {
@@ -495,7 +471,6 @@ void CRenderSystemDX::DeleteDevice()
   m_bHWStereoEnabled = false;
   m_bRenderCreated = false;
   m_bStereoEnabled = false;
-#endif
 }
 
 void CRenderSystemDX::OnDeviceLost()
@@ -536,103 +511,24 @@ void CRenderSystemDX::OnDeviceReset()
 
 bool CRenderSystemDX::CreateDevice()
 {
-  return true;
-
-#if 0
-  CSingleLock lock(m_resourceSection);
-
-  HRESULT hr;
-  SAFE_RELEASE(m_pD3DDev);
-
-  D3D_FEATURE_LEVEL featureLevels[] =
-  {
-    D3D_FEATURE_LEVEL_11_1,
-    D3D_FEATURE_LEVEL_11_0,
-    D3D_FEATURE_LEVEL_10_1,
-    D3D_FEATURE_LEVEL_10_0,
-    D3D_FEATURE_LEVEL_9_3,
-    D3D_FEATURE_LEVEL_9_2,
-    D3D_FEATURE_LEVEL_9_1,
-  };
-
-  // the VIDEO_SUPPORT flag force lowering feature level if current env not support video on 11_1
-  UINT createDeviceFlags = D3D11_CREATE_DEVICE_VIDEO_SUPPORT; 
-#ifdef _DEBUG
-  createDeviceFlags |= D3D11_CREATE_DEVICE_DEBUG;
-#endif
-  D3D_DRIVER_TYPE driverType = m_adapter == nullptr ? D3D_DRIVER_TYPE_HARDWARE : D3D_DRIVER_TYPE_UNKNOWN;
-  // we should specify D3D_DRIVER_TYPE_UNKNOWN if create device with specified adapter.
-  hr = D3D11CreateDevice(m_adapter, driverType, nullptr, createDeviceFlags, featureLevels, ARRAYSIZE(featureLevels),
-                         D3D11_SDK_VERSION, &m_pD3DDev, &m_featureLevel, &m_pImdContext);
-
-  if (FAILED(hr))
-  {
-    // DirectX 11.0 platforms will not recognize D3D_FEATURE_LEVEL_11_1 so we need to retry without it
-    CLog::Log(LOGDEBUG, "%s - First try to create device failed with error: %s.", __FUNCTION__, GetErrorDescription(hr).c_str());
-    CLog::Log(LOGDEBUG, "%s - Trying to create device with lowest feature level: %#x.", __FUNCTION__, featureLevels[1]);
-
-    hr = D3D11CreateDevice(m_adapter, driverType, nullptr, createDeviceFlags, &featureLevels[1], ARRAYSIZE(featureLevels) - 1,
-                           D3D11_SDK_VERSION, &m_pD3DDev, &m_featureLevel, &m_pImdContext);
-    if (FAILED(hr))
-    {
-      // still failed. seems driver doesn't support video API acceleration, try without VIDEO_SUPPORT flag
-      CLog::Log(LOGDEBUG, "%s - Next try to create device failed with error: %s.", __FUNCTION__, GetErrorDescription(hr).c_str());
-      CLog::Log(LOGDEBUG, "%s - Trying to create device without video API support.", __FUNCTION__);
-
-      createDeviceFlags &= ~D3D11_CREATE_DEVICE_VIDEO_SUPPORT;
-      hr = D3D11CreateDevice(m_adapter, driverType, nullptr, createDeviceFlags, &featureLevels[1], ARRAYSIZE(featureLevels) - 1,
-                             D3D11_SDK_VERSION, &m_pD3DDev, &m_featureLevel, &m_pImdContext);
-      if (SUCCEEDED(hr))
-        CLog::Log(LOGNOTICE, "%s - Your video driver doesn't support DirectX 11 Video Acceleration API. Application is not be able to use hardware video processing and decoding", __FUNCTION__);
-    }
-  }
-
-  if (FAILED(hr))
-  {
-    CLog::Log(LOGERROR, "%s - D3D11 device creation failure with error %s.", __FUNCTION__, GetErrorDescription(hr).c_str());
+  if (!CreateStates() || !InitGUIShader() || !CreateWindowSizeDependentResources())
     return false;
-  }
 
-  if (!m_adapter)
-  {
-    // get adapter from device if it was not detected previously
-    IDXGIDevice1* pDXGIDevice = nullptr;
-    if (SUCCEEDED(m_pD3DDev->QueryInterface(__uuidof(IDXGIDevice1), reinterpret_cast<void**>(&pDXGIDevice))))
-    {
-      IDXGIAdapter *pAdapter = nullptr;
-      if (SUCCEEDED(pDXGIDevice->GetAdapter(&pAdapter)))
-      {
-        hr = pAdapter->QueryInterface(__uuidof(IDXGIAdapter1), reinterpret_cast<void**>(&m_adapter));
-        SAFE_RELEASE(pAdapter);
-        if (FAILED(hr))
-          return false;
+  m_bRenderCreated = true;
+  m_needNewDevice = false;
 
-        m_adapter->GetDesc(&m_adapterDesc);
-        CLog::Log(LOGDEBUG, __FUNCTION__" - Selected %S adapter. ", m_adapterDesc.Description);
-      }
-      SAFE_RELEASE(pDXGIDevice);
-    }
-  }
+  // tell any shared objects about our resurrection
+  for (std::vector<ID3DResource *>::iterator i = m_resources.begin(); i != m_resources.end(); ++i)
+    (*i)->OnCreateDevice();
 
-  if (!m_adapter)
-  {
-    CLog::Log(LOGERROR, "%s - Failed to find adapter.", __FUNCTION__);
-    return false;
-  }
+  RestoreViewPort();
 
-  SAFE_RELEASE(m_dxgiFactory);
-  m_adapter->GetParent(__uuidof(IDXGIFactory1), reinterpret_cast<void**>(&m_dxgiFactory));
 
   if (g_advancedSettings.m_useDisplayControlHWStereo)
     UpdateDisplayStereoStatus(true);
 
 #if 0
-  if (!m_pOutput)
-  {
-    HMONITOR hMonitor = MonitorFromWindow(m_hDeviceWnd, MONITOR_DEFAULTTONULL);
-    SetMonitor(hMonitor);
-  }
-#endif
+
 
   if ( g_advancedSettings.m_bAllowDeferredRendering 
     && FAILED(m_pD3DDev->CreateDeferredContext(0, &pContext)))
@@ -642,22 +538,28 @@ bool CRenderSystemDX::CreateDevice()
 
   // make immediate context as default context if deferred context was not created
   if (!pContext)
-    pContext = m_pImdContext;
+      pContext = m_pImdContext;
 
-  if (m_featureLevel < D3D_FEATURE_LEVEL_9_3)
+#endif
+
+  auto featureLevel = DX::DeviceResources::getInstance()->GetDeviceFeatureLevel();
+
+  if (featureLevel < D3D_FEATURE_LEVEL_9_3)
     m_maxTextureSize = D3D_FL9_1_REQ_TEXTURE2D_U_OR_V_DIMENSION;
-  else if (m_featureLevel < D3D_FEATURE_LEVEL_10_0)
+  else if (featureLevel < D3D_FEATURE_LEVEL_10_0)
     m_maxTextureSize = D3D_FL9_3_REQ_TEXTURE2D_U_OR_V_DIMENSION;
-  else if (m_featureLevel < D3D_FEATURE_LEVEL_11_0)
+  else if (featureLevel < D3D_FEATURE_LEVEL_11_0)
     m_maxTextureSize = D3D10_REQ_TEXTURE2D_U_OR_V_DIMENSION;
   else 
     // 11_x and greater feature level. Limit this size to avoid memory overheads
     m_maxTextureSize = D3D11_REQ_TEXTURE2D_U_OR_V_DIMENSION >> 1;
 
+  auto pD3DDev = DX::DeviceResources::getInstance()->GetD3DDevice();
+
   // use multi-thread protection on the device context to prevent deadlock issues that can sometimes happen
   // when decoder call ID3D11VideoContext::GetDecoderBuffer or ID3D11VideoContext::ReleaseDecoderBuffer.
   ID3D10Multithread *pMultiThreading = nullptr;
-  if (SUCCEEDED(m_pD3DDev->QueryInterface(__uuidof(ID3D10Multithread), reinterpret_cast<void**>(&pMultiThreading))))
+  if (SUCCEEDED(pD3DDev->QueryInterface(__uuidof(ID3D10Multithread), reinterpret_cast<void**>(&pMultiThreading))))
   {
     pMultiThreading->SetMultithreadProtected(true);
     pMultiThreading->Release();
@@ -666,7 +568,7 @@ bool CRenderSystemDX::CreateDevice()
   SetMaximumFrameLatency();
 
 #ifdef _DEBUG
-  if (SUCCEEDED(m_pD3DDev->QueryInterface(__uuidof(ID3D11Debug), reinterpret_cast<void**>(&m_d3dDebug))))
+  if (SUCCEEDED(pD3DDev->QueryInterface(__uuidof(ID3D11Debug), reinterpret_cast<void**>(&m_d3dDebug))))
   {
     ID3D11InfoQueue *d3dInfoQueue = nullptr;
     if (SUCCEEDED(m_d3dDebug->QueryInterface(__uuidof(ID3D11InfoQueue), reinterpret_cast<void**>(&d3dInfoQueue))))
@@ -689,18 +591,21 @@ bool CRenderSystemDX::CreateDevice()
 #endif
 
   m_adapterDesc = {};
-  if (SUCCEEDED(m_adapter->GetDesc(&m_adapterDesc)))
+
+  DX::DeviceResources::getInstance()->ValidateDevice();
+
+  auto pAdapter = DX::DeviceResources::getInstance()->GetAdapter();
+  if (SUCCEEDED(pAdapter->GetDesc(&m_adapterDesc)))
   {
     CLog::Log(LOGDEBUG, "%s - on adapter %S (VendorId: %#x DeviceId: %#x) with feature level %#x.", __FUNCTION__, 
-                        m_adapterDesc.Description, m_adapterDesc.VendorId, m_adapterDesc.DeviceId, m_featureLevel);
+                        m_adapterDesc.Description, m_adapterDesc.VendorId, m_adapterDesc.DeviceId, featureLevel);
 
     m_RenderRenderer = KODI::PLATFORM::WINDOWS::FromW(StringUtils::Format(L"%s", m_adapterDesc.Description));
-    IDXGIFactory2* dxgiFactory2 = nullptr;
-    m_dxgiFactory->QueryInterface(__uuidof(IDXGIFactory2), reinterpret_cast<void**>(&dxgiFactory2));
+    IDXGIFactory2* dxgiFactory2 = DX::DeviceResources::getInstance()->GetIDXGIFactory2();
     m_RenderVersion = StringUtils::Format("DirectX %s (FL %d.%d)", 
                                           dxgiFactory2 != nullptr ? "11.1" : "11.0", 
-                                          (m_featureLevel >> 12) & 0xF, 
-                                          (m_featureLevel >> 8) & 0xF);
+                                          (featureLevel >> 12) & 0xF, 
+                                          (featureLevel >> 8) & 0xF);
     SAFE_RELEASE(dxgiFactory2);
   }
 
@@ -716,10 +621,10 @@ bool CRenderSystemDX::CreateDevice()
   // Second, no wrap sampler modes for textures are allowed - we are using clamp everywhere
   // At feature levels 10_0, 10_1 and 11_0, the display device unconditionally supports the use of 2D textures with dimensions that are not powers of two.
   // so, setup caps NPOT
-  m_renderCaps |= m_featureLevel > D3D_FEATURE_LEVEL_9_3 ? RENDER_CAPS_NPOT : 0;
+  m_renderCaps |= featureLevel > D3D_FEATURE_LEVEL_9_3 ? RENDER_CAPS_NPOT : 0;
   if ((m_renderCaps & RENDER_CAPS_DXT) != 0)
   {
-    if (m_featureLevel > D3D_FEATURE_LEVEL_9_3 ||
+    if (featureLevel > D3D_FEATURE_LEVEL_9_3 ||
       (!IsFormatSupport(DXGI_FORMAT_BC1_UNORM, D3D11_FORMAT_SUPPORT_MIP_AUTOGEN)
       && !IsFormatSupport(DXGI_FORMAT_BC2_UNORM, D3D11_FORMAT_SUPPORT_MIP_AUTOGEN)
       && !IsFormatSupport(DXGI_FORMAT_BC3_UNORM, D3D11_FORMAT_SUPPORT_MIP_AUTOGEN)))
@@ -779,6 +684,10 @@ bool CRenderSystemDX::CreateDevice()
 
 bool CRenderSystemDX::CreateWindowSizeDependentResources()
 {
+  auto pContext = DX::DeviceResources::getInstance()->GetD3DDeviceContext();
+  auto pDepthStencilView = DX::DeviceResources::getInstance()->GetDepthStencilView();
+  ID3D11RenderTargetView *const targets[1] = { DX::DeviceResources::getInstance()->GetBackBufferRenderTargetView() };
+  pContext->OMSetRenderTargets(1, targets, pDepthStencilView);
 #if 0
   if (m_resizeInProgress)
     return false;
@@ -1204,8 +1113,6 @@ bool CRenderSystemDX::CreateStates()
 
 void CRenderSystemDX::PresentRenderImpl(bool rendered)
 {
-  HRESULT hr;
-
   if (!rendered)
     return;
   
@@ -1224,6 +1131,7 @@ void CRenderSystemDX::PresentRenderImpl(bool rendered)
   auto pContext = DX::DeviceResources::getInstance()->GetD3DDeviceContext();
   auto pSwapChain = DX::DeviceResources::getInstance()->GetSwapChain();
 
+#if 0
   if ( m_stereoMode == RENDER_STEREO_MODE_INTERLACED
     || m_stereoMode == RENDER_STEREO_MODE_CHECKERBOARD)
   {
@@ -1237,6 +1145,7 @@ void CRenderSystemDX::PresentRenderImpl(bool rendered)
     CD3DTexture::DrawQuad(destRect, 0, 1, &m_pShaderResourceViewRight, nullptr, method);
     CD3DHelper::PSClearShaderResources(pContext);
   }
+#endif
 
   // time for decoder that may require the context
   {
@@ -1252,30 +1161,20 @@ void CRenderSystemDX::PresentRenderImpl(bool rendered)
   FinishCommandList();
   pContext->Flush();
 
-  hr = pSwapChain->Present((m_bVSync ? 1 : 0), 0);
-
-  if (DXGI_ERROR_DEVICE_REMOVED == hr)
+  try
   {
-    CLog::Log(LOGDEBUG, "%s - device removed", __FUNCTION__);
+    DX::DeviceResources::getInstance()->Present();
+    //pSwapChain->Present((m_bVSync ? 1 : 0), 0);
+  }
+  catch (Platform::Exception^ e)
+  {
+    CLog::Log(LOGDEBUG, "%s - device removed %s", __FUNCTION__, e->Message);
     return;
   }
 
-  if (DXGI_ERROR_INVALID_CALL == hr)
-  {
-    SetFullScreenInternal();
-    CreateWindowSizeDependentResources();
-    hr = S_OK;
-  }
-
-  if (FAILED(hr))
-  {
-    CLog::Log(LOGDEBUG, "%s - Present failed. %s", __FUNCTION__, GetErrorDescription(hr).c_str());
-    return;
-  }
-
-  // after present swapchain unbinds RT view from immediate context, need to restore it because it can be used by something else
-  if (pContext == pContext)
-    pContext->OMSetRenderTargets(1, &m_pRenderTargetView, m_depthStencilView);
+  auto pDepthStencilView = DX::DeviceResources::getInstance()->GetDepthStencilView();
+  ID3D11RenderTargetView *const targets[1] = { DX::DeviceResources::getInstance()->GetBackBufferRenderTargetView() };
+  pContext->OMSetRenderTargets(1, targets, pDepthStencilView);
 }
 
 void CRenderSystemDX::RequestDecodingTime()
@@ -1300,8 +1199,14 @@ bool CRenderSystemDX::BeginRender()
   auto pContext = DX::DeviceResources::getInstance()->GetD3DDeviceContext();
   auto pSwapChain = DX::DeviceResources::getInstance()->GetSwapChain();
 
+  // Reset the viewport to target the whole screen.
+  auto viewport = DX::DeviceResources::getInstance()->GetScreenViewport();
+  pContext->RSSetViewports(1, &viewport);
+
+#if 0
   HRESULT oldStatus = m_nDeviceStatus;
   m_nDeviceStatus = pSwapChain->Present(0, DXGI_PRESENT_TEST);
+  m_nDeviceStatus = S_OK;
 
   // handling of return values. 
   switch (m_nDeviceStatus)
@@ -1342,8 +1247,11 @@ bool CRenderSystemDX::BeginRender()
     }
     return false;
   }
+#endif
 
-  pContext->OMSetRenderTargets(1, &m_pRenderTargetView, m_depthStencilView);
+  auto pDepthStencilView = DX::DeviceResources::getInstance()->GetDepthStencilView();
+  ID3D11RenderTargetView *const targets[1] = { DX::DeviceResources::getInstance()->GetBackBufferRenderTargetView() };
+  pContext->OMSetRenderTargets(1, targets, pDepthStencilView);
   m_inScene = true;
 
   return true;
@@ -1364,6 +1272,9 @@ bool CRenderSystemDX::EndRender()
 
 bool CRenderSystemDX::ClearBuffers(color_t color)
 {
+  if (!m_bRenderCreated || m_resizeInProgress)
+    return false;
+  
   auto pDevice = DX::DeviceResources::getInstance()->GetD3DDevice();
   auto pContext = DX::DeviceResources::getInstance()->GetD3DDeviceContext();
   auto pSwapChain = DX::DeviceResources::getInstance()->GetSwapChain();
@@ -1373,8 +1284,9 @@ bool CRenderSystemDX::ClearBuffers(color_t color)
 
   float fColor[4];
   CD3DHelper::XMStoreColor(fColor, color);
-  ID3D11RenderTargetView* pRTView = m_pRenderTargetView;
+  ID3D11RenderTargetView* pRTView = DX::DeviceResources::getInstance()->GetBackBufferRenderTargetView();
 
+#if 0
   if ( m_stereoMode != RENDER_STEREO_MODE_OFF
     && m_stereoMode != RENDER_STEREO_MODE_MONO)
   {
@@ -1396,13 +1308,16 @@ bool CRenderSystemDX::ClearBuffers(color_t color)
         pRTView = m_pRenderTargetViewRight;
     }
   }
- 
+#endif
+
   if (pRTView == nullptr)
     return true;
 
+  auto vp = DX::DeviceResources::getInstance()->GetScreenViewport();
+
   CRect clRect(0.0f, 0.0f,
-    static_cast<float>(m_nBackBufferWidth),
-    static_cast<float>(m_nBackBufferHeight));
+    static_cast<float>(vp.Width),
+    static_cast<float>(vp.Height));
 
   // Unlike Direct3D 9, D3D11 ClearRenderTargetView always clears full extent of the resource view. 
   // Viewport and scissor settings are not applied. So clear RT by drawing full sized rect with clear color
@@ -1420,7 +1335,8 @@ bool CRenderSystemDX::ClearBuffers(color_t color)
   else
     pContext->ClearRenderTargetView(pRTView, fColor);
 
-  pContext->ClearDepthStencilView(m_depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0, 0);
+  auto pDepthStencilView = DX::DeviceResources::getInstance()->GetDepthStencilView();
+  pContext->ClearDepthStencilView(pDepthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0, 0);
   return true;
 }
 
@@ -1460,9 +1376,11 @@ void CRenderSystemDX::SetCameraPosition(const CPoint &camera, int screenWidth, i
   if (!m_bRenderCreated)
     return;
 
+  auto viewport = DX::DeviceResources::getInstance()->GetScreenViewport();
+
   // grab the viewport dimensions and location
-  float w = m_viewPort.Width*0.5f;
-  float h = m_viewPort.Height*0.5f;
+  float w = viewport.Width*0.5f;
+  float h = viewport.Height*0.5f;
 
   XMFLOAT2 offset = XMFLOAT2(camera.x - screenWidth*0.5f, camera.y - screenHeight*0.5f);
 
@@ -1573,10 +1491,12 @@ void CRenderSystemDX::GetViewPort(CRect& viewPort)
   if (!m_bRenderCreated)
     return;
 
-  viewPort.x1 = m_viewPort.TopLeftX;
-  viewPort.y1 = m_viewPort.TopLeftY;
-  viewPort.x2 = m_viewPort.TopLeftX + m_viewPort.Width;
-  viewPort.y2 = m_viewPort.TopLeftY + m_viewPort.Height;
+  auto vp = DX::DeviceResources::getInstance()->GetScreenViewport();
+
+  viewPort.x1 = vp.TopLeftX;
+  viewPort.y1 = vp.TopLeftY;
+  viewPort.x2 = vp.TopLeftX + vp.Width;
+  viewPort.y2 = vp.TopLeftY + vp.Height;
 }
 
 void CRenderSystemDX::SetViewPort(CRect& viewPort)
@@ -1584,16 +1504,17 @@ void CRenderSystemDX::SetViewPort(CRect& viewPort)
   if (!m_bRenderCreated)
     return;
 
-  m_viewPort.MinDepth   = 0.0f;
-  m_viewPort.MaxDepth   = 1.0f;
-  m_viewPort.TopLeftX   = viewPort.x1;
-  m_viewPort.TopLeftY   = viewPort.y1;
-  m_viewPort.Width      = viewPort.x2 - viewPort.x1;
-  m_viewPort.Height     = viewPort.y2 - viewPort.y1;
+  D3D11_VIEWPORT vp;
+  vp.MinDepth   = 0.0f;
+  vp.MaxDepth   = 1.0f;
+  vp.TopLeftX   = viewPort.x1;
+  vp.TopLeftY   = viewPort.y1;
+  vp.Width      = viewPort.x2 - viewPort.x1;
+  vp.Height     = viewPort.y2 - viewPort.y1;
 
   auto pContext = DX::DeviceResources::getInstance()->GetD3DDeviceContext();
-  pContext->RSSetViewports(1, &m_viewPort);
-  m_pGUIShader->SetViewPort(m_viewPort);
+  pContext->RSSetViewports(1, &vp);
+  m_pGUIShader->SetViewPort(vp);
 }
 
 void CRenderSystemDX::RestoreViewPort()
@@ -1602,8 +1523,9 @@ void CRenderSystemDX::RestoreViewPort()
     return;
 
   auto pContext = DX::DeviceResources::getInstance()->GetD3DDeviceContext();
-  pContext->RSSetViewports(1, &m_viewPort);
-  m_pGUIShader->SetViewPort(m_viewPort);
+  auto vp = DX::DeviceResources::getInstance()->GetScreenViewport();
+  pContext->RSSetViewports(1, &vp);
+  m_pGUIShader->SetViewPort(vp);
 }
 
 bool CRenderSystemDX::ScissorsCanEffectClipping()
@@ -1652,9 +1574,11 @@ void CRenderSystemDX::ResetScissors()
   if (!m_bRenderCreated)
     return;
 
+  auto vp = DX::DeviceResources::getInstance()->GetScreenViewport();
+
   m_scissor.SetRect(0.0f, 0.0f, 
-    static_cast<float>(m_nBackBufferWidth),
-    static_cast<float>(m_nBackBufferHeight));
+    static_cast<float>(vp.Width),
+    static_cast<float>(vp.Height));
 
   auto pContext = DX::DeviceResources::getInstance()->GetD3DDeviceContext();
   pContext->RSSetState(m_RSScissorDisable);
@@ -1689,6 +1613,10 @@ std::string CRenderSystemDX::GetErrorDescription(HRESULT hr)
 
 void CRenderSystemDX::SetStereoMode(RENDER_STEREO_MODE mode, RENDER_STEREO_VIEW view)
 {
+  CLog::Log(LOGERROR, "%s is not implemented", __FUNCTION__);
+  return;
+
+#if 0
   CRenderSystemBase::SetStereoMode(mode, view);
   auto pContext = DX::DeviceResources::getInstance()->GetD3DDeviceContext();
   auto pDevice = DX::DeviceResources::getInstance()->GetD3DDevice();
@@ -1746,18 +1674,13 @@ void CRenderSystemDX::SetStereoMode(RENDER_STEREO_MODE mode, RENDER_STEREO_VIEW 
     float blendFactors[] = { 0.0f, 0.0f, 0.0f, 0.0f };
     pContext->OMSetBlendState(m_BlendEnabled ? m_BlendEnableState : m_BlendDisableState, blendFactors, 0xFFFFFFFF);
   }
+#endif
 }
 
 bool CRenderSystemDX::GetStereoEnabled() const
 {
-  bool result = false;
-
-  IDXGIFactory2* dxgiFactory2 = nullptr;
-  if (SUCCEEDED(m_dxgiFactory->QueryInterface(__uuidof(IDXGIFactory2), reinterpret_cast<void**>(&dxgiFactory2))))
-    result = dxgiFactory2->IsWindowedStereoEnabled() == TRUE;
-  SAFE_RELEASE(dxgiFactory2);
-
-  return result;
+  IDXGIFactory2* dxgiFactory2 = DX::DeviceResources::getInstance()->GetIDXGIFactory2();
+  return dxgiFactory2->IsWindowedStereoEnabled() == TRUE;
 }
 
 bool CRenderSystemDX::GetDisplayStereoEnabled() const
@@ -1918,4 +1841,3 @@ void CRenderSystemDX::GetRefreshRatio(uint32_t refresh, uint32_t * num, uint32_t
 
 
 
-#endif

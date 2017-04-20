@@ -75,7 +75,7 @@ public:
   bool SupportsStereo(RENDER_STEREO_MODE mode) const override;
   bool TestRender() override;
   void Project(float &x, float &y, float &z) override;
-  virtual CRect GetBackBufferRect() { return CRect(0.f, 0.f, static_cast<float>(m_nBackBufferWidth), static_cast<float>(m_nBackBufferHeight)); }
+  virtual CRect GetBackBufferRect();
 
   IDXGIOutput* GetCurrentOutput() const { return m_pOutput; }
   void GetDisplayMode(DXGI_MODE_DESC *mode, bool useCached = false);
@@ -110,8 +110,6 @@ protected:
   void OnDeviceReset();
   void PresentRenderImpl(bool rendered);
 
-  void SetFocusWnd(HWND wnd) { m_hFocusWnd = wnd; }
-  void SetDeviceWnd(HWND wnd) { m_hDeviceWnd = wnd; }
   void SetMonitor(HMONITOR monitor);
   void SetRenderParams(unsigned int width, unsigned int height, bool fullScreen, float refreshRate);
   bool CreateWindowSizeDependentResources();
@@ -143,10 +141,6 @@ protected:
   bool                        m_needNewViews;
   bool                        m_resizeInProgress{false};
   unsigned int                m_screenHeight{0};
-  HWND                        m_hFocusWnd{nullptr};
-  HWND                        m_hDeviceWnd{nullptr};
-  unsigned int                m_nBackBufferWidth{0};
-  unsigned int                m_nBackBufferHeight{0};
   bool                        m_bFullScreenDevice{false};
   float                       m_refreshRate;
   bool                        m_interlaced;
@@ -156,28 +150,35 @@ protected:
   CCriticalSection            m_resourceSection;
   std::vector<ID3DResource*>  m_resources;
   bool                        m_inScene{false}; ///< True if we're in a BeginScene()/EndScene() block
-  D3D_DRIVER_TYPE             m_driverType{D3D_DRIVER_TYPE_HARDWARE};
-  D3D_FEATURE_LEVEL           m_featureLevel{D3D_FEATURE_LEVEL_11_1};
+  IDXGIOutput*                m_pOutput{ nullptr };
+  DXGI_ADAPTER_DESC           m_adapterDesc;
+  CGUIShaderDX*               m_pGUIShader{ nullptr };
+  ID3D11DepthStencilState*    m_depthStencilState{ nullptr };
+  ID3D11BlendState*           m_BlendEnableState{ nullptr };
+  ID3D11BlendState*           m_BlendDisableState{ nullptr };
+  bool                        m_BlendEnabled{ false };
+  ID3D11RasterizerState*      m_RSScissorDisable{ nullptr };
+  ID3D11RasterizerState*      m_RSScissorEnable{ nullptr };
+  bool                        m_ScissorsEnabled{ false };
+  CRect                       m_scissor;
+
+#if 0
   IDXGIFactory1*              m_dxgiFactory{nullptr};
   IDXGIAdapter1*              m_adapter{nullptr};
-  IDXGIOutput*                m_pOutput{nullptr};
   ID3D11RenderTargetView*     m_pRenderTargetView{nullptr};
-  ID3D11DepthStencilState*    m_depthStencilState{nullptr};
   ID3D11DepthStencilView*     m_depthStencilView{nullptr};
   D3D11_VIEWPORT              m_viewPort;
-  CRect                       m_scissor;
-  CGUIShaderDX*               m_pGUIShader{nullptr};
   ID3D11BlendState*           m_BlendEnableState{nullptr};
   ID3D11BlendState*           m_BlendDisableState{nullptr};
   bool                        m_BlendEnabled{false};
   ID3D11RasterizerState*      m_RSScissorDisable{nullptr};
   ID3D11RasterizerState*      m_RSScissorEnable{nullptr};
   bool                        m_ScissorsEnabled{false};
-  DXGI_ADAPTER_DESC           m_adapterDesc;
   // stereo interlaced/checkerboard intermediate target
   ID3D11Texture2D*            m_pTextureRight{nullptr};
   ID3D11RenderTargetView*     m_pRenderTargetViewRight{nullptr};
   ID3D11ShaderResourceView*   m_pShaderResourceViewRight{nullptr};
+#endif
   bool                        m_bResizeRequired{false};
   bool                        m_bHWStereoEnabled{false};
   // improve get current mode
