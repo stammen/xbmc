@@ -506,7 +506,7 @@ bool CPVRManager::SetWakeupCommand(void)
   if (!m_settings.GetBoolValue(CSettings::SETTING_PVRPOWERMANAGEMENT_ENABLED))
     return false;
 
-#ifdef TARGET_WIN10
+#ifndef TARGET_WIN10
 
   const std::string strWakeupCommand(m_settings.GetStringValue(CSettings::SETTING_PVRPOWERMANAGEMENT_SETWAKEUPCMD));
   if (!strWakeupCommand.empty() && m_timers)
