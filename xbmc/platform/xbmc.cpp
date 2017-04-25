@@ -34,6 +34,10 @@
 #include <mmdeviceapi.h>
 #endif
 
+#if defined(TARGET_ANDROID)
+#include "platform/android/activity/XBMCApp.h"
+#endif
+
 #include "platform/MessagePrinter.h"
 
 
@@ -63,6 +67,8 @@ extern "C" int XBMC_Run(bool renderGUI, CFileItemList &playlist)
   if(!g_RBP.Initialize())
     return false;
   g_RBP.LogFirmwareVersion();
+#elif defined(TARGET_ANDROID)
+  CXBMCApp::get()->Initialize();
 #endif
 
   if (renderGUI && !g_application.CreateGUI())
@@ -119,6 +125,8 @@ extern "C" int XBMC_Run(bool renderGUI, CFileItemList &playlist)
 
 #ifdef TARGET_RASPBERRY_PI
   g_RBP.Deinitialize();
+#elif defined(TARGET_ANDROID)
+  CXBMCApp::get()->Deinitialize();
 #endif
 
   return status;
