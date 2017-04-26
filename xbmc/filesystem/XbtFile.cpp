@@ -139,6 +139,14 @@ int CXbtFile::Stat(struct __stat64 *buffer)
 
 int CXbtFile::Stat(const CURL& url, struct __stat64* buffer)
 {
+
+  auto size = sizeof(struct __stat64);
+
+#pragma pack()   // n defaults to 8; equivalent to /Zp8  
+
+  size = sizeof(struct __stat64);
+
+
   memset(buffer, 0, sizeof(struct __stat64));
 
   // check if the file exists

@@ -277,7 +277,7 @@ bool CPythonInvoker::execute(const std::string &script, const std::vector<std::s
       //  is linked against may not be the DLL that xbmc is linked against so
       //  passing a FILE* to python from an fopen has the potential to crash.
       std::string nativeFilename(realFilename); // filename in system encoding
-#if defined(TARGET_WINDOWS) || defined(TARGET_WIN10)
+#if defined(TARGET_WINDOWS)
       if (!g_charsetConverter.utf8ToSystem(nativeFilename, true))
       {
         CLog::Log(LOGERROR, "CPythonInvoker(%d, %s): can't convert filename \"%s\" to system encoding", GetId(), m_sourceFile.c_str(), realFilename.c_str());
@@ -654,7 +654,7 @@ void CPythonInvoker::getAddonModuleDeps(const ADDON::AddonPtr& addon, std::set<s
 
 void CPythonInvoker::addPath(const std::string& path)
 {
-#if defined(TARGET_WINDOWS) || defined(TARGET_WIN10)
+#if defined(TARGET_WINDOWS)
   if (path.empty())
     return;
 

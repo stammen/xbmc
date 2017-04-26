@@ -39,7 +39,6 @@ bool CJob::ShouldCancel(unsigned int progress, unsigned int total) const
 
 CJobWorker::CJobWorker(CJobManager *manager) : CThread("JobWorker")
 {
-  m_jobManager = manager;
   Create(true); // start work immediately, and kill ourselves when we're done
 }
 
@@ -48,7 +47,7 @@ CJobWorker::~CJobWorker()
   // while we should already be removed from the job manager, if an exception
   // occurs during processing that we haven't caught, we may skip over that step.
   // Thus, before we go out of scope, ensure the job manager knows we're gone.
-  m_jobManager->RemoveWorker(this);
+  CJobManager::GetInstance().RemoveWorker(this);
   if(!IsAutoDelete())
     StopThread();
 }
@@ -59,7 +58,7 @@ void CJobWorker::Process()
   while (true)
   {
     // request an item from our manager (this call is blocking)
-    CJob *job = m_jobManager->GetNextJob(this);
+    CJob *job = CJobManager::GetInstance().GetNextJob(this);
     if (!job)
       break;
 
@@ -72,7 +71,7 @@ void CJobWorker::Process()
     {
       CLog::Log(LOGERROR, "%s error processing job %s", __FUNCTION__, job->GetType());
     }
-    m_jobManager->OnJobComplete(success, job);
+    CJobManager::GetInstance().OnJobComplete(success, job);
   }
 }
 
