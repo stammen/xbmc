@@ -8,6 +8,5 @@
     mc:Ignorable="d">
 
   <SwapChainPanel x:Name="swapChainPanel">
-
   </SwapChainPanel>
 </Page>

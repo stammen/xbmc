@@ -24,12 +24,13 @@ using namespace Windows::UI::Xaml::Input;
 using namespace Windows::UI::Xaml::Media;
 using namespace Windows::UI::Xaml::Navigation;
 using namespace concurrency;
+using namespace Windows::UI::Core;
+using namespace Windows::UI::ViewManagement;
 
 #pragma comment(lib, "libkodi.lib")
 
-DirectXPage::DirectXPage():
-	m_windowVisible(true),
-	m_coreInput(nullptr)
+DirectXPage::DirectXPage()
+	: m_windowVisible(true)
 {
 	InitializeComponent();
 
@@ -50,38 +51,11 @@ DirectXPage::DirectXPage():
 	DisplayInformation::DisplayContentsInvalidated +=
 		ref new TypedEventHandler<DisplayInformation^, Object^>(this, &DirectXPage::OnDisplayContentsInvalidated);
 
-	swapChainPanel->CompositionScaleChanged += 
-		ref new TypedEventHandler<SwapChainPanel^, Object^>(this, &DirectXPage::OnCompositionScaleChanged);
-
-	swapChainPanel->SizeChanged +=
-		ref new SizeChangedEventHandler(this, &DirectXPage::OnSwapChainPanelSizeChanged);
 
 	// At this point we have access to the device. 
 	// We can create the device-dependent resources.
   auto deviceResources = getKodiDeviceResources();
   deviceResources->SetSwapChainPanel(swapChainPanel);
-
-	// Register our SwapChainPanel to get independent input pointer events
-	auto workItemHandler = ref new WorkItemHandler([this] (IAsyncAction ^)
-	{
-		// The CoreIndependentInputSource will raise pointer events for the specified device types on whichever thread it's created on.
-		m_coreInput = swapChainPanel->CreateCoreIndependentInputSource(
-			Windows::UI::Core::CoreInputDeviceTypes::Mouse |
-			Windows::UI::Core::CoreInputDeviceTypes::Touch |
-			Windows::UI::Core::CoreInputDeviceTypes::Pen
-			);
-
-		// Register for pointer events, which will be raised on the background thread.
-		m_coreInput->PointerPressed += ref new TypedEventHandler<Object^, PointerEventArgs^>(this, &DirectXPage::OnPointerPressed);
-		m_coreInput->PointerMoved += ref new TypedEventHandler<Object^, PointerEventArgs^>(this, &DirectXPage::OnPointerMoved);
-		m_coreInput->PointerReleased += ref new TypedEventHandler<Object^, PointerEventArgs^>(this, &DirectXPage::OnPointerReleased);
-
-		// Begin processing input messages as they're delivered.
-		m_coreInput->Dispatcher->ProcessEvents(CoreProcessEventsOption::ProcessUntilQuit);
-	});
-
-	// Run task on a dedicated high priority background thread.
-	m_inputLoopWorker = ThreadPool::RunAsync(workItemHandler, WorkItemPriority::High, WorkItemOptions::TimeSliced);
 
 	StartRenderLoop(swapChainPanel);
 }
@@ -90,10 +64,9 @@ DirectXPage::~DirectXPage()
 {
 	// Stop rendering and processing events on destruction.
 	StopRenderLoop();
-	m_coreInput->Dispatcher->StopProcessEvents();
 }
 
-void DirectXPage::StartRenderLoop(Windows::UI::Xaml::Controls::Panel^ swapChainPanel)
+void DirectXPage::StartRenderLoop(Windows::UI::Xaml::Controls::SwapChainPanel^ swapChainPanel)
 {
   // If the animation render loop is already running then do not start another thread.
   if (m_renderLoopWorker != nullptr && m_renderLoopWorker->Status == AsyncStatus::Started)
@@ -197,37 +170,5 @@ void DirectXPage::OnDisplayContentsInvalidated(DisplayInformation^ sender, Objec
   deviceResources->ValidateDevice();
 }
 
-// Called when the app bar button is clicked.
-void DirectXPage::AppBarButton_Click(Object^ sender, RoutedEventArgs^ e)
-{
-	// Use the app bar if it is appropriate for your app. Design the app bar, 
-	// then fill in event handlers (like this one).
-}
 
-void DirectXPage::OnPointerPressed(Object^ sender, PointerEventArgs^ e)
-{
-}
 
-void DirectXPage::OnPointerMoved(Object^ sender, PointerEventArgs^ e)
-{
-}
-
-void DirectXPage::OnPointerReleased(Object^ sender, PointerEventArgs^ e)
-{
-}
-
-void DirectXPage::OnCompositionScaleChanged(SwapChainPanel^ sender, Object^ args)
-{
-  auto deviceResources = getKodiDeviceResources();
-  critical_section::scoped_lock lock(deviceResources->GetCriticalSection());
-  deviceResources->SetCompositionScale(sender->CompositionScaleX, sender->CompositionScaleY);
-	//m_main->CreateWindowSizeDependentResources();
-}
-
-void DirectXPage::OnSwapChainPanelSizeChanged(Object^ sender, SizeChangedEventArgs^ e)
-{
-  auto deviceResources = getKodiDeviceResources();
-  critical_section::scoped_lock lock(deviceResources->GetCriticalSection());
-  deviceResources->SetLogicalSize(e->NewSize);
-	//m_main->CreateWindowSizeDependentResources();
-}
