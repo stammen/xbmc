@@ -44,6 +44,7 @@
 
 #ifndef TARGET_WIN10
 #include "d3d9.h"
+#include <d3d9types.h>
 #endif
 
 #include "d3d11_1.h"
@@ -51,9 +52,8 @@
 #include "d3dcompiler.h"
 #include "directxmath.h"
 #include "directxcolors.h" 
-#else
-#include <d3d9types.h>
 #endif
+
 #include <memory>
 // anything below here should be headers that very rarely (hopefully never)
 // change yet are included almost everywhere.

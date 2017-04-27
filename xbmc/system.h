@@ -209,7 +209,6 @@
 #include "dxgi.h"
 #include "d3dcompiler.h"
 #include "directxmath.h"
-#include <d3d9types.h>
 #endif
 
 #if defined(TARGET_POSIX)
