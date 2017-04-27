@@ -606,8 +606,8 @@ bool CWinSystemWin10::UpdateResolutionsInternal()
 
   MONITOR_DETAILS md = {};
   // note that refresh rate information is not available on Win10 UWP
-  md.ScreenWidth = 1920;
-  md.ScreenHeight = 1080;
+  md.ScreenWidth = size.Width;
+  md.ScreenHeight = size.Height;
   md.RefreshRate = 60;
   md.Interlaced = false;
 
