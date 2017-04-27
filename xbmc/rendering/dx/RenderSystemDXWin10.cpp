@@ -224,15 +224,10 @@ void CRenderSystemDX::OnMove()
 
 void CRenderSystemDX::OnResize(unsigned int width, unsigned int height)
 {
-#if 0
   if (!m_bRenderCreated)
     return;
 
-  m_nBackBufferWidth = width;
-  m_nBackBufferHeight = height;
   CreateWindowSizeDependentResources();
-#endif // 0
-
 }
 
 CRect CRenderSystemDX::GetBackBufferRect() { 
@@ -688,33 +683,24 @@ bool CRenderSystemDX::CreateWindowSizeDependentResources()
   auto pDepthStencilView = DX::DeviceResources::getInstance()->GetDepthStencilView();
   ID3D11RenderTargetView *const targets[1] = { DX::DeviceResources::getInstance()->GetBackBufferRenderTargetView() };
   pContext->OMSetRenderTargets(1, targets, pDepthStencilView);
+
+  // Reset the viewport to target the whole screen.
+  auto viewport = DX::DeviceResources::getInstance()->GetScreenViewport();
+
+  CRect rect(0.0f, 0.0f,
+    static_cast<float>(viewport.Width),
+    static_cast<float>(viewport.Height));
+  SetViewPort(rect);
+  // set camera to center of screen
+  CPoint camPoint = { viewport.Width * 0.5f, viewport.Height * 0.5f };
+  SetCameraPosition(camPoint, viewport.Width, viewport.Height);
+
+
+
 #if 0
   if (m_resizeInProgress)
     return false;
 
-  HRESULT hr;
-  DXGI_SWAP_CHAIN_DESC scDesc = { 0 };
-
-  bool bNeedRecreate = false;
-  bool bNeedResize   = false;
-  bool bHWStereoEnabled = RENDER_STEREO_MODE_HARDWAREBASED == g_graphicsContext.GetStereoMode();
-
-  if (m_pSwapChain)
-  {
-    m_pSwapChain->GetDesc(&scDesc);
-    bNeedResize = m_bResizeRequired || 
-                  m_nBackBufferWidth != scDesc.BufferDesc.Width || 
-                  m_nBackBufferHeight != scDesc.BufferDesc.Height;
-  }
-  else
-    bNeedResize = true;
-
-  if (m_pSwapChain1)
-  {
-    DXGI_SWAP_CHAIN_DESC1 scDesc;
-    m_pSwapChain1->GetDesc1(&scDesc);
-    bNeedRecreate = (scDesc.Stereo == TRUE) != bHWStereoEnabled;
-  }
 
   if (!bNeedRecreate && !bNeedResize)
   {
@@ -722,227 +708,8 @@ bool CRenderSystemDX::CreateWindowSizeDependentResources()
     return true;
   }
 
-  m_resizeInProgress = true;
-  CLog::Log(LOGDEBUG, "%s - (Re)Create window size (%dx%d) dependent resources.", __FUNCTION__, m_nBackBufferWidth, m_nBackBufferHeight);
 
-  bool bRestoreRTView = false;
-  {
-    ID3D11RenderTargetView* pRTView; ID3D11DepthStencilView* pDSView;
-    pContext->OMGetRenderTargets(1, &pRTView, &pDSView);
 
-    bRestoreRTView = (nullptr != pRTView || nullptr != pDSView);
-
-    SAFE_RELEASE(pRTView);
-    SAFE_RELEASE(pDSView);
-  }
-
-  pContext->OMSetRenderTargets(0, nullptr, nullptr);
-  FinishCommandList(false);
-
-  SAFE_RELEASE(m_pRenderTargetView);
-  SAFE_RELEASE(m_depthStencilView);
-  SAFE_RELEASE(m_pRenderTargetViewRight);
-  SAFE_RELEASE(m_pShaderResourceViewRight);
-  SAFE_RELEASE(m_pTextureRight);
-
-  if (bNeedRecreate)
-  {
-    if (!m_bResizeRequired)
-    {
-      OnDisplayLost();
-      m_bResizeRequired = true;
-    }
-
-    BOOL fullScreen;
-    m_pSwapChain1->GetFullscreenState(&fullScreen, nullptr);
-    if (fullScreen)
-      m_pSwapChain1->SetFullscreenState(false, nullptr);
-
-    // disable/enable stereo 3D on system level
-    if (g_advancedSettings.m_useDisplayControlHWStereo)
-      SetDisplayStereoEnabled(bHWStereoEnabled);
-
-    CLog::Log(LOGDEBUG, "%s - Destroying swapchain in order to switch %s stereoscopic 3D.", __FUNCTION__, bHWStereoEnabled ? "to" : "from");
-
-    SAFE_RELEASE(m_pSwapChain);
-    SAFE_RELEASE(m_pSwapChain1);
-    m_pImdContext->ClearState();
-    m_pImdContext->Flush();
-
-    // flush command is asynchronous, so wait until destruction is completed
-    // otherwise it can cause problems with flip presentation model swap chains.
-    DXWait(m_pD3DDev, m_pImdContext);
-  }
-
-  uint32_t scFlags = m_useWindowedDX ? 0 : DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
-  if (!m_pSwapChain)
-  {
-    CLog::Log(LOGDEBUG, "%s - Creating swapchain in %s mode.", __FUNCTION__, bHWStereoEnabled ? "Stereoscopic 3D" : "Mono");
-
-    // Create swap chain
-    IDXGIFactory2* dxgiFactory2 = nullptr;
-    hr = m_dxgiFactory->QueryInterface(__uuidof(IDXGIFactory2), reinterpret_cast<void**>(&dxgiFactory2));
-    if (SUCCEEDED(hr) && dxgiFactory2)
-    {
-      // DirectX 11.1 or later
-      DXGI_SWAP_CHAIN_DESC1 scDesc1 = { 0 };
-      scDesc1.Width       = m_nBackBufferWidth;
-      scDesc1.Height      = m_nBackBufferHeight;
-      scDesc1.BufferCount = 3 * (1 + bHWStereoEnabled);
-      scDesc1.Format      = DXGI_FORMAT_B8G8R8A8_UNORM;
-      scDesc1.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-      scDesc1.AlphaMode   = DXGI_ALPHA_MODE_UNSPECIFIED;
-      scDesc1.Stereo      = bHWStereoEnabled;
-      scDesc1.SwapEffect  = DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL;
-      scDesc1.Flags       = scFlags;
-
-      scDesc1.SampleDesc.Count = 1;
-      scDesc1.SampleDesc.Quality = 0;
-
-      DXGI_SWAP_CHAIN_FULLSCREEN_DESC scFSDesc = { 0 };
-      scFSDesc.ScanlineOrdering = m_interlaced ? DXGI_MODE_SCANLINE_ORDER_UPPER_FIELD_FIRST : DXGI_MODE_SCANLINE_ORDER_PROGRESSIVE;
-      scFSDesc.Windowed         = m_useWindowedDX;
-
-      hr = dxgiFactory2->CreateSwapChainForHwnd(m_pD3DDev, m_hFocusWnd, &scDesc1, &scFSDesc, nullptr, &m_pSwapChain1);
-
-      // some drivers (AMD) are denied to switch in stereoscopic 3D mode, if so then fallback to mono mode
-      if (FAILED(hr) && bHWStereoEnabled)
-      {
-        // switch to stereo mode failed, create mono swapchain
-        CLog::Log(LOGERROR, "%s - Creating stereo swap chain failed with error: %s.", __FUNCTION__, GetErrorDescription(hr).c_str());
-        CLog::Log(LOGNOTICE, "%s - Fallback to monoscopic mode.", __FUNCTION__);
-
-        scDesc1.Stereo = false;
-        bHWStereoEnabled = false;
-        hr = dxgiFactory2->CreateSwapChainForHwnd(m_pD3DDev, m_hFocusWnd, &scDesc1, &scFSDesc, nullptr, &m_pSwapChain1);
-
-        // fallback to split_horizontal mode.
-        g_graphicsContext.SetStereoMode(RENDER_STEREO_MODE_SPLIT_HORIZONTAL);
-      }
-
-      if (SUCCEEDED(hr))
-      {
-        m_pSwapChain1->QueryInterface(__uuidof(IDXGISwapChain), reinterpret_cast<void**>(&m_pSwapChain));
-        // this hackish way to disable stereo in windowed mode:
-        // - restart presenting, 0 in sync interval discards current frame also
-        // - wait until new frame will be drawn
-        // sleep value possible depends on hardware m.b. need a setting in as.xml
-        if (!g_advancedSettings.m_useDisplayControlHWStereo && m_useWindowedDX && !bHWStereoEnabled && m_bHWStereoEnabled)
-        {
-          m_pSwapChain1->Present(0, DXGI_PRESENT_RESTART);
-          Sleep(100);
-        }
-        m_bHWStereoEnabled = bHWStereoEnabled;
-      }
-      dxgiFactory2->Release();
-    }
-    else
-    {
-      // DirectX 11.0 systems
-      scDesc.BufferCount  = 3;
-      scDesc.BufferUsage  = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-      scDesc.OutputWindow = m_hFocusWnd;
-      scDesc.Windowed     = m_useWindowedDX;
-      scDesc.SwapEffect   = DXGI_SWAP_EFFECT_SEQUENTIAL;
-      scDesc.Flags        = scFlags;
-
-      scDesc.BufferDesc.Width   = m_nBackBufferWidth;
-      scDesc.BufferDesc.Height  = m_nBackBufferHeight;
-      scDesc.BufferDesc.Format  = DXGI_FORMAT_B8G8R8A8_UNORM;
-      scDesc.BufferDesc.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
-      scDesc.BufferDesc.ScanlineOrdering = m_interlaced ? DXGI_MODE_SCANLINE_ORDER_UPPER_FIELD_FIRST : DXGI_MODE_SCANLINE_ORDER_PROGRESSIVE;
-      scDesc.SampleDesc.Count = 1;
-      scDesc.SampleDesc.Quality = 0;
-
-      hr = m_dxgiFactory->CreateSwapChain(m_pD3DDev, &scDesc, &m_pSwapChain);
-    }
-
-    if (FAILED(hr))
-    {
-      CLog::Log(LOGERROR, "%s - Creating swap chain failed with error: %s.", __FUNCTION__, GetErrorDescription(hr).c_str());
-      m_bRenderCreated = false;
-      return false;
-    }
-
-    // tell DXGI to not interfere with application's handling of window mode changes
-    m_dxgiFactory->MakeWindowAssociation(m_hFocusWnd, DXGI_MWA_NO_WINDOW_CHANGES | DXGI_MWA_NO_ALT_ENTER);
-  }
-  else
-  {
-    // resize swap chain buffers with preserving the existing buffer count and format.
-    hr = m_pSwapChain->ResizeBuffers(scDesc.BufferCount, m_nBackBufferWidth, m_nBackBufferHeight, scDesc.BufferDesc.Format, scFlags);
-    if (FAILED(hr))
-    {
-      CLog::Log(LOGERROR, "%s - Failed to resize buffers (%s).", __FUNCTION__, GetErrorDescription(hr).c_str());
-      if (DXGI_ERROR_DEVICE_REMOVED == hr)
-      {
-        OnDeviceLost();
-        return false;
-      }
-      // wait a bit and try again
-      Sleep(50);
-      hr = m_pSwapChain->ResizeBuffers(scDesc.BufferCount, m_nBackBufferWidth, m_nBackBufferHeight, scDesc.BufferDesc.Format, scFlags);
-    }
-  }
-
-  // Create a render target view
-  ID3D11Texture2D* pBackBuffer = nullptr;
-  hr = m_pSwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), reinterpret_cast<void**>(&pBackBuffer));
-  if (FAILED(hr))
-  {
-    CLog::Log(LOGERROR, "%s - Failed to get back buffer (%s).", __FUNCTION__, GetErrorDescription(hr).c_str());
-    return false;
-  }
-
-  // Create a view interface on the rendertarget to use on bind for mono or left eye view.
-  CD3D11_RENDER_TARGET_VIEW_DESC rtDesc(D3D11_RTV_DIMENSION_TEXTURE2DARRAY, DXGI_FORMAT_UNKNOWN, 0, 0, 1);
-  hr = m_pD3DDev->CreateRenderTargetView(pBackBuffer, &rtDesc, &m_pRenderTargetView);
-  if (FAILED(hr))
-  {
-    CLog::Log(LOGERROR, "%s - Failed to create render target view (%s).", __FUNCTION__, GetErrorDescription(hr).c_str());
-    pBackBuffer->Release();
-    return false;
-  }
-
-  if (m_bHWStereoEnabled)
-  {
-    // Stereo swapchains have an arrayed resource, so create a second Render Target for the right eye buffer.
-    CD3D11_RENDER_TARGET_VIEW_DESC rtDesc(D3D11_RTV_DIMENSION_TEXTURE2DARRAY, DXGI_FORMAT_UNKNOWN, 0, 1, 1);
-    hr = m_pD3DDev->CreateRenderTargetView(pBackBuffer, &rtDesc, &m_pRenderTargetViewRight);
-    if (FAILED(hr))
-    {
-      CLog::Log(LOGERROR, "%s - Failed to create right eye buffer (%s).", __FUNCTION__, GetErrorDescription(hr).c_str());
-      g_graphicsContext.SetStereoMode(RENDER_STEREO_MODE_OFF); // try fallback to mono
-    }
-  }
-  pBackBuffer->Release();
-
-  DXGI_FORMAT zFormat = DXGI_FORMAT_D16_UNORM;
-  if      (IsFormatSupport(DXGI_FORMAT_D32_FLOAT, D3D11_FORMAT_SUPPORT_DEPTH_STENCIL))          zFormat = DXGI_FORMAT_D32_FLOAT;
-  else if (IsFormatSupport(DXGI_FORMAT_D24_UNORM_S8_UINT, D3D11_FORMAT_SUPPORT_DEPTH_STENCIL))  zFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
-  else if (IsFormatSupport(DXGI_FORMAT_D16_UNORM, D3D11_FORMAT_SUPPORT_DEPTH_STENCIL))          zFormat = DXGI_FORMAT_D16_UNORM;
-
-  ID3D11Texture2D* depthStencilBuffer = nullptr;
-  // Initialize the description of the depth buffer.
-  CD3D11_TEXTURE2D_DESC depthBufferDesc(zFormat, m_nBackBufferWidth, m_nBackBufferHeight, 1, 1, D3D11_BIND_DEPTH_STENCIL);
-  // Create the texture for the depth buffer using the filled out description.
-  hr = m_pD3DDev->CreateTexture2D(&depthBufferDesc, nullptr, &depthStencilBuffer);
-  if (FAILED(hr))
-  {
-    CLog::Log(LOGERROR, "%s - Failed to create depth stencil buffer (%s).", __FUNCTION__, GetErrorDescription(hr).c_str());
-    return false;
-  }
-
-  // Create the depth stencil view.
-  CD3D11_DEPTH_STENCIL_VIEW_DESC viewDesc(D3D11_DSV_DIMENSION_TEXTURE2D);
-  hr = m_pD3DDev->CreateDepthStencilView(depthStencilBuffer, &viewDesc, &m_depthStencilView);
-  depthStencilBuffer->Release();
-
-  if (FAILED(hr))
-  {
-    CLog::Log(LOGERROR, "%s - Failed to create depth stencil view (%s).", __FUNCTION__, GetErrorDescription(hr).c_str());
-    return false;
-  }
 
   if (m_viewPort.Height == 0 || m_viewPort.Width == 0)
   {
@@ -1336,7 +1103,10 @@ bool CRenderSystemDX::ClearBuffers(color_t color)
     pContext->ClearRenderTargetView(pRTView, fColor);
 
   auto pDepthStencilView = DX::DeviceResources::getInstance()->GetDepthStencilView();
-  pContext->ClearDepthStencilView(pDepthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0, 0);
+  if (pDepthStencilView)
+  {
+    pContext->ClearDepthStencilView(pDepthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0, 0);
+  }
   return true;
 }
 

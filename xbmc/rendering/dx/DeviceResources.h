@@ -26,6 +26,31 @@ namespace DX
 		virtual void OnDeviceRestored() = 0;
 	};
 
+  ref class SwapChainPanelHander sealed
+  {
+  public:
+    SwapChainPanelHander();
+    virtual ~SwapChainPanelHander();
+
+    void SetSwapChainPanel(Windows::UI::Xaml::Controls::SwapChainPanel^ panel);
+    void ShowCursor(bool show);
+
+  private:
+    void OnCompositionScaleChanged(Windows::UI::Xaml::Controls::SwapChainPanel^ sender, Object^ args);
+    void OnSwapChainPanelSizeChanged(Platform::Object^ sender, Windows::UI::Xaml::SizeChangedEventArgs^ e);
+
+    // Independent input handling functions.
+    void OnPointerPressed(Platform::Object^ sender, Windows::UI::Core::PointerEventArgs^ e);
+    void OnPointerMoved(Platform::Object^ sender, Windows::UI::Core::PointerEventArgs^ e);
+    void OnPointerReleased(Platform::Object^ sender, Windows::UI::Core::PointerEventArgs^ e);
+
+    Windows::UI::Xaml::Controls::SwapChainPanel^	m_swapChainPanel;
+
+    // Track our independent input on a background worker thread.
+    Windows::Foundation::IAsyncAction^ m_inputLoopWorker;
+    Windows::UI::Core::CoreIndependentInputSource^ m_coreInput;
+  };
+
 	// Controls all the DirectX device resources.
   class DECLDIR DeviceResources
 	{
@@ -42,6 +67,10 @@ namespace DX
 		void RegisterDeviceNotify(IDeviceNotify* deviceNotify);
 		void Trim();
 		void Present();
+    void ShowCursor(bool show) {
+      mSwapChainPanelHander->ShowCursor(show);
+    };
+
     Concurrency::critical_section& GetCriticalSection() { return m_criticalSection; }
 
 		// The size of the render target, in pixels.
@@ -132,6 +161,8 @@ namespace DX
 		IDeviceNotify* m_deviceNotify;
 
     Concurrency::critical_section m_criticalSection;
+
+    SwapChainPanelHander^ mSwapChainPanelHander;
 
 	};
 }

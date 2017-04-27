@@ -1,17 +1,25 @@
 ﻿#include "DeviceResources.h"
 #include "DirectXHelper.h"
+#include "windowing/WinEvents.h"
+#include "utils/log.h"
 #include <algorithm>
 #include <windows.ui.xaml.media.dxinterop.h>
 #include <wrl/client.h>
+#include "windowing/WindowingFactory.h"
+#include "input/MouseStat.h"
 
+
+using namespace concurrency;
 using namespace D2D1;
 using namespace DirectX;
 using namespace Microsoft::WRL;
 using namespace Windows::Foundation;
 using namespace Windows::Graphics::Display;
+using namespace Windows::System::Threading;
 using namespace Windows::UI::Core;
 using namespace Windows::UI::Xaml::Controls;
 using namespace Platform;
+using namespace Windows::UI::Xaml;
 
 
 namespace DisplayMetrics
@@ -89,6 +97,7 @@ DX::DeviceResources::DeviceResources() :
 	m_compositionScaleY(1.0f),
 	m_deviceNotify(nullptr)
 {
+  mSwapChainPanelHander = ref new SwapChainPanelHander;
 	CreateDeviceIndependentResources();
 	CreateDeviceResources();
 }
@@ -529,6 +538,7 @@ void DX::DeviceResources::SetSwapChainPanel(SwapChainPanel^ panel)
 {
 	DisplayInformation^ currentDisplayInformation = DisplayInformation::GetForCurrentView();
 
+  mSwapChainPanelHander->SetSwapChainPanel(panel);
 	m_swapChainPanel = panel;
 	m_logicalSize = Windows::Foundation::Size(static_cast<float>(panel->ActualWidth), static_cast<float>(panel->ActualHeight));
 	m_nativeOrientation = currentDisplayInformation->NativeOrientation;
@@ -753,3 +763,132 @@ DXGI_MODE_ROTATION DX::DeviceResources::ComputeDisplayRotation()
 	}
 	return rotation;
 }
+
+
+DX::SwapChainPanelHander::SwapChainPanelHander()
+  : m_coreInput(nullptr)
+{
+
+}
+
+DX::SwapChainPanelHander::~SwapChainPanelHander()
+{
+  m_coreInput->Dispatcher->StopProcessEvents();
+}
+
+
+
+void DX::SwapChainPanelHander::SetSwapChainPanel(Windows::UI::Xaml::Controls::SwapChainPanel^ panel)
+{
+  m_swapChainPanel = panel;
+
+  m_swapChainPanel->CompositionScaleChanged +=
+    ref new TypedEventHandler<SwapChainPanel^, Object^>(this, &SwapChainPanelHander::OnCompositionScaleChanged);
+
+  m_swapChainPanel->SizeChanged +=
+    ref new SizeChangedEventHandler(this, &SwapChainPanelHander::OnSwapChainPanelSizeChanged);
+
+  // Register our SwapChainPanel to get independent input pointer events
+  auto workItemHandler = ref new WorkItemHandler([this](IAsyncAction ^)
+  {
+    // The CoreIndependentInputSource will raise pointer events for the specified device types on whichever thread it's created on.
+    m_coreInput = m_swapChainPanel->CreateCoreIndependentInputSource(
+      Windows::UI::Core::CoreInputDeviceTypes::Mouse |
+      Windows::UI::Core::CoreInputDeviceTypes::Touch |
+      Windows::UI::Core::CoreInputDeviceTypes::Pen
+    );
+
+    // Register for pointer events, which will be raised on the background thread.
+    m_coreInput->PointerPressed += ref new TypedEventHandler<Object^, PointerEventArgs^>(this, &DX::SwapChainPanelHander::OnPointerPressed);
+    m_coreInput->PointerMoved += ref new TypedEventHandler<Object^, PointerEventArgs^>(this, &DX::SwapChainPanelHander::OnPointerMoved);
+    m_coreInput->PointerReleased += ref new TypedEventHandler<Object^, PointerEventArgs^>(this, &DX::SwapChainPanelHander::OnPointerReleased);
+
+    // Begin processing input messages as they're delivered.
+    m_coreInput->Dispatcher->ProcessEvents(CoreProcessEventsOption::ProcessUntilQuit);
+  });
+
+  // Run task on a dedicated high priority background thread.
+  m_inputLoopWorker = ThreadPool::RunAsync(workItemHandler, WorkItemPriority::High, WorkItemOptions::TimeSliced);
+
+}
+
+void DX::SwapChainPanelHander::ShowCursor(bool show)
+{
+  m_coreInput->Dispatcher->RunAsync(Windows::UI::Core::CoreDispatcherPriority::Normal, ref new DispatchedHandler([this, show]()
+  {
+    if (show)
+    {
+      m_coreInput->PointerCursor = ref new CoreCursor(CoreCursorType::Arrow, 1);
+    }
+    else
+    {
+      m_coreInput->PointerCursor = nullptr;
+    }
+  }));
+}
+
+void DX::SwapChainPanelHander::OnCompositionScaleChanged(Windows::UI::Xaml::Controls::SwapChainPanel^ sender, Object^ args)
+{
+  {
+    auto deviceResources = DX::DeviceResources::getInstance();
+    critical_section::scoped_lock lock(deviceResources->GetCriticalSection());
+    deviceResources->SetCompositionScale(sender->CompositionScaleX, sender->CompositionScaleY);
+  }
+}
+
+void DX::SwapChainPanelHander::OnSwapChainPanelSizeChanged(Platform::Object^ sender, Windows::UI::Xaml::SizeChangedEventArgs^ e)
+{
+  {
+    auto deviceResources = DX::DeviceResources::getInstance();
+    critical_section::scoped_lock lock(deviceResources->GetCriticalSection());
+    deviceResources->SetLogicalSize(e->NewSize);
+  }
+
+  CLog::Log(LOGDEBUG, __FUNCTION__": window resize event");
+
+  XBMC_Event newEvent;
+  memset(&newEvent, 0, sizeof(newEvent));
+  newEvent.type = XBMC_VIDEORESIZE;
+  newEvent.resize.w = e->NewSize.Width;
+  newEvent.resize.h = e->NewSize.Height;
+  CWinEvents::MessagePush(&newEvent);
+}
+
+
+void DX::SwapChainPanelHander::OnPointerPressed(Object^ sender, PointerEventArgs^ e)
+{
+  XBMC_Event newEvent;
+  memset(&newEvent, 0, sizeof(newEvent));
+  newEvent.type = XBMC_MOUSEBUTTONDOWN;
+  newEvent.button.state = XBMC_PRESSED;
+  newEvent.button.x = e->CurrentPoint->Position.X;
+  newEvent.button.y = e->CurrentPoint->Position.Y;
+  newEvent.button.button = XBMC_BUTTON_LEFT;
+  CWinEvents::MessagePush(&newEvent);
+}
+
+void DX::SwapChainPanelHander::OnPointerMoved(Object^ sender, PointerEventArgs^ e)
+{
+  XBMC_Event newEvent;
+  memset(&newEvent, 0, sizeof(newEvent));
+  newEvent.type = XBMC_MOUSEMOTION;
+  newEvent.button.x = e->CurrentPoint->Position.X;
+  newEvent.button.y = e->CurrentPoint->Position.Y;
+  newEvent.button.button = 0;
+  CWinEvents::MessagePush(&newEvent);
+}
+
+void DX::SwapChainPanelHander::OnPointerReleased(Object^ sender, PointerEventArgs^ e)
+{
+  XBMC_Event newEvent;
+  memset(&newEvent, 0, sizeof(newEvent));
+  newEvent.button.state = XBMC_RELEASED;
+  newEvent.type = XBMC_MOUSEBUTTONUP;
+  newEvent.button.x = e->CurrentPoint->Position.X;
+  newEvent.button.y = e->CurrentPoint->Position.Y;
+  newEvent.button.button = XBMC_BUTTON_LEFT;
+  CWinEvents::MessagePush(&newEvent);
+}
+
+
+
