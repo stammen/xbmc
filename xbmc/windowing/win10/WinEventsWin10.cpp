@@ -77,7 +77,6 @@ uint32_t g_uQueryCancelAutoPlay = 0;
 
 int XBMC_TranslateUNICODE = 1;
 
-PHANDLE_EVENT_FUNC CWinEventsWin10::m_pEventFunc = NULL;
 int CWinEventsWin10::m_originalZoomDistance = 0;
 Pointer CWinEventsWin10::m_touchPointer;
 CGenericTouchSwipeDetector* CWinEventsWin10::m_touchSwipeDetector = NULL;
@@ -366,23 +365,36 @@ static XBMC_keysym *TranslateKey(WPARAM vkey, UINT scancode, XBMC_keysym *keysym
 
 void CWinEventsWin10::MessagePush(XBMC_Event *newEvent)
 {
-  // m_pEventFunc should be set because MessagePush is only executed by
-  // methods called from WndProc()
-  if (m_pEventFunc == NULL)
-    return;
-
-  m_pEventFunc(*newEvent);
+  m_events.push(*newEvent);
 }
 
 bool CWinEventsWin10::MessagePump()
 {
+  bool ret = false;
 
-  return true;
+  // Do not always loop, only pump the initial queued count events. else if ui keep pushing
+  // events the loop won't finish then it will block xbmc main message loop.
+  for (size_t pumpEventCount = GetQueueSize(); pumpEventCount > 0; --pumpEventCount)
+  {
+    // Pop up only one event per time since in App::OnEvent it may init modal dialog which init
+    // deeper message loop and call the deeper MessagePump from there.
+    XBMC_Event pumpEvent;
+    {
+      if (m_events.try_pop(pumpEvent))
+      {
+        ret |= g_application.OnEvent(pumpEvent);
+
+        if (pumpEvent.type == XBMC_MOUSEBUTTONUP)
+          g_windowManager.SendMessage(GUI_MSG_UNFOCUS_ALL, 0, 0, 0, 0);
+      }
+    }
+  }
+  return ret;
 }
 
 size_t CWinEventsWin10::GetQueueSize()
 {
-  return 0;
+  return m_events.unsafe_size();
 }
 
 #if 0

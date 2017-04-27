@@ -616,14 +616,13 @@ bool CWinSystemWin10::UpdateResolutionsInternal()
   return true;
 }
 
+using namespace Windows::UI::Core;
+using namespace Windows::UI::Xaml;
+#include "windowing/WindowingFactory.h"
+
 void CWinSystemWin10::ShowOSMouse(bool show)
 {
-  CLog::Log(LOGERROR, "%s is not implemented", __FUNCTION__);
-#if 0
-  static int counter = 0;
-  if ((counter < 0 && show) || (counter >= 0 && !show))
-    counter = ShowCursor(show);
-#endif
+  DX::DeviceResources::getInstance()->ShowCursor(show);
 }
 
 bool CWinSystemWin10::Minimize()

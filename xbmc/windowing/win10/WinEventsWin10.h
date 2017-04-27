@@ -25,6 +25,7 @@
 
 #include "windowing/WinEvents.h"
 #include "input/touch/TouchTypes.h"
+#include <concurrent_queue.h>
 
 class CGenericTouchSwipeDetector;
 
@@ -37,7 +38,8 @@ public:
 
 private:
 
-  static PHANDLE_EVENT_FUNC m_pEventFunc;
+  Concurrency::concurrent_queue<XBMC_Event> m_events;
+
   static int m_originalZoomDistance;
   static Pointer m_touchPointer;
   static CGenericTouchSwipeDetector *m_touchSwipeDetector;

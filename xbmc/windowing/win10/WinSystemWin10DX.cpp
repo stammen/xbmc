@@ -28,6 +28,12 @@
 #include "threads/SingleLock.h"
 #include "utils/CharsetConverter.h"
 #include "utils/log.h"
+#include "windowing/WindowingFactory.h"
+#include <ppltasks.h>
+
+using namespace concurrency;
+using namespace Windows::UI::Core;
+using namespace Windows::UI::ViewManagement;
 
 #ifdef HAS_DX
 
@@ -106,55 +112,35 @@ void CWinSystemWin10DX::OnMove(int x, int y)
 
 bool CWinSystemWin10DX::SetFullScreen(bool fullScreen, RESOLUTION_INFO& res, bool blankOtherDisplays)
 {
-  // When going DX fullscreen -> windowed, we must switch DXGI device to windowed mode first to
-  // get it out of fullscreen mode because it restores a former resolution.
-  // We then change to the mode we want.
-  // In other cases, set the window/mode then swith DXGI mode.
-  bool FS2Windowed = !m_useWindowedDX && UseWindowedDX(fullScreen);
+  auto dispatcher = g_Windowing.GetDispatcher();
+  bool result = true;
 
-  const MONITOR_DETAILS* monitor = GetMonitor(res.iScreen);
-  if (!monitor)
-    return false;
-
-  //SetMonitor(monitor->hMonitor);
-  CRenderSystemDX::m_interlaced = ((res.dwFlags & D3DPRESENTFLAG_INTERLACED) != 0);
-  CRenderSystemDX::m_useWindowedDX = UseWindowedDX(fullScreen);
-
-  // this needed to prevent resize/move events from DXGI during changing mode
-  CWinSystemWin10::m_IsAlteringWindow = true;
-  if (FS2Windowed)
-    CRenderSystemDX::SetFullScreenInternal();
-
-#if 0
-  if (!m_useWindowedDX)
-    SetForegroundWindowInternal(m_hWnd);
-#endif
-  // most 3D content has 23.976fps, so switch for this mode
-  if (g_graphicsContext.GetStereoMode() == RENDER_STEREO_MODE_HARDWAREBASED)
-    res = CDisplaySettings::GetInstance().GetResolutionInfo(CResolutionUtils::ChooseBestResolution(24.f / 1.001f, res.iWidth, true));
-
-  // so this flags delays call SetFullScreen _after_ resetting render system
-  bool delaySetFS = CRenderSystemDX::m_bHWStereoEnabled;
-  if (!delaySetFS)
-    CWinSystemWin10::SetFullScreen(fullScreen, res, blankOtherDisplays);
-
-  // this needed to prevent resize/move events from DXGI during changing mode
-  CWinSystemWin10::m_IsAlteringWindow = true;
-  CRenderSystemDX::ResetRenderSystem(res.iWidth, res.iHeight, fullScreen, res.fRefreshRate);
-
-  if (delaySetFS)
+  auto t = create_task([this, dispatcher, fullScreen, &result]()
   {
-    // now resize window and force changing resolution if stereo mode disabled
-    if (UseWindowedDX(fullScreen))
-      CWinSystemWin10::SetFullScreenEx(fullScreen, res, blankOtherDisplays, !CRenderSystemDX::m_bHWStereoEnabled);
-    else
+    return dispatcher->RunAsync(Windows::UI::Core::CoreDispatcherPriority::Normal, ref new DispatchedHandler([this, fullScreen, &result]()
     {
-      CRenderSystemDX::SetFullScreenInternal();
-      CRenderSystemDX::CreateWindowSizeDependentResources();
-    }
-  }
-  CWinSystemWin10::m_IsAlteringWindow = false;
+      ApplicationView^ view = ApplicationView::GetForCurrentView();
+      if (fullScreen)
+      {
+        if (!view->IsFullScreenMode)
+        {
+         result =  view->TryEnterFullScreenMode();
+         if (result)
+         {
+           int i = 0; i++;
+         }
+        }
+      }
+      else
+      {
+        result = true;
+        view->ExitFullScreenMode();
+      }
+    }));
+  });
 
+  t.get();
+  bool f = result;
   return true;
 }
 
