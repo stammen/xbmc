@@ -424,15 +424,23 @@ void CGraphicContext::SetVideoResolutionInternal(RESOLUTION res, bool forceUpdat
 
   if (g_advancedSettings.m_fullScreen)
   {
-#if defined (TARGET_DARWIN) || defined (TARGET_WINDOWS) || defined(TARGET_WIN10)
+#if defined (TARGET_DARWIN) || defined (TARGET_WINDOWS)
     bool blankOtherDisplays = CServiceBroker::GetSettings().GetBool(CSettings::SETTING_VIDEOSCREEN_BLANKDISPLAYS);
     g_Windowing.SetFullScreen(true,  info_org, blankOtherDisplays);
 #else
     g_Windowing.SetFullScreen(true,  info_org, false);
 #endif
   }
-  else if (lastRes >= RES_DESKTOP )
-    g_Windowing.SetFullScreen(false, info_org, false);
+  else if (lastRes >= RES_DESKTOP)
+  {
+    if (!g_Windowing.SetFullScreen(false, info_org, false))
+    {
+      g_advancedSettings.m_fullScreen = false;
+      m_bFullScreenRoot = false;
+      g_Windowing.ResizeWindow(info_org.iWidth, info_org.iHeight, -1, -1);
+    }
+
+  }
   else
     g_Windowing.ResizeWindow(info_org.iWidth, info_org.iHeight, -1, -1);
 
