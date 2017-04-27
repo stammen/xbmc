@@ -41,12 +41,15 @@ App::App()
 /// <param name="e">Details about the launch request and process.</param>
 void App::OnLaunched(Windows::ApplicationModel::Activation::LaunchActivatedEventArgs^ e)
 {
+#if 0
 #if _DEBUG
-	if (IsDebuggerPresent())
-	{
-		DebugSettings->EnableFrameRateCounter = true;
-	}
-#endif
+  if (IsDebuggerPresent())
+  {
+    DebugSettings->EnableFrameRateCounter = true;
+  }
+#endif  
+#endif // 0
+
 
 	if (m_directXPage == nullptr)
 	{
