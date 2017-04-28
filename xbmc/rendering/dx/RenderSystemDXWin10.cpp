@@ -55,6 +55,8 @@
 CRenderSystemDX* s_windowing{ nullptr };
 
 using namespace DirectX::PackedVector;
+using namespace concurrency;
+
 
 CRenderSystemDX::CRenderSystemDX() : CRenderSystemBase()
 {
@@ -893,6 +895,9 @@ void CRenderSystemDX::PresentRenderImpl(bool rendered)
       FinishCommandList(false);
     return;
   }
+
+  auto deviceResources = DX::DeviceResources::getInstance();
+  critical_section::scoped_lock lock(deviceResources->GetCriticalSection());
 
   auto pDevice = DX::DeviceResources::getInstance()->GetD3DDevice();
   auto pContext = DX::DeviceResources::getInstance()->GetD3DDeviceContext();
