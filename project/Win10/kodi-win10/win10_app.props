@@ -52,7 +52,7 @@
     <None Include="$(BinPath)fribidi.dll">
       <DeploymentContent>true</DeploymentContent>
     </None>
-    <None Include="$(BinPath)harfbuzz-vs14.dll">
+    <None Include="$(BinPath)harfbuzz.dll">
         <DeploymentContent>true</DeploymentContent>
       </None>
 	  <None Include="$(BinPath)libass.dll">
